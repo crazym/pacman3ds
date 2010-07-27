@@ -32,9 +32,6 @@
 
 const GLfloat tileZ = 100.0; 
 
-
-
-
 void WallY()
 {
 	// Empty. No wall.

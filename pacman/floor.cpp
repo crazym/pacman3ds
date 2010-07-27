@@ -23,34 +23,10 @@
 
 #include <cmath>
 
+extern GLfloat low_shininess[];
+extern GLfloat no_shininess[];
+
 using namespace std;
-/*
-//GLOBAL VARIABLES
-	//Initial size of graphics window
-	const int WIDTH = 1000;
-	const int HEIGHT = 1000;
-
-	//Current size of window
-	int width = WIDTH;
-	int height = HEIGHT;
-
-	//Bounds of viewing frustum
-	double nearPlane =  0;
-	double farPlane  = 500;
-
-	//Viewing angle
-	double fovy = 45.0;
-
-	// Mouse positions, normalized to [0,1].
-	double xMouse = 0.5;
-	double yMouse = 0.5;
-
-	//Variables
-	double alpha = 0;								//Set by idle function
-	double beta = 0;								//Set by mouse X
-	double distanced = - (farPlane - nearPlane) / 2;    // Set by mouse Y
-
-*/
 
 void number()
 {
@@ -89,6 +65,8 @@ void drawTile()
 	glEnd();*/
 
 	// Draw tile
+    glMaterialfv(GL_FRONT, GL_SHININESS, low_shininess);
+    
 	glBegin(GL_POLYGON);
 		glColor3f( 0.8, 0.8, 0.8);
 		//bottom face
@@ -164,83 +142,5 @@ void drawTile()
 		number();
 	glPopMatrix();
 	//----------------------------
-
+    glMaterialfv(GL_FRONT, GL_SHININESS, no_shininess);
 }
-
-/*
-// This function is called when there is nothing else to do.
-void idle ()
-{
-	const double STEP = 0.0;
-	const double ALL_ROUND = 360;
-	alpha += STEP;
-	if (alpha > ALL_ROUND)
-		alpha -= ALL_ROUND;
-
-	glutPostRedisplay();
-}
-
-void mouseMovement (int mx, int my)
-{
-	// Normalize mouse coordinates.
-	xMouse = double(mx) / double(width);
-	yMouse = 1 - double(my) / double(height);
-
-	// Redisplay image.
-	glutPostRedisplay();
-}
-
-// Respond to window resizing, preserving proportions.
-// Parameters give new window size in pixels.
-void reshapeMainWindow (int newWidth, int newHeight)
-{
-	width = newWidth;
-	height = newHeight;
-	glViewport(0, 0, width, height);
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	gluPerspective(fovy, GLfloat(width) / GLfloat(height), nearPlane, farPlane);
-}
-void display()
-{
-	glClear(GL_COLOR_BUFFER_BIT);
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-
-	// Translate using Y mouse.
-	distanced = - (yMouse * (farPlane - nearPlane) + nearPlane);
-	glTranslatef(0, 0, distanced);
-
-	// Rotation from idle function.
-	alpha = 720 * yMouse;
-	glRotatef(alpha, 0, 1, 0);
-
-	// Rotation using X mouse.
-	beta = 720 * xMouse;
-	glRotatef(beta, 1, 0, 0);
-
-	drawTile();
-
-	glutSwapBuffers();
-}
-
-
-void main(int argc, char **argv)
-{
-	// GLUT initialization.
-	glutInit(&argc, argv);
-	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
-	glutInitWindowSize(width, height);
-	glutCreateWindow("Floor tiles");
-
-	// Register call backs.
-	glutDisplayFunc(display);
-	glutReshapeFunc(reshapeMainWindow);
-	glutMotionFunc(mouseMovement);
-	glutIdleFunc(idle);
-
-
-	// Enter GLUT loop.
-	glutMainLoop();
-}
-*/

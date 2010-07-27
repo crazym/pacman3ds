@@ -24,41 +24,6 @@
 
 #include <cmath>
 
-extern GLfloat mat_diffuse[];
-extern GLfloat mat_ambient_color[];
-
-//#include <iostream>
-//#include <sstream>
-//#include <iomanip>
-
-/*
-//GLOBAL Variables---------------------------------------
-	// Initial size of graphics window.
-	const int WIDTH  = 600;
-	const int HEIGHT = 400;
-
-	// Current size of window.
-	int width  = WIDTH;
-	int height = HEIGHT;
-
-	// Mouse positions, normalized to [0,1].
-	double xMouse = 0.5;
-	double yMouse = 0.5;
-
-	// Bounds of viewing frustum.
-	double nearPlane =  2;
-	double farPlane  = 20;
-
-	// Viewing angle.
-	double fovy = 100.0;
-
-	// Variables.
-	double alpha = 0.0;                   // Set by mouse X.
-	double beta = 0.0;                    // Set by mouse Y.
-	//double gamma = 0.0;                   // Set by mouse Z.
-	double distance = - (farPlane + nearPlane) / 2;   
-//--------------------------------------------------------
-*/
 void number8()
 {
 	float radius = 1.0;
@@ -201,8 +166,6 @@ void DrawPacman()
 {
 	//Top and bottom parts of Pacman--
     glPushMatrix();
-        glMaterialfv(GL_FRONT, GL_AMBIENT, mat_ambient_color);
-        glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_diffuse);
 		glColor3f(1, 1, 0);
 		glTranslated(0.0, 0.0, 0.0);
 		glRotatef(90, 0.0, 1, 0.0);
@@ -289,98 +252,3 @@ void DrawPacman()
 		//----------------------------
 
 }
-
-/*
-
-void display ()
-{
-	//Initializing-----------------------------
- 	
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glEnable(GL_DEPTH_TEST);
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-	
-	//Translation
-	glTranslatef(0, 0, distance);
-
-	// Rotation using x mouse.
-	alpha = 720.0 * yMouse;
-	glRotatef(alpha, 1, 0, 0);
-
-	// Rotation using Y mouse.
-	beta = 720.0 * xMouse;
-	glRotatef(beta, 0, 1, 0);	
-
-		// Draw model axes.---------------------
-		glPushMatrix();
-		glBegin(GL_LINES);
-		// X axis
-		glColor3f(1, 0, 0);//red
-		glVertex3f(0, 0, 0);
-		glVertex3f(8, 0, 0);
-		// Y axis
-		glColor3f(0, 1, 0);
-		glVertex3f(0, 0, 0);
-		glVertex3f(0, 8, 0);
-		// Z axis
-		glColor3f(0, 0, 1);
-		glVertex3f(0, 0, 0);
-		glVertex3f(0, 0, 8);
-		glEnd();
-		glPopMatrix();
-		//---------------------------------------
-	//-------------------------------------------
-
-	//Pacman-------------------
-	DrawPacman();
-	//-------------------------
-
-	//-------------------------
-	//Disabling Flickering
-	glutSwapBuffers();
-	//-------------------------
-
-	
-}
-
-void reshapeMainWindow (int newWidth, int newHeight)
-{
-	width = newWidth;
-	height = newHeight;
-	glViewport(0, 0, width, height);
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	gluPerspective(fovy, GLfloat(width) / GLfloat(height), nearPlane, farPlane);
-}
-
-void mouseMovement (int mx, int my)
-{
-	// Normalize mouse coordinates.
-	xMouse = double(mx) / double(width);
-	yMouse = 1 - double(my) / double(height);
-
-	// Redisplay image.
-	glutPostRedisplay();
-}
-
-int main3(int argc, char **argv)
-{
-	// GLUT initialization.
-	glutInit(&argc, argv);
-	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
-	glutInitWindowSize(width, height);
-	glutCreateWindow("GLUT Skeleton Program");
-
-	// Register call backs.
-	glutDisplayFunc(display);
-	glutReshapeFunc(reshapeMainWindow);
-	//glutKeyboardFunc(graphicKeys);
-	//glutSpecialFunc(functionKeys);
-	glutMotionFunc(mouseMovement);
-
-	// Enter GLUT loop.
-	glutMainLoop();
-}
-*/
-
