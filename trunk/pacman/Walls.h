@@ -10,9 +10,7 @@
 #ifndef WALL_H_
 #define WALL_H_
 
-void DrawWall1();
-void DrawWall2();
-void DrawWall3();
-void DrawWall4();
+
+void DrawSimpleWall();
 
 #endif /* WALL_H_ */
