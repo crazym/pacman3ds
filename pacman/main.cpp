@@ -4,7 +4,6 @@
  *
  *  Created by carlos, bronson, sid, andrew, allan on 10-07-16.
  *  Copyright 2010 Concordia University. All rights reserved.
-
 	Carlos Pinto (Team Leader)
 	ID: 9343911
 
@@ -23,24 +22,28 @@
 
 // This program uses sampleprogram.cpp as a template
 // This Program Draws a scene in a Pacman game.
+
 // Function Keys support:
-//   1. F2 : toggle between continuous rotation about y-axis and stop rotation
-//   2. Up and Down Arrow keys for rotating view about  x-axis
-//	 3. Left and Right Arrow keys for rotating about z-axis
-//	 4.	F10: reset view in case your view parameters get out of control.
-//	 5. W : Forward
-//   6. S : Backward
-//   7. Q : Strafe Left
-//   8. E : Strafe Right
-//   9. A : Left Rotation around Y-axis
-//   10. D : Right Rotation around Y-axis
+//   1. F1 : toggle between ortho/perspective mode of viewing.
+//   2. F2 : toggle between continuous rotation about y-axis and stop rotation
+//   3. Up and Down Arrow keys for rotating view about  x-axis
+//	 4. Left and Right Arrow keys for rotating about z-axis
+//	 5.	F10: reset view in case your view parameters get out of control.
+//	 6. W : Forward
+//   7. S : Backward
+//   8. Q : Strafe Left
+//   9. E : Strafe Right
+//   10. A : Left Rotation around Y-axis
+//   11. D : Right Rotation around Y-axis
 
 
 // Link with: opengl32.lib, glu32.lib, glut32.lib.
 // glut includes links to the other two libraries.
 #ifdef __APPLE__
+#include <cstdlib>
 #include <GLUT/glut.h>
 #else 
+#include <stdlib.h>
 #include <GL/glut.h>
 #endif
 
@@ -102,12 +105,104 @@ double fw_rw=0;
 double up_dn=0;
 double lt_rt=0;
 
-double eye_x=-20;
-double eye_y=-20;
-double eye_z=-20;
+double eye_x=12.0;
+double eye_y=20.0;
+double eye_z=65.0;
 
+double center_x=12.0;
+double center_y=0.0;
+double center_z=0.0;
 
+double up_x=0.0;
+double up_y=1.0;
+double up_z=0.0;
 
+//////////////////// Default Camera Positions ///////////////
+/*
+key 6: Bottom left Corner 
+eye_x=-10.0;
+eye_y=2.5;
+eye_z=40.5;
+center_x=28.0;
+center_y=0.0;
+center_z=0.0;
+
+key 7: Bottom right Corner 
+eye_x=37.0;
+eye_y=2.5;
+eye_z=39.5;
+center_x=2.0;
+center_y=0.0;
+center_z=0.0;
+
+key 8: Top right Corner 
+eye_x=35.5;
+eye_y=2.5;
+eye_z=-6.5;
+center_x=27.5;
+center_y=0.0;
+center_z=0.0;
+
+key 9: Top left Corner 
+eye_x=-7.5;
+eye_y=2.5;
+eye_z=-11.5;
+center_x=0.0;
+center_y=0.0;
+center_z=0.0;
+
+	// gluLookAt Calibration
+    //gluLookAt(eye_x, eye_y, eye_z, center_x, center_y, center_z, up_x, up_y, up_z);
+		case '1':
+            eye_x+=0.5;
+			cout << "eye_x : " << eye_x << endl;
+            break;
+		case '2':
+            eye_x-=0.5;
+			cout << "eye_x : " << eye_x << endl;
+            break;
+		case '3':
+            eye_y+=0.5;
+			cout << "eye_y : " << eye_y << endl;
+            break;
+		case '4':
+            eye_y-=0.5;
+			cout << "eye_y : " << eye_y << endl;
+            break;
+		case '5':
+            eye_z+=0.5;
+			cout << "eye_z : " << eye_z << endl;
+            break;
+		case '6':
+            eye_z-=0.5;
+			cout << "eye_z : " << eye_z << endl;
+            break;
+ 		case '7':
+            center_x+=0.5;
+			cout << "center_x : " << center_x << endl;
+            break;
+		case '8':
+            center_x-=0.5;
+			cout << "center_x : " << center_x << endl;
+            break;
+		case '9':
+            center_y+=0.5;
+			cout << "center_y : " << center_y << endl;
+            break;
+		case '0':
+            center_y-=0.5;
+			cout << "center_y : " << center_y << endl;
+            break;
+		case '-':
+            center_z+=0.5;
+			cout << "center_z : " << center_z << endl;
+            break;
+		case '=':
+            center_z-=0.5;
+			cout << "center_z : " << center_z << endl;
+            break;
+
+*/
 bool idleEnable = 0;	// flags that set continuous rotation on/off
 bool projType = 1;      // flag for proj type; ortho = 0, perspective = 1
 bool isWireFrame =0;    // flag for setting wire frame mode
@@ -178,7 +273,7 @@ void zoom(unsigned char direction)
 }
 
 void drawAxes(){
-
+/*
 	glPushMatrix();
 		glBegin(GL_LINES);
 		// X axis
@@ -195,7 +290,7 @@ void drawAxes(){
 		glVertex3f(0, 0, 10);
 		glEnd();
     glPopMatrix();
-
+*/
 
 
 }
@@ -208,32 +303,31 @@ void drawMaze(GLdouble x, GLdouble y, GLdouble z)
 		else
 			glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
 
-	// will be mapped to a text file.
 	char map[483] = {										 
         
-        'H','N','N','N','N','N','N','N','N','N','D','N','N','N','N','N','N','N','N','N','I',	 // Current map
-        'L','Z','Z','Z','Z','Z','Z','Z','Z','Z','B','Z','Z','Z','Z','Z','Z','Z','Z','Z','M',
-        'L','Z','H','N','I','Z','H','N','I','Z','B','Z','H','N','I','Z','H','N','I','Z','M',
-        'L','Z','K','O','J','Z','K','O','J','Z','B','Z','K','O','J','Z','K','O','J','Z','M',
-        'L','Z','Z','Z','Z','Z','Z','Z','Z','Z','B','Z','Z','Z','Z','Z','Z','Z','Z','Z','M',
-        'L','Z','A','A','A','Z','B','Z','A','A','C','A','A','Z','B','Z','A','A','A','Z','M',
-        'L','Z','Z','Z','Z','Z','B','Z','Z','Z','B','Z','Z','Z','B','Z','Z','Z','Z','Z','M',
-        'K','O','O','O','O','Z','B','A','A','Z','B','Z','A','A','B','Z','O','O','O','O','J',
-        'Y','Y','Y','Y','M','Z','B','Z','Z','Z','Z','Z','Z','Z','B','Z','L','Y','Y','Y','Y',
-        'O','O','O','O','J','Z','B','Z','O','O','Z','O','O','Z','B','Z','K','O','O','O','O',
-        'Y','Y','Y','Y','Y','Z','Z','Z','L','Y','Y','Y','M','Z','Z','Z','Y','Y','Y','Y','Y',
-        'N','N','N','N','I','Z','B','Z','L','Y','Y','Y','M','Z','B','Z','H','N','N','N','N',
-        'Y','Y','Y','Y','M','Z','B','Z','N','N','N','N','N','Z','B','Z','L','Y','Y','Y','Y',
-        'Y','Y','Y','Y','M','Z','B','Z','Z','Z','Z','Z','Z','Z','B','Z','L','Y','Y','Y','Y',
-        'O','O','O','O','J','Z','B','Z','N','N','D','N','N','Z','B','Z','K','O','O','O','O',
-        'L','Z','Z','Z','Z','Z','Z','Z','Z','Z','B','Z','Z','Z','Z','Z','Z','Z','Z','Z','M',
-        'L','Z','O','O','Z','Z','O','O','O','Z','B','Z','O','O','O','Z','Z','O','O','Z','M',
-        'L','Z','Z','M','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','M','Z','Z','M',
-        'E','A','Z','M','Z','Z','B','Z','N','N','D','N','N','Z','B','Z','Z','M','Z','A','G',
-        'L','Z','Z','Z','Z','Z','B','Z','Z','Z','B','Z','Z','Z','B','Z','Z','Z','Z','Z','M',
-        'L','Z','Z','O','O','O','F','O','Z','Z','B','Z','Z','O','F','O','O','O','Z','Z','M',
-        'L','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','M',
-        'K','O','O','O','O','O','O','O','O','O','O','O','O','O','O','O','O','O','O','O','J'
+        'W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W',	 // Current map
+        'W','Z','Z','Z','Z','Z','Z','Z','Z','Z','W','Z','Z','Z','Z','Z','Z','Z','Z','Z','W',
+        'W','Z','W','W','W','Z','W','W','W','Z','W','Z','W','W','W','Z','W','W','W','Z','W',
+        'W','Z','W','W','W','Z','W','W','W','Z','W','Z','W','W','W','Z','W','W','W','Z','W',
+        'W','Z','Z','Z','Z','Z','Z','Z','Z','Z','W','Z','Z','Z','Z','Z','Z','Z','Z','Z','W',
+        'W','Z','W','W','W','Z','W','Z','W','W','W','W','W','Z','W','Z','W','W','W','Z','W',
+        'W','Z','Z','Z','Z','Z','W','Z','Z','Z','W','Z','Z','Z','W','Z','Z','Z','Z','Z','W',
+        'W','W','W','W','W','Z','W','W','W','Z','W','Z','W','W','W','Z','W','W','W','W','W',
+        'Y','Y','Y','Y','W','Z','W','Z','Z','Z','Z','Z','Z','Z','W','Z','W','Y','Y','Y','Y',
+        'W','W','W','W','W','Z','W','Z','W','W','Z','W','W','Z','W','Z','W','W','W','W','W',
+        'Y','Y','Y','Y','Y','Z','Z','Z','W','Y','Y','Y','W','Z','Z','Z','Y','Y','Y','Y','Y',
+        'W','W','W','W','W','Z','W','Z','W','Y','Y','Y','W','Z','W','Z','W','W','W','W','W',
+        'Y','Y','Y','Y','W','Z','W','Z','W','W','W','W','W','Z','W','Z','W','Y','Y','Y','Y',
+        'Y','Y','Y','Y','W','Z','W','Z','Z','Z','Z','Z','Z','Z','W','Z','W','Y','Y','Y','Y',
+        'W','W','W','W','W','Z','W','Z','W','W','W','W','W','Z','W','Z','W','W','W','W','W',
+        'W','Z','Z','Z','Z','Z','Z','Z','Z','Z','W','Z','Z','Z','Z','Z','Z','Z','Z','Z','W',
+        'W','Z','W','W','W','Z','W','W','W','Z','W','Z','W','W','W','Z','W','W','W','Z','W',
+        'W','Z','Z','Z','W','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','W','Z','Z','Z','W',
+        'W','W','W','Z','W','Z','W','Z','W','W','W','W','W','Z','W','Z','W','Z','W','W','W',
+        'W','Z','Z','Z','Z','Z','W','Z','Z','Z','W','Z','Z','Z','W','Z','Z','Z','Z','Z','W',
+        'W','Z','W','W','W','W','W','W','W','Z','W','Z','W','W','W','W','W','W','W','Z','W',
+        'W','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','W',
+        'W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W'
         
     };
     glPushMatrix();
@@ -255,9 +349,9 @@ void drawPacman(GLdouble x, GLdouble y, GLdouble z)
     }
     
 	glPushMatrix();
-		drawAxes();
+
 		glTranslatef(x,y,z);
-		glScalef(0.4,0.4,0.4);
+		glScalef(0.2,0.2,0.2);
 		DrawPacman();
 	glPopMatrix();
 
@@ -275,9 +369,8 @@ void drawGhost(GLdouble x, GLdouble y, GLdouble z, Ghost *ghost)
     
     glPushMatrix();
     
-        drawAxes();
         glTranslatef(x,y,z);
-        glScalef(2,2,2);
+        glScalef(1,1,1);
         ghost->draw();
     
     glPopMatrix();
@@ -296,15 +389,10 @@ void drawSpecial(GLdouble Radius, GLdouble x, GLdouble y, GLdouble z)
 
 void drawScene(GLdouble scenewidth, GLdouble sceneheight, GLdouble scenedepth)
 {
-	/* container/sky  box */
-	glPushMatrix();
-	   glColor3f(0, 0.5, 0.5);
-		glScaled(scenewidth, sceneheight, scenedepth);
-		glutWireCube(1.0);
-	glPopMatrix();
 
 	glPushMatrix();
 		drawMaze(-40,-40,-40);
+
 		drawPacman(-5,-6,3);
 		drawGhost(10,-6,14, ghost1);
         drawGhost(0,-6,5, ghost2);
@@ -322,7 +410,7 @@ void display ()
     // set modelling mode
 	glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    gluLookAt(0.0, 20.0, 65.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+    gluLookAt(eye_x, eye_y, eye_z, center_x, center_y, center_z, up_x, up_y, up_z);
     
     //translate along Z, Y, X
 	glTranslatef(0,0,fw_rw);
@@ -338,7 +426,7 @@ void display ()
     
     // Draw the scene in double buffer.
     glColor3f(0, 1, 1);
-    drawScene(200.0, 200.0, 200.0);
+    drawScene(20.0, 20.0, 20.0);
 
     // now swap buffer
     glutSwapBuffers();
@@ -410,17 +498,17 @@ void reshapeMainWindow (int newWidth, int newHeight)
 // Display AAA.
 void help()
 {
-   cout << "F1 : toggle between ortho/perspective mode of viewing"
-		<< "F2 : toggle between continuous rotation about y-axis and stop rotation"
-		<< "Up and Down Arrow keys for rotating view about  x-axis"
-		<< "Left and Right Arrow keys for rotating about z-axis"
-		<< "F10: reset view in case your view parameters get out of control"
-		<< "W : Forward"
-		<< "S : Backward"
-		<< "Q : Strafe Left"
-		<< "E : Strafe Right"
-		<< "A : Left Rotation around Y-axis"
-		<< "D : Right Rotation around Y-axis" << endl;
+   cout << "F1 : toggle between ortho/perspective mode of viewing" << endl
+		<< "F2 : toggle between continuous rotation about y-axis and stop rotation" << endl
+		<< "Up and Down Arrow keys for rotating view about  x-axis" << endl
+		<< "Left and Right Arrow keys for rotating about z-axis" << endl
+		<< "F10: reset view in case your view parameters get out of control" << endl
+		<< "W : Forward" << endl
+		<< "S : Backward" << endl
+		<< "Q : Strafe Left" << endl
+		<< "E : Strafe Right" << endl
+		<< "A : Left Rotation around Y-axis" << endl
+		<< "D : Right Rotation around Y-axis" << endl << endl;
 }
 
 // Respond to graphic character keys.
@@ -429,24 +517,87 @@ void graphicKeys (unsigned char key, int x, int y)
 {
 	switch (key)
 	{
-        case 'h':
+		case 'c':
+			eye_x=12.0;
+			eye_y=20.0;
+			eye_z=65.0;
+			center_x=12.0;
+			center_y=0.0;
+			center_z=0.0;
+            break;   
+		case '1':
+            eye_x+=0.5;
+			cout << "eye_x : " << eye_x << endl;
+            break;
+		case '2':
+            eye_x-=0.5;
+			cout << "eye_x : " << eye_x << endl;
+            break;
+		case '3':
+            eye_y+=0.5;
+			cout << "eye_y : " << eye_y << endl;
+            break;
+		case '4':
+            eye_y-=0.5;
+			cout << "eye_y : " << eye_y << endl;
+            break;
+		case '5':
+            eye_z+=0.5;
+			cout << "eye_z : " << eye_z << endl;
+            break;
+		case '6':
+            eye_x=-10.0;
+			eye_y=2.5;
+			eye_z=40.5;
+			center_x=28.0;
+			center_y=0.0;
+			center_z=0.0;
+            break;
+ 		case '7':
+            eye_x=37.0;
+			eye_y=2.5;
+			eye_z=39.5;
+			center_x=2.0;
+			center_y=0.0;
+			center_z=0.0;
+            break;
+		case '8':
+			eye_x=35.5;
+			eye_y=2.5;
+			eye_z=-6.5;
+			center_x=27.5;
+			center_y=0.0;
+			center_z=0.0;
+            break;
+		case '9':
+			eye_x=-7.5;
+			eye_y=2.5;
+			eye_z=-11.5;
+			center_x=0.0;
+			center_y=0.0;
+			center_z=0.0;
+            break;
+		case '0':
+            center_y-=0.5;
+			cout << "center_y : " << center_y << endl;
+            break;
+		case '-':
+            center_z+=0.5;
+			cout << "center_z : " << center_z << endl;
+            break;
+		case '=':
+            center_z-=0.5;
+			cout << "center_z : " << center_z << endl;
+            break;
+
+		case 'h':
             help();
             break;
             
         case 27:
             exit(0);
-        case 'd':
-            alpha -= 10*RotSTEP;
-		    if (alpha < -ALL_ROUND) {
-                alpha += ALL_ROUND;
-            }
-            break;
-        case 'a':
-            alpha += 10*RotSTEP;
-            if (alpha > -ALL_ROUND) {
-                alpha += ALL_ROUND;
-            }
-            break;
+
+     
         case 'w':
             fw_rw += 0.2*mvSTEP;
             break;
@@ -454,11 +605,17 @@ void graphicKeys (unsigned char key, int x, int y)
         case 's':
             fw_rw -= 0.2*mvSTEP;
             break;
-        case 'q':
+        case 'a':
             lt_rt += 0.2*mvSTEP;
             break;
-        case 'e':
+        case 'd':
             lt_rt -= 0.2*mvSTEP;
+            break;
+		case ',':
+			up_dn += 0.2*mvSTEP;
+            break;
+		case '.':
+			up_dn -= 0.2*mvSTEP;
             break;
         default:
             cout << key << endl;
@@ -496,18 +653,20 @@ void functionKeys (int key, int x, int y)
            beta -= 10*RotSTEP;
            if (beta < -ALL_ROUND)
                beta += ALL_ROUND;
-           break;
-           
-       case GLUT_KEY_LEFT:
-           yamma -= 10*RotSTEP;
-           if (yamma > ALL_ROUND)
-               yamma -= ALL_ROUND;
-           break;
-           
-       case GLUT_KEY_RIGHT:
-           yamma += 10*RotSTEP;
-           if (yamma > ALL_ROUND)
-               yamma += ALL_ROUND;           
+           break; 
+
+		case GLUT_KEY_RIGHT:
+            alpha -= 10*RotSTEP;
+		    if (alpha < -ALL_ROUND) {
+                alpha += ALL_ROUND;
+            }
+            break; 
+        case GLUT_KEY_LEFT:
+            alpha += 10*RotSTEP;
+            if (alpha > -ALL_ROUND) {
+                alpha += ALL_ROUND;
+            }
+            break;  
    }
 
     glutPostRedisplay();
@@ -544,8 +703,7 @@ void setupLighting()
 
     glEnable(GL_DEPTH_TEST);	// Hidden surface removal
     glFrontFace(GL_CCW);		// Counter clock-wise polygons face out
-    //glEnable(GL_CULL_FACE);		// Do not calculate inside of jet
-
+ 
     // Enable lighting
     glEnable(GL_LIGHTING);
 

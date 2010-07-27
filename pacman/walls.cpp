@@ -15,15 +15,15 @@
 #include <stdlib.h>
 #include <GL/glut.h>
 #endif
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////
-// Draw the Wall Version 1. Straight Wall.
-void DrawWall1()
+// A unit cube.
+void DrawSimpleWall()
 {
 
 	glPushMatrix();
-	 	glTranslatef(0.0f, 0.0f,20.0f);
-
-
+	 			
 	 // Set material color, Blue
 	 glColor3f(0.0f, 0.0f, 1.0f);
 
@@ -31,109 +31,61 @@ void DrawWall1()
 	glBegin(GL_POLYGON);
 
 		// Front Face
-        glNormal3f(0.0f, 0.0f, 1.0f);
+        glNormal3f(0.0f, 0.0f, 1.0f);	
 
-        glVertex3f(0.0f,0.0f,0.0f);
-		glVertex3f(100.0f,0.0f,0.0f);
-		glVertex3f(100.0f,100.0f,0.0f);
-		glVertex3f(0.0f,100.0f,0.0f);
-		glVertex3f(0.0f,0.0f,0.0f);
+        glVertex3f(0.0f,0.0f,100.0f);
+		glVertex3f(100.0f,0.0f,100.0f);
+		glVertex3f(100.0f,100.0f,100.0f);
+		glVertex3f(0.0f,100.0f,100.0f);
+		glVertex3f(0.0f,0.0f,100.0f);
 
 		// Right Side Face
-        glNormal3f(1.0f,0.0f, 0.0f);
+        glNormal3f(1.0f,0.0f, 0.0f);	
+
+		glVertex3f(100.0f,0.0f,100.0f);
+		glVertex3f(100.0f,0.0f,0.0f);
+		glVertex3f(100.0f,100.0f,0.0f);
+		glVertex3f(100.0f,100.0f,100.0f);
+		glVertex3f(100.0f,0.0f,100.0f);
+
+		// Back Face
+        glNormal3f(0.0f, 0.0f, -1.0f);	
 
 		glVertex3f(100.0f,0.0f,0.0f);
-		glVertex3f(100.0f,0.0f,-20.0f);
-		glVertex3f(100.0f,100.0f,-20.0f);
+		glVertex3f(0.0f,0.0f,0.0f);
+		glVertex3f(0.0f,100.0f,0.0f);
 		glVertex3f(100.0f,100.0f,0.0f);
 		glVertex3f(100.0f,0.0f,0.0f);
 
-		// Back Face
-        glNormal3f(0.0f, 0.0f, -1.0f);
-
-		glVertex3f(100.0f,0.0f,-20.0f);
-		glVertex3f(0.0f,0.0f,-20.0f);
-		glVertex3f(0.0f,100.0f,-20.0f);
-		glVertex3f(100.0f,100.0f,-20.0f);
-		glVertex3f(100.0f,0.0f,-20.0f);
-
 		// Left Side Face
-        glNormal3f(-1.0f, 0.0f, 0.0f);
+        glNormal3f(-1.0f, 0.0f, 0.0f);	
 
 		glVertex3f(0.0f,0.0f,0.0f);
+		glVertex3f(0.0f,0.0f,100.0f);
+		glVertex3f(0.0f,100.0f,100.0f);
 		glVertex3f(0.0f,100.0f,0.0f);
-		glVertex3f(0.0f,100.0f,-20.0f);
-		glVertex3f(0.0f,0.0f,-20.0f);
 		glVertex3f(0.0f,0.0f,0.0f);
 
 		// Bottom Face
-        glNormal3f(0.0f, -1.0f, 0.0f);
+        glNormal3f(0.0f, -1.0f, 0.0f);	
 
 		glVertex3f(0.0f,0.0f,0.0f);
-		glVertex3f(0.0f,0.0f,-20.0f);
-		glVertex3f(100.0f,0.0f,-20.0f);
 		glVertex3f(100.0f,0.0f,0.0f);
+		glVertex3f(100.0f,0.0f,100.0f);
+		glVertex3f(0.0f,0.0f,100.0f);
 		glVertex3f(0.0f,0.0f,0.0f);
 
 		// Top Face
-        glNormal3f(0.0f, 1.0f, 0.0f);
+        glNormal3f(0.0f, 1.0f, 0.0f);	
 
-		glVertex3f(0.0f,100.0f,0.0f);
+		glVertex3f(0.0f,100.0f,100.0f);
+		glVertex3f(100.0f,100.0f,100.0f);
 		glVertex3f(100.0f,100.0f,0.0f);
-		glVertex3f(100.0f,100.0f,-20.0f);
-		glVertex3f(0.0f,100.0f,-20.0f);
 		glVertex3f(0.0f,100.0f,0.0f);
+		glVertex3f(0.0f,100.0f,100.0f);
 
     glEnd();
-
+	
 	 glPopMatrix();
 
 }
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////
-// Draw the Wall Version 2. Cross Wall.
-void DrawWall2()
-{
-	glPushMatrix();
-	 	glTranslatef(0.0f, 0.0f, 40.0f);
-
-		DrawWall1();
-
-		glTranslatef(40.0f, 0.0f, 60.0f);
-		glRotatef(90.0f, 0.0f, 1.0f, 0.0f);
-	    DrawWall1();
-	glPopMatrix();
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////
-// Draw the Wall Version 3. T Wall.
-void DrawWall3()
-{
-
-		DrawWall1();
-
-	glPushMatrix();
-		glTranslatef(40.0f, 0.0f, 100.0f);
-		glRotatef(90.0f, 0.0f, 1.0f, 0.0f);
-	    DrawWall1();
-	glPopMatrix();
-
-
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////
-// Draw the Wall Version 4. Corner Wall.
-void DrawWall4()
-{
-	 DrawWall1();
-
-	 glPushMatrix();
-		glTranslatef(0.0f, 0.0f, 100.0f);
-		glRotatef(90.0f, 0.0f, 1.0f, 0.0f);
-	    DrawWall1();
-	glPopMatrix();
-
-
-}
-
