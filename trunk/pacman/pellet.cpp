@@ -15,13 +15,16 @@
 #include <GL/glut.h>
 #endif
 
+extern GLfloat high_shininess[];
+extern GLfloat no_shininess[];
+
 void drawPellet(){
 
-// Draw a pellet.
-    
-       glPushMatrix();
-       	glColor3f(0.96, 0.933, 0.545);
-    	glutSolidSphere(1, 20, 20);
-       glPopMatrix();
-
+    // Draw a pellet.
+    glPushMatrix();
+        glMaterialfv(GL_FRONT, GL_SHININESS, high_shininess);
+        glColor3f(0.96, 0.933, 0.545);
+        glutSolidSphere(1, 20, 20);
+    glPopMatrix();
+    glMaterialfv(GL_FRONT, GL_SHININESS, no_shininess);
 }

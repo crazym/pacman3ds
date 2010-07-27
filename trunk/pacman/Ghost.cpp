@@ -43,129 +43,127 @@ void Ghost::initializeModel(bool isWireframe)
         gluQuadricDrawStyle(cylinder, GLU_LINE);
     }
     
-    glColor3f(this->red, this->green, this->blue);
+    glColor4f(this->red, this->green, this->blue, 0.65);
     glTranslatef(-0.4, -0.4, 0.0);
     
     //Draw the base
     glPushMatrix();
-    glPushMatrix();
-    glRotatef(90, 1.0, 0.0, 0.0);
-    if (isWireframe) {
-        glutWireCone(0.3, 0.5, 10, 10);
-    } else {
-        glutSolidCone(0.3, 0.5, 10, 10);
-    }
-    glPopMatrix();
+        //Draw first cone
+        glPushMatrix();
+            glRotatef(90, 1.0, 0.0, 0.0);
+            if (isWireframe) {
+                glutWireCone(0.3, 0.5, 10, 10);
+            } else {
+                glutSolidCone(0.3, 0.5, 10, 10);
+            }
+        glPopMatrix();
     
-    glPushMatrix();
-    glTranslatef(0.5, 0.0, 0.5);
-    glRotatef(90, 1.0, 0.0, 0.0);
-    if (isWireframe) {
-        glutWireCone(0.3, 0.5, 10, 10);
-    } else {
-        glutSolidCone(0.3, 0.5, 10, 10);
-    }
-    glPopMatrix();
+        //Draw second cone
+        glPushMatrix();
+            glTranslatef(0.5, 0.0, 0.5);
+            glRotatef(90, 1.0, 0.0, 0.0);
+            if (isWireframe) {
+                glutWireCone(0.3, 0.5, 10, 10);
+            } else {
+                glutSolidCone(0.3, 0.5, 10, 10);
+            }
+        glPopMatrix();
     
-    glPushMatrix();
-    glTranslatef(0.5, 0.0, -0.5);
-    glRotatef(90, 1.0, 0.0, 0.0);
-    if (isWireframe) {
-        glutWireCone(0.3, 0.5, 10, 10);
-    } else {
-        glutSolidCone(0.3, 0.5, 10, 10);
-    }
-    glPopMatrix();
+        //Draw third cone
+        glPushMatrix();
+            glTranslatef(0.5, 0.0, -0.5);
+            glRotatef(90, 1.0, 0.0, 0.0);
+        if (isWireframe) {
+            glutWireCone(0.3, 0.5, 10, 10);
+        } else {
+            glutSolidCone(0.3, 0.5, 10, 10);
+        }
+        glPopMatrix();
     
-    glPushMatrix();
-    glTranslatef(1.0, 0.0, 0.0);
-    glRotatef(90, 1.0, 0.0, 0.0);
-    if (isWireframe) {
-        glutWireCone(0.3, 0.5, 10, 10);
-    } else {
-        glutSolidCone(0.3, 0.5, 10, 10);
-    }
-    glPopMatrix();
+        //Draw fourth cone
+        glPushMatrix();
+            glTranslatef(1.0, 0.0, 0.0);
+            glRotatef(90, 1.0, 0.0, 0.0);
+            if (isWireframe) {
+                glutWireCone(0.3, 0.5, 10, 10);
+            } else {
+                glutSolidCone(0.3, 0.5, 10, 10);
+            }
+        glPopMatrix();
+    
     glPopMatrix();
     
     //Draw the cylindrical body
     glPushMatrix();
-    glTranslatef(0.5, 0.78, 0.0);
-    glRotatef(90, 1.0, 0.0, 0.0);
-    gluCylinder(cylinder, 0.8, 0.8, 0.8, 20, 20);
+        glTranslatef(0.5, 0.78, 0.0);
+        glRotatef(90, 1.0, 0.0, 0.0);
+        gluCylinder(cylinder, 0.8, 0.8, 0.8, 20, 20);
     glPopMatrix();
     
     //Draw the top spherical head
     glPushMatrix();
-    glTranslatef(0.5, 0.8, 0.0);
-    if (isWireframe) {
-        glutWireSphere(0.8, 20, 20);
-    } else {
-        glutSolidSphere(0.8, 20, 20);
-    }
+        glTranslatef(0.5, 0.8, 0.0);
+        if (isWireframe) {
+            glutWireSphere(0.8, 20, 20);
+        } else {
+            glutSolidSphere(0.8, 20, 20);
+        }
     glPopMatrix();
     
     //Draw the eyes
     glPushMatrix();
-    glTranslatef(0.0, 0.8, 0.75);
+        glTranslatef(0.0, 0.8, 0.75);
     
-    //Draw a white
-    glPushMatrix();
+        //Draw a white
+        glPushMatrix();
+            glTranslatef(0.25, 0.0, 0.0);
+            glRotatef(-20, 0.0, 1.0, 0.0);
+            glScalef(1.0, 1.0, 0.3);
+            glColor3f(1.0, 1.0, 1.0);
+            if (isWireframe) {
+                glutWireSphere(0.2, 20, 20);
+            } else {
+                glutSolidSphere(0.2, 20, 20);
+            }
     
-    glTranslatef(0.25, 0.0, 0.0);
-    glRotatef(-20, 0.0, 1.0, 0.0);
-    glScalef(1.0, 1.0, 0.3);
-    glColor3f(1.0, 1.0, 1.0);
-    if (isWireframe) {
-        glutWireSphere(0.2, 20, 20);
-    } else {
-        glutSolidSphere(0.2, 20, 20);
-    }
-    
-    //Draw its pupil
-    glPushMatrix();
-    glTranslatef(0.1, 0.0, 0.17);
-    glColor3f(0.0, 0.0, 1.0);
-    if (isWireframe) {
-        glutWireSphere(0.1, 20, 20);
-    } else {
-        glutSolidSphere(0.1, 20, 20);
-    }
+            //Draw its pupil
+            glPushMatrix();
+                glTranslatef(0.1, 0.0, 0.17);
+                glColor3f(0.0, 0.0, 1.0);
+                if (isWireframe) {
+                    glutWireSphere(0.1, 20, 20);
+                } else {
+                    glutSolidSphere(0.1, 20, 20);
+                }
 
-    glPopMatrix();
+            glPopMatrix();
+        glPopMatrix();
     
-    glPopMatrix();
     
+        //Draw a white
+        glPushMatrix();
+            glTranslatef(0.75, 0.0, 0.0);
+            glRotatef(20, 0.0, 1.0, 0.0);
+            glScalef(1.0, 1.0, 0.3);
+            glColor3f(1.0, 1.0, 1.0);
+            if (isWireframe) {
+                glutWireSphere(0.2, 20, 20);
+            } else {
+                glutSolidSphere(0.2, 20, 20);
+            }
     
-    //Draw a white
-    glPushMatrix();
-    
-    glTranslatef(0.75, 0.0, 0.0);
-    glRotatef(20, 0.0, 1.0, 0.0);
-    glScalef(1.0, 1.0, 0.3);
-    glColor3f(1.0, 1.0, 1.0);
-    if (isWireframe) {
-        glutWireSphere(0.2, 20, 20);
-    } else {
-        glutSolidSphere(0.2, 20, 20);
+            //Draw its pupil
+            glPushMatrix();
+                glTranslatef(0.06, 0.0, 0.17);
+                glColor3f(0.0, 0.0, 1.0);
+                if (isWireframe) {
+                    glutWireSphere(0.1, 20, 20);
+                } else {
+                    glutSolidSphere(0.1, 20, 20);
+                }
 
-    }
-    
-    //Draw its pupil
-    glPushMatrix();
-    //glTranslatef(0.75, 0.0, 0.0);
-    glTranslatef(0.06, 0.0, 0.17);
-    glColor3f(0.0, 0.0, 1.0);
-    if (isWireframe) {
-        glutWireSphere(0.1, 20, 20);
-    } else {
-        glutSolidSphere(0.1, 20, 20);
-    }
-
-    glPopMatrix();
-    
-    glPopMatrix();
-    
+            glPopMatrix();
+        glPopMatrix();
     glPopMatrix();
     
     glEndList();

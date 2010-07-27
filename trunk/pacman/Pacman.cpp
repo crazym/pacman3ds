@@ -22,7 +22,11 @@
 #include <GL/glut.h>
 #endif
 
-#include <math.h>
+#include <cmath>
+
+extern GLfloat mat_diffuse[];
+extern GLfloat mat_ambient_color[];
+
 //#include <iostream>
 //#include <sstream>
 //#include <iomanip>
@@ -196,13 +200,15 @@ void retina()
 void DrawPacman()
 {
 	//Top and bottom parts of Pacman--
-		glPushMatrix();
+    glPushMatrix();
+        glMaterialfv(GL_FRONT, GL_AMBIENT, mat_ambient_color);
+        glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_diffuse);
 		glColor3f(1, 1, 0);
 		glTranslated(0.0, 0.0, 0.0);
 		glRotatef(90, 0.0, 1, 0.0);
 		top_pacman(2, 40, 40);
 		bottom_pacman(2, 40, 40);
-		glPopMatrix();
+    glPopMatrix();
 	//--------------------------------
 	//Palate--------------------------
 		glPushMatrix();

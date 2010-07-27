@@ -55,6 +55,7 @@
 #include "Maze.h"
 #include "Ghost.h"
 #include "Pacman.h"
+#include "Material.h"
 
 using namespace std;
 
@@ -722,7 +723,10 @@ void setupLighting()
 
     // Black blue background
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f );
-
+    
+    // Enable Transparency
+    glEnable (GL_BLEND);
+    glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
 int main (int argc, char **argv)
