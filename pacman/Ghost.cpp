@@ -10,39 +10,43 @@
 
 #include "Ghost.h"
 
+#include "Common.h"
+
 using namespace std;
 
 Ghost::Ghost():
     red(1.0), green(0.0), blue(0.0)
 {
+#ifdef DEBUG
     cout << "Allocating Ghost" << endl;
-    initializeModel(true);
+#endif
+    initializeModel();
 }
 
-Ghost::Ghost(GLfloat red, GLfloat green, GLfloat blue, bool isWireframe):
+Ghost::Ghost(GLfloat red, GLfloat green, GLfloat blue):
     red(red), green(green), blue(blue)
 {
+#ifdef DEBUG
     cout << "Allocating Ghost" << endl;
-    initializeModel(isWireframe);
+#endif
+    initializeModel();
 }
 
 Ghost::~Ghost()
 {
+#ifdef DEBUG
     cout << "Deallocating Ghost" << endl;
+#endif
     glDeleteLists(this->listID, 1);
     gluDeleteQuadric(cylinder);
 }
 
-void Ghost::initializeModel(bool isWireframe)
+void Ghost::initializeModel()
 {    
     this->listID = glGenLists(1);
     glNewList(listID, GL_COMPILE);
     cylinder = gluNewQuadric();
-   
-    if (isWireframe) {
-        gluQuadricDrawStyle(cylinder, GLU_LINE);
-    }
-    
+       
     glColor4f(this->red, this->green, this->blue, 0.65);
     glTranslatef(-0.4, -0.4, 0.0);
     
@@ -51,44 +55,28 @@ void Ghost::initializeModel(bool isWireframe)
         //Draw first cone
         glPushMatrix();
             glRotatef(90, 1.0, 0.0, 0.0);
-            if (isWireframe) {
-                glutWireCone(0.3, 0.5, 10, 10);
-            } else {
-                glutSolidCone(0.3, 0.5, 10, 10);
-            }
+            glutSolidCone(0.3, 0.5, 10, 10);
         glPopMatrix();
     
         //Draw second cone
         glPushMatrix();
             glTranslatef(0.5, 0.0, 0.5);
             glRotatef(90, 1.0, 0.0, 0.0);
-            if (isWireframe) {
-                glutWireCone(0.3, 0.5, 10, 10);
-            } else {
-                glutSolidCone(0.3, 0.5, 10, 10);
-            }
+            glutSolidCone(0.3, 0.5, 10, 10);
         glPopMatrix();
     
         //Draw third cone
         glPushMatrix();
             glTranslatef(0.5, 0.0, -0.5);
             glRotatef(90, 1.0, 0.0, 0.0);
-        if (isWireframe) {
-            glutWireCone(0.3, 0.5, 10, 10);
-        } else {
             glutSolidCone(0.3, 0.5, 10, 10);
-        }
         glPopMatrix();
     
         //Draw fourth cone
         glPushMatrix();
             glTranslatef(1.0, 0.0, 0.0);
             glRotatef(90, 1.0, 0.0, 0.0);
-            if (isWireframe) {
-                glutWireCone(0.3, 0.5, 10, 10);
-            } else {
-                glutSolidCone(0.3, 0.5, 10, 10);
-            }
+            glutSolidCone(0.3, 0.5, 10, 10);
         glPopMatrix();
     
     glPopMatrix();
@@ -103,11 +91,7 @@ void Ghost::initializeModel(bool isWireframe)
     //Draw the top spherical head
     glPushMatrix();
         glTranslatef(0.5, 0.8, 0.0);
-        if (isWireframe) {
-            glutWireSphere(0.8, 20, 20);
-        } else {
-            glutSolidSphere(0.8, 20, 20);
-        }
+        glutSolidSphere(0.8, 20, 20);
     glPopMatrix();
     
     //Draw the eyes
@@ -120,21 +104,13 @@ void Ghost::initializeModel(bool isWireframe)
             glRotatef(-20, 0.0, 1.0, 0.0);
             glScalef(1.0, 1.0, 0.3);
             glColor3f(1.0, 1.0, 1.0);
-            if (isWireframe) {
-                glutWireSphere(0.2, 20, 20);
-            } else {
-                glutSolidSphere(0.2, 20, 20);
-            }
+            glutSolidSphere(0.2, 20, 20);
     
             //Draw its pupil
             glPushMatrix();
                 glTranslatef(0.1, 0.0, 0.17);
                 glColor3f(0.0, 0.0, 1.0);
-                if (isWireframe) {
-                    glutWireSphere(0.1, 20, 20);
-                } else {
-                    glutSolidSphere(0.1, 20, 20);
-                }
+                glutSolidSphere(0.1, 20, 20);
 
             glPopMatrix();
         glPopMatrix();
@@ -146,21 +122,13 @@ void Ghost::initializeModel(bool isWireframe)
             glRotatef(20, 0.0, 1.0, 0.0);
             glScalef(1.0, 1.0, 0.3);
             glColor3f(1.0, 1.0, 1.0);
-            if (isWireframe) {
-                glutWireSphere(0.2, 20, 20);
-            } else {
-                glutSolidSphere(0.2, 20, 20);
-            }
+            glutSolidSphere(0.2, 20, 20);
     
             //Draw its pupil
             glPushMatrix();
                 glTranslatef(0.06, 0.0, 0.17);
                 glColor3f(0.0, 0.0, 1.0);
-                if (isWireframe) {
-                    glutWireSphere(0.1, 20, 20);
-                } else {
-                    glutSolidSphere(0.1, 20, 20);
-                }
+                glutSolidSphere(0.1, 20, 20);
 
             glPopMatrix();
         glPopMatrix();
@@ -170,8 +138,19 @@ void Ghost::initializeModel(bool isWireframe)
     
 }
 
+void Ghost::initPosition(GLfloat x, GLfloat y, GLfloat z)
+{
+    this->x = x;
+    this->y = y;
+    this->z = z;
+}
+
 void Ghost::draw()
 {
     //cout << "Ghost drawing" << endl;
+    glPushMatrix();
+    glTranslatef(this->x, this->y, this->z);
+    glScalef(0.6, 0.6, 0.6);
     glCallList(this->listID);
+    glPopMatrix();
 }
