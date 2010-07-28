@@ -31,10 +31,10 @@
 //	 5.	F10: reset view in case your view parameters get out of control.
 //	 6. W : Forward
 //   7. S : Backward
-//   8. Q : Strafe Left
-//   9. E : Strafe Right
-//   10. A : Left Rotation around Y-axis
-//   11. D : Right Rotation around Y-axis
+//   8. A : Strafe Left
+//   9. D : Strafe Right
+//   10. , : Lower Camera
+//   11. . : Raise Camera
 
 
 // Link with: opengl32.lib, glu32.lib, glut32.lib.
@@ -258,14 +258,18 @@ void resetViewParameters()
 	viewWindowRight  = 60;
 	viewWindowBottom =  -60;
 	viewWindowTop  = 60;
+    
 	nearPlane =  60;
 	farPlane  = 120;
+    
 	fovy = 60;
 	alpha = 0.0;
 	beta = 0.0;
 	yamma = 0.0;
+    
 	projType = 1;
 	idleEnable = 0;
+    
     fw_rw=0;
     up_dn=0;
     lt_rt=0;
@@ -448,10 +452,10 @@ void help()
 		<< "F10: reset view in case your view parameters get out of control" << endl
 		<< "W : Forward" << endl
 		<< "S : Backward" << endl
-		<< "Q : Strafe Left" << endl
-		<< "E : Strafe Right" << endl
-		<< "A : Left Rotation around Y-axis" << endl
-		<< "D : Right Rotation around Y-axis" << endl 
+		<< "A : Strafe Left" << endl
+		<< "D : Strafe Right" << endl
+		<< ", : Lower Camera" << endl
+		<< ". : Raise Camera" << endl 
         << "Right Mouse Button: Menu" << endl
         << endl;
 }
@@ -462,108 +466,6 @@ void graphicKeys (unsigned char key, int x, int y)
 {
 	switch (key)
 	{
-		case 'c':
-            eye_x = initial_eye[0];
-            eye_y = initial_eye[1];
-            eye_z = initial_eye[2];
-            
-            center_x = initial_center[0];
-            center_y = initial_center[1];
-            center_z = initial_center[2];
-            
-            fw_rw=0;
-            up_dn=0;
-            lt_rt=0;
-            
-            alpha = 0;
-            beta = 0;
-            yamma = 0;            
-            
-            break;   
-		case '1':
-            eye_x+=0.5;
-			cout << "eye_x : " << eye_x << endl;
-            break;
-		case '2':
-            eye_x-=0.5;
-			cout << "eye_x : " << eye_x << endl;
-            break;
-		case '3':
-            eye_y+=0.5;
-			cout << "eye_y : " << eye_y << endl;
-            break;
-		case '4':
-            eye_y-=0.5;
-			cout << "eye_y : " << eye_y << endl;
-            break;
-		case '5':
-            eye_z+=0.5;
-			cout << "eye_z : " << eye_z << endl;
-            break;
-		case '6':
-            eye_x = -2;
-            eye_y = 3.5;
-            eye_z = -2;
-            center_x = initial_center[0];
-            center_y = initial_center[1];
-            center_z = initial_center[2];
-            
-            fw_rw=0;
-            up_dn=0;
-            lt_rt=0;
-            
-            alpha = 0;
-            beta = 0;
-            yamma = 0;            
-            
-            break;
- 		case '7':
-            eye_x = 23;
-            eye_y = 3.5;
-            eye_z = -2;
-            center_x = initial_center[0];
-            center_y = initial_center[1];
-            center_z = initial_center[2];
-            
-            fw_rw=0;
-            up_dn=0;
-            lt_rt=0;
-            
-            alpha = 0;
-            beta = 0;
-            yamma = 0;                        
-            
-            break;
-		case '8':
-			eye_x=-2;
-			eye_y=3.5;
-			eye_z=24;
-            center_x = initial_center[0];
-            center_y = initial_center[1];
-            center_z = initial_center[2];
-            
-            fw_rw=0;
-            up_dn=0;
-            lt_rt=0;
-            
-            break;
-		case '9':
-			eye_x=23;
-			eye_y=3.5;
-			eye_z=24;
-            center_x = initial_center[0];
-            center_y = initial_center[1];
-            center_z = initial_center[2];
-            
-            fw_rw=0;
-            up_dn=0;
-            lt_rt=0;
-            
-            alpha = 0;
-            beta = 0;
-            yamma = 0;                        
-            
-            break;
 		case 'h':
             help();
             break;
@@ -673,6 +575,7 @@ void ProcessMenu(int value)
             glShadeModel(GL_FLAT);
             break;
         
+        /* Pacman-cam */
         case 5:
             eye_x = pacman->x;
             eye_y = pacman->y+1.0;
@@ -682,16 +585,17 @@ void ProcessMenu(int value)
             center_y = pacman->y;
             center_z = pacman->z+5.0;
             
-            fw_rw=0;
-            up_dn=0;
-            lt_rt=0;
+            fw_rw = 0;
+            up_dn = 0;
+            lt_rt = 0;
             
             alpha = 0;
-            beta = 0;
+            beta  = 0;
             yamma = 0;   
             
             break;
             
+        /* Ghost1-Cam */    
         case 6:
             eye_x = ghost1->x;
             eye_y = ghost1->y+1.0;
@@ -701,16 +605,17 @@ void ProcessMenu(int value)
             center_y = ghost1->y;
             center_z = ghost1->z+5.0;
             
-            fw_rw=0;
-            up_dn=0;
-            lt_rt=0;
+            fw_rw = 0;
+            up_dn = 0;
+            lt_rt = 0;
             
             alpha = 0;
-            beta = 0;
+            beta  = 0;
             yamma = 0;   
             
             break;
             
+        /* Ghost2-Cam */
         case 7:
             eye_x = ghost2->x;
             eye_y = ghost2->y+1.0;
@@ -720,16 +625,17 @@ void ProcessMenu(int value)
             center_y = ghost2->y;
             center_z = ghost2->z+5.0;
             
-            fw_rw=0;
-            up_dn=0;
-            lt_rt=0;
+            fw_rw = 0;
+            up_dn = 0;
+            lt_rt = 0;
             
             alpha = 0;
-            beta = 0;
+            beta  = 0;
             yamma = 0;   
             
             break;
-            
+         
+        /* Ghost3-Cam */    
         case 8:
             eye_x = ghost3->x;
             eye_y = ghost3->y+1.0;
@@ -739,16 +645,17 @@ void ProcessMenu(int value)
             center_y = ghost3->y;
             center_z = ghost3->z+5.0;            
             
-            fw_rw=0;
-            up_dn=0;
-            lt_rt=0;
+            fw_rw = 0;
+            up_dn = 0;
+            lt_rt = 0;
             
             alpha = 0;
-            beta = 0;
+            beta  = 0;
             yamma = 0;   
             
             break;
-            
+        
+        /* Ghost4-Cam */
         case 9:
             eye_x = ghost4->x;
             eye_y = ghost4->y+1.0;
@@ -758,13 +665,119 @@ void ProcessMenu(int value)
             center_y = ghost4->y;
             center_z = ghost4->z+5.0;            
             
-            fw_rw=0;
-            up_dn=0;
-            lt_rt=0;
+            fw_rw = 0;
+            up_dn = 0;
+            lt_rt = 0;
             
             alpha = 0;
-            beta = 0;
+            beta  = 0;
             yamma = 0;   
+            
+            break;
+            
+        /* Light1-Cam */
+        case 10:
+            eye_x = -2;
+            eye_y = 3.5;
+            eye_z = -2;
+            center_x = initial_center[0];
+            center_y = initial_center[1];
+            center_z = initial_center[2];
+            
+            fw_rw = 0;
+            up_dn = 0;
+            lt_rt = 0;
+            
+            alpha = 0;
+            beta  = 0;
+            yamma = 0;
+            
+            break;
+        
+        /* Light2-Cam */
+        case 11:
+            eye_x = 23;
+            eye_y = 3.5;
+            eye_z = -2;
+            center_x = initial_center[0];
+            center_y = initial_center[1];
+            center_z = initial_center[2];
+            
+            fw_rw = 0;
+            up_dn = 0;
+            lt_rt = 0;
+            
+            alpha = 0;
+            beta  = 0;
+            yamma = 0;   
+            
+            break;
+            
+        /* Light3-Cam */
+		case 12:
+			eye_x = -2;
+			eye_y = 3.5;
+			eye_z = 24;
+            center_x = initial_center[0];
+            center_y = initial_center[1];
+            center_z = initial_center[2];
+            
+            fw_rw = 0;
+            up_dn = 0;
+            lt_rt = 0;
+            
+            alpha = 0;
+            beta  = 0;
+            yamma = 0;                        
+            
+            break;
+           
+        /* Light4-Cam */
+		case 13:
+			eye_x = 23;
+			eye_y = 3.5;
+			eye_z = 24;
+            center_x = initial_center[0];
+            center_y = initial_center[1];
+            center_z = initial_center[2];
+            
+            fw_rw = 0;
+            up_dn = 0;
+            lt_rt = 0;
+            
+            alpha = 0;
+            beta  = 0;
+            yamma = 0;                        
+            
+            break;
+            
+        /* Enable Ambient Light */
+        case 14:
+            glEnable(GL_LIGHT0);
+            break;
+
+        /* Disable Ambient Light */
+        case 15:
+            glDisable(GL_LIGHT0);
+            break;
+        
+        /* Initial-Cam */
+        case 16:
+            eye_x = initial_eye[0];
+            eye_y = initial_eye[1];
+            eye_z = initial_eye[2];
+            
+            center_x = initial_center[0];
+            center_y = initial_center[1];
+            center_z = initial_center[2];
+            
+            fw_rw = 0;
+            up_dn = 0;
+            lt_rt = 0;
+            
+            alpha = 0;
+            beta  = 0;
+            yamma = 0;            
             
             break;
 
@@ -822,13 +835,23 @@ int main (int argc, char **argv)
 	nModeMenu = glutCreateMenu(ProcessMenu);
 	glutAddMenuEntry("Solid",1);
 	glutAddMenuEntry("Wire",2);
+    glutAddMenuEntry("-------------", 0);
     glutAddMenuEntry("Smooth Shading", 3);
     glutAddMenuEntry("Flat Shading", 4);
+    glutAddMenuEntry("-------------", 0);
+    glutAddMenuEntry("Initial Cam", 16);
     glutAddMenuEntry("Pacman-Cam", 5);
     glutAddMenuEntry("Ghost1-Cam", 6);
     glutAddMenuEntry("Ghost2-Cam", 7);
     glutAddMenuEntry("Ghost3-Cam", 8);
     glutAddMenuEntry("Ghost4-Cam", 9);
+    glutAddMenuEntry("Light1-Cam", 10);
+    glutAddMenuEntry("Light2-Cam", 11);
+    glutAddMenuEntry("Light3-Cam", 12);
+    glutAddMenuEntry("Light4-Cam", 13);
+    glutAddMenuEntry("-------------", 0);
+    glutAddMenuEntry("Enable Ambient Light", 14);
+    glutAddMenuEntry("Disable Ambient Light",15);
 	glutAttachMenu(GLUT_RIGHT_BUTTON);
     
 	// Register call backs for standard tasks such as:
