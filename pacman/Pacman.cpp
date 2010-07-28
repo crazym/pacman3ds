@@ -16,9 +16,15 @@
 #include "Common.h"
 
 #include <cmath>
+#include <iostream>
+
+using namespace std;
 
 Pacman::Pacman()
 {
+#ifdef DEBUG
+    cout << "Allocating Pacman" << endl;
+#endif
     this->listID = glGenLists(1);
     glNewList(listID, GL_COMPILE);
 
@@ -110,6 +116,14 @@ Pacman::Pacman()
     //----------------------------
     
     glEndList();
+}
+
+Pacman::~Pacman()
+{
+#ifdef DEBUG
+    cout << "Deallocating Pacman" << endl;
+#endif
+    glDeleteLists(this->listID, 1);
 }
 
 void Pacman::initPosition(GLfloat x, GLfloat y, GLfloat z)
