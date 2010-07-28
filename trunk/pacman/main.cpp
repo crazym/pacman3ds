@@ -160,92 +160,6 @@ GLdouble up_x=0.0;
 GLdouble up_y=1.0;
 GLdouble up_z=0.0;
 
-//////////////////// Default Camera Positions ///////////////
-/*
-key 6: Bottom left Corner 
-eye_x=-10.0;
-eye_y=2.5;
-eye_z=40.5;
-center_x=28.0;
-center_y=0.0;
-center_z=0.0;
-
-key 7: Bottom right Corner 
-eye_x=37.0;
-eye_y=2.5;
-eye_z=39.5;
-center_x=2.0;
-center_y=0.0;
-center_z=0.0;
-
-key 8: Top right Corner 
-eye_x=35.5;
-eye_y=2.5;
-eye_z=-6.5;
-center_x=27.5;
-center_y=0.0;
-center_z=0.0;
-
-key 9: Top left Corner 
-eye_x=-7.5;
-eye_y=2.5;
-eye_z=-11.5;
-center_x=0.0;
-center_y=0.0;
-center_z=0.0;
-
-	// gluLookAt Calibration
-    //gluLookAt(eye_x, eye_y, eye_z, center_x, center_y, center_z, up_x, up_y, up_z);
-		case '1':
-            eye_x+=0.5;
-			cout << "eye_x : " << eye_x << endl;
-            break;
-		case '2':
-            eye_x-=0.5;
-			cout << "eye_x : " << eye_x << endl;
-            break;
-		case '3':
-            eye_y+=0.5;
-			cout << "eye_y : " << eye_y << endl;
-            break;
-		case '4':
-            eye_y-=0.5;
-			cout << "eye_y : " << eye_y << endl;
-            break;
-		case '5':
-            eye_z+=0.5;
-			cout << "eye_z : " << eye_z << endl;
-            break;
-		case '6':
-            eye_z-=0.5;
-			cout << "eye_z : " << eye_z << endl;
-            break;
- 		case '7':
-            center_x+=0.5;
-			cout << "center_x : " << center_x << endl;
-            break;
-		case '8':
-            center_x-=0.5;
-			cout << "center_x : " << center_x << endl;
-            break;
-		case '9':
-            center_y+=0.5;
-			cout << "center_y : " << center_y << endl;
-            break;
-		case '0':
-            center_y-=0.5;
-			cout << "center_y : " << center_y << endl;
-            break;
-		case '-':
-            center_z+=0.5;
-			cout << "center_z : " << center_z << endl;
-            break;
-		case '=':
-            center_z-=0.5;
-			cout << "center_z : " << center_z << endl;
-            break;
-
-*/
 bool idleEnable = 0;	// flags that set continuous rotation on/off
 bool projType = 1;      // flag for proj type; ortho = 0, perspective = 1
 bool isWireFrame =0;    // flag for setting wire frame mode
@@ -439,7 +353,7 @@ void reshapeMainWindow (int newWidth, int newHeight)
 	glViewport(0, 0, width, height);
     setView();
 	glMatrixMode (GL_MODELVIEW);
-    gluLookAt(0.0, 0.0, 5.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+    gluLookAt(eye_x, eye_y, eye_z, center_x, center_y, center_z, up_x, up_y, up_z);
 }
 
 // Display Help.
@@ -780,6 +694,16 @@ void ProcessMenu(int value)
             yamma = 0;            
             
             break;
+            
+        /* Enable Color Material */
+        case 17:
+            glEnable(GL_COLOR_MATERIAL);
+            break;
+
+        /* Disable Color Material */
+        case 18:
+            glDisable(GL_COLOR_MATERIAL);
+            break;
 
         default:
             break;
@@ -793,7 +717,6 @@ void setupLighting()
     // Light values and coordinates
     GLfloat  whiteLight[] = { 0.45f, 0.45f, 0.45f, 1.0f };
     GLfloat  sourceLight[] = { 0.25f, 0.25f, 0.25f, 1.0f };
-    //GLfloat	 lightPos[] = { -50.0f, 25.0f, 250.0f, 0.0f };
     GLfloat	 lightPos[] = { 11.0f, 25.0f, 10.0f, 0.0f };
 
     glEnable(GL_DEPTH_TEST);	// Hidden surface removal
@@ -810,7 +733,7 @@ void setupLighting()
     glEnable(GL_LIGHT0);
 
     // Enable color tracking
-    glEnable(GL_COLOR_MATERIAL);
+    //glEnable(GL_COLOR_MATERIAL);
 
     // Set Material properties to follow glColor values
     glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
@@ -852,6 +775,9 @@ int main (int argc, char **argv)
     glutAddMenuEntry("-------------", 0);
     glutAddMenuEntry("Enable Ambient Light", 14);
     glutAddMenuEntry("Disable Ambient Light",15);
+    glutAddMenuEntry("-------------", 0);
+    glutAddMenuEntry("Enable Color Material", 17);
+    glutAddMenuEntry("Disable Color Material", 18);
 	glutAttachMenu(GLUT_RIGHT_BUTTON);
     
 	// Register call backs for standard tasks such as:

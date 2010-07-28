@@ -15,8 +15,14 @@
 
 extern GLfloat high_shininess[];
 extern GLfloat no_shininess[];
+
 extern GLfloat mat_specular[];
 extern GLfloat no_specular[];
+
+extern GLfloat group_number[];
+
+extern GLfloat wall_specular[];
+extern GLfloat wall_shininess[];
 
 Tile::Tile(char type, GLint x, GLint z)
 {
@@ -73,9 +79,13 @@ void Tile::draw()
     
     /* Draw */
     glPushMatrix();
+    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, tile_color);
+    
     switch (this->type) {
         case 'W':
             /* Draw a Wall */
+            glMaterialfv(GL_FRONT, GL_SHININESS, no_shininess);
+            glMaterialfv(GL_FRONT, GL_SPECULAR, no_specular);
             glColor4fv(tile_color);
             glutSolidCube(1.0);
             break;
@@ -91,7 +101,8 @@ void Tile::draw()
             
             /* Draw the Number 8 */
             glPushMatrix();
-                glColor4f(0.0, 0.0, 0.0, 1.0);
+                glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, group_number);
+                glColor4fv(group_number);
                 glTranslatef(0.0, -0.2, 0.0);
                 glRotatef(90, 1.0, 0.0, 0.0);
                 number();
@@ -115,7 +126,8 @@ void Tile::draw()
             
             /* Draw the Number 8 */
             glPushMatrix();
-                glColor4f(0.0, 0.0, 0.0, 1.0);
+                glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, group_number);
+                glColor4fv(group_number);
                 glTranslatef(0.0, -0.2, 0.0);
                 glRotatef(90, 1.0, 0.0, 0.0);
                 number();
@@ -135,6 +147,7 @@ void Tile::draw()
     /* Draw Pellet */
     if (this->pellet) {
         glTranslatef(0.0, 0.1, 0.0);
+        glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, pellet_color);
         glColor4fv(pellet_color);
         glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, high_shininess);
         glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, mat_specular);

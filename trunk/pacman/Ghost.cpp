@@ -14,18 +14,30 @@
 
 using namespace std;
 
-Ghost::Ghost():
-    red(1.0), green(0.0), blue(0.0)
+extern GLfloat ghost_body[];
+extern GLfloat ghost_pupil[];
+extern GLfloat ghost_white[];
+
+Ghost::Ghost()
 {
+    color[0] = 1.0;
+    color[1] = 0.0;
+    color[2] = 0.0;
+    color[3] = 0.65;
+    
 #ifdef DEBUG
     cout << "Allocating Ghost" << endl;
 #endif
     initializeModel();
 }
 
-Ghost::Ghost(GLfloat red, GLfloat green, GLfloat blue):
-    red(red), green(green), blue(blue)
+Ghost::Ghost(GLfloat red, GLfloat green, GLfloat blue)
 {
+    color[0] = red;
+    color[1] = green;
+    color[2] = blue;
+    color[3] = 0.65;
+    
 #ifdef DEBUG
     cout << "Allocating Ghost" << endl;
 #endif
@@ -47,7 +59,8 @@ void Ghost::initializeModel()
     glNewList(listID, GL_COMPILE);
     cylinder = gluNewQuadric();
        
-    glColor4f(this->red, this->green, this->blue, 0.65);
+    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, ghost_body);
+    glColor4fv(color);
     glTranslatef(-0.4, -0.4, 0.0);
     
     //Draw the base
@@ -103,13 +116,15 @@ void Ghost::initializeModel()
             glTranslatef(0.25, 0.0, 0.0);
             glRotatef(-20, 0.0, 1.0, 0.0);
             glScalef(1.0, 1.0, 0.3);
-            glColor3f(1.0, 1.0, 1.0);
+            glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, ghost_white);
+            glColor4fv(ghost_white);
             glutSolidSphere(0.2, 20, 20);
     
             //Draw its pupil
             glPushMatrix();
                 glTranslatef(0.1, 0.0, 0.17);
-                glColor3f(0.0, 0.0, 1.0);
+                glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, ghost_pupil);
+                glColor4fv(ghost_pupil);
                 glutSolidSphere(0.1, 20, 20);
 
             glPopMatrix();
@@ -121,13 +136,15 @@ void Ghost::initializeModel()
             glTranslatef(0.75, 0.0, 0.0);
             glRotatef(20, 0.0, 1.0, 0.0);
             glScalef(1.0, 1.0, 0.3);
-            glColor3f(1.0, 1.0, 1.0);
+            glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, ghost_white);
+            glColor4fv(ghost_white);
             glutSolidSphere(0.2, 20, 20);
     
             //Draw its pupil
             glPushMatrix();
                 glTranslatef(0.06, 0.0, 0.17);
-                glColor3f(0.0, 0.0, 1.0);
+                glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, ghost_pupil);
+                glColor4fv(ghost_pupil);
                 glutSolidSphere(0.1, 20, 20);
 
             glPopMatrix();

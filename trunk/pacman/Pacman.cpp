@@ -20,6 +20,13 @@
 
 using namespace std;
 
+extern GLfloat pacman_body_ambient[];
+extern GLfloat pacman_body_diffuse[];
+extern GLfloat pacman_palate[];
+extern GLfloat pacman_retina[];
+extern GLfloat pacman_pupil[];
+extern GLfloat group_number[];
+
 Pacman::Pacman()
 {
 #ifdef DEBUG
@@ -30,7 +37,9 @@ Pacman::Pacman()
 
    	//Top and bottom parts of Pacman--
     glPushMatrix();
-    glColor3f(1, 1, 0);
+    glMaterialfv(GL_FRONT, GL_AMBIENT, pacman_body_ambient);
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, pacman_body_diffuse);
+    glColor4fv(pacman_body_diffuse);
     glTranslated(0.0, 0.0, 0.0);
     glRotatef(90, 0.0, 1, 0.0);
     top_pacman(2, 40, 40);
@@ -39,7 +48,8 @@ Pacman::Pacman()
 	//--------------------------------
 	//Palate--------------------------
     glPushMatrix();
-    glColor3f(1, 0, 0);	
+    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, pacman_palate);
+    glColor4fv(pacman_palate);	
     glRotatef(58, 1, 0, 0.0);
     glTranslated(0.0, 0.0, 0.0);
     palate(4.0);
@@ -47,7 +57,6 @@ Pacman::Pacman()
 	//--------------------------------
 	//Bottom of mouth-----------------
     glPushMatrix();
-    glColor3f(1, 0, 0);	
     glRotatef(116, 1, 0, 0.0);
     glTranslated(0.0, 0.0, 0.0);
     palate(4.0);
@@ -56,6 +65,8 @@ Pacman::Pacman()
 	//Pupils--------------------------
     //Right Pupil-----------------
     glPushMatrix();
+    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, pacman_pupil);
+    glColor4fv(pacman_pupil);	
     glTranslated(1.3, 2.4, 2);
     glRotatef(70, 1, 0, 0);
     glRotatef(80, 0, 1, 0);
@@ -77,6 +88,8 @@ Pacman::Pacman()
 	//Retina--------------------------
     //Right Retina----------------
     glPushMatrix();
+    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, pacman_retina);
+    glColor4fv(pacman_retina);
     glTranslated(1.2, 2.7, 2.8);
     glRotatef(70, 1, 0, 0);
     glRotatef(80, 0, 1, 0);
@@ -98,7 +111,8 @@ Pacman::Pacman()
 	//Group Number--------------------
     //Top part of number 8--------
     glPushMatrix();
-    glColor3f(0, 0, 0);
+    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, group_number);
+    glColor4fv(group_number);
     glTranslated(0, 3.9, 0);
     glRotatef(90, 1, 0, 0);
     glScalef(10.0, 10.0, 10.0);
@@ -107,7 +121,6 @@ Pacman::Pacman()
     //----------------------------
     //Bottom part of number 8-----
     glPushMatrix();
-    glColor3f(0, 0, 0);
     glTranslated(0, 3.4, -1.9);
     glRotatef(-120, 1, 0, 0);
     glScalef(10.0, 10.0, 10.0);
@@ -251,7 +264,6 @@ void Pacman::bottom_pacman(double r, int lats, int longs)
 void Pacman::pupil()
 {
 	glPushMatrix();
-	glColor3f(255, 255, 255);
 	hemisphere(1, 8, 8);
 	glPopMatrix();
 }
@@ -259,7 +271,6 @@ void Pacman::pupil()
 void Pacman::retina()
 {
 	glPushMatrix();
-	glColor3f(0, 0, 0);
 	hemisphere(0.6, 8, 8);
 	glPopMatrix();
 }

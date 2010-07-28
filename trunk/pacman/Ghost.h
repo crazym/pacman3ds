@@ -30,9 +30,7 @@ public:
     void initPosition(GLfloat x, GLfloat y, GLfloat z);
     
     GLuint listID;
-    GLfloat red;
-    GLfloat green;
-    GLfloat blue;
+    GLfloat color[4];
     GLfloat x;
     GLfloat y;
     GLfloat z;
