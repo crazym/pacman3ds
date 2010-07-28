@@ -102,8 +102,8 @@ static char map[483] = {
 };
 
 // Initial size of graphics window on your screen.
-const int WIDTH  = 600; // in pixels
-const int HEIGHT = 400; //
+const int WIDTH  = 800; // in pixels
+const int HEIGHT = 600; //
 
 // increment for idle function rotation and zoom
 const double RotSTEP = 0.2;
@@ -131,15 +131,16 @@ double farPlane  = 120;
 // Viewing angle.
 double fovy = 60;
 
-// Variables.
+/* Rotation */
 double alpha = 0;                                  // rotation angle about Y axis.
 double beta = 0;                                   // rotation angle about X axis.
 double yamma = 0;
+
+/* misc */
 double halfway = - (farPlane + nearPlane) / 2;	   // half way between near and far planes
 
 /* Camera */
-
-//Initial values
+/* Set initial values */
 const GLdouble initial_eye[3] = {10.0, 30.0, 35.0};
 const GLdouble initial_center[3] = {10.0, 2.0, 11.0};
 
@@ -440,7 +441,7 @@ void reshapeMainWindow (int newWidth, int newHeight)
     gluLookAt(0.0, 0.0, 5.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
 }
 
-// Display AAA.
+// Display Help.
 void help()
 {
    cout << "F1 : toggle between ortho/perspective mode of viewing" << endl
@@ -453,7 +454,9 @@ void help()
 		<< "Q : Strafe Left" << endl
 		<< "E : Strafe Right" << endl
 		<< "A : Left Rotation around Y-axis" << endl
-		<< "D : Right Rotation around Y-axis" << endl << endl;
+		<< "D : Right Rotation around Y-axis" << endl 
+        << "Right Mouse Button: Menu" << endl
+        << endl;
 }
 
 // Respond to graphic character keys.
@@ -548,7 +551,7 @@ void graphicKeys (unsigned char key, int x, int y)
             
             break;
 		case '9':
-			eye_x=22;
+			eye_x=23;
 			eye_y=3.5;
 			eye_z=24;
             center_x = initial_center[0];
@@ -605,23 +608,29 @@ void functionKeys (int key, int x, int y)
        case GLUT_KEY_F10:
            resetViewParameters();
            break;
+           
        case GLUT_KEY_F1:
            projType = 1 - projType;
            break;
+           
        case GLUT_KEY_F2:
            idleEnable = 1 - idleEnable;
            break;
+           
        case GLUT_KEY_F3:
            zoom('+');
            break;
+           
        case GLUT_KEY_F4:
            zoom('-');
            break;
+           
        case GLUT_KEY_UP:
            beta += 10*RotSTEP;
            if (beta > ALL_ROUND)
                beta -= ALL_ROUND;
            break;
+           
        case GLUT_KEY_DOWN:
            beta -= 10*RotSTEP;
            if (beta < -ALL_ROUND)
@@ -633,7 +642,8 @@ void functionKeys (int key, int x, int y)
 		    if (alpha < -ALL_ROUND) {
                 alpha += ALL_ROUND;
             }
-            break; 
+            break;
+           
         case GLUT_KEY_LEFT:
             alpha += 10*RotSTEP;
             if (alpha > -ALL_ROUND) {
@@ -653,10 +663,21 @@ void ProcessMenu(int value)
 		case 1:
 			isWireFrame = false;
 			break;
-
+            
 		case 2:
 			isWireFrame = true;
 			break;
+            
+        case 3:
+            glShadeModel(GL_SMOOTH);
+            break;
+            
+        case 4:
+            glShadeModel(GL_FLAT);
+            break;
+
+        default:
+            break;
 	}
 
 	glutPostRedisplay();
@@ -668,7 +689,7 @@ void setupLighting()
     GLfloat  whiteLight[] = { 0.45f, 0.45f, 0.45f, 1.0f };
     GLfloat  sourceLight[] = { 0.25f, 0.25f, 0.25f, 1.0f };
     //GLfloat	 lightPos[] = { -50.0f, 25.0f, 250.0f, 0.0f };
-    GLfloat	 lightPos[] = { 10.0f, 8.0f, 2.0f, 0.0f };
+    GLfloat	 lightPos[] = { 11.0f, 25.0f, 10.0f, 0.0f };
 
     glEnable(GL_DEPTH_TEST);	// Hidden surface removal
     glFrontFace(GL_CCW);		// Counter clock-wise polygons face out
@@ -707,8 +728,10 @@ int main (int argc, char **argv)
     
 	int nModeMenu; // menu identifier used when calling glutsetmenu
 	nModeMenu = glutCreateMenu(ProcessMenu);
-	glutAddMenuEntry("Flat ",1);
+	glutAddMenuEntry("Solid",1);
 	glutAddMenuEntry("Wire",2);
+    glutAddMenuEntry("Smooth Shading", 3);
+    glutAddMenuEntry("Flat Shading", 4);
 	glutAttachMenu(GLUT_RIGHT_BUTTON);
     
 	// Register call backs for standard tasks such as:
@@ -724,6 +747,7 @@ int main (int argc, char **argv)
 	help();
     
     //init scene
+    glShadeModel(GL_SMOOTH);
     setupLighting();
     
 	/* init ghosts */
@@ -741,13 +765,14 @@ int main (int argc, char **argv)
     ghost4->initPosition(10.0f, 0.2f, 10.0f);
 
     /* init map */
-    srand(time(NULL));
+    srand(time(NULL)); //seed rand for pellet colours
     map1 = new Map(map, 23, 21);
     
     // Enter GLUT loop.
 	glutMainLoop();
     
     /* Clean up */
+    delete pacman;
     delete ghost1;
     delete ghost2;
     delete ghost3;
