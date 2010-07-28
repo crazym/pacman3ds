@@ -715,9 +715,12 @@ void ProcessMenu(int value)
 void setupLighting()
 {
     // Light values and coordinates
-    GLfloat  whiteLight[] = { 0.45f, 0.45f, 0.45f, 1.0f };
-    GLfloat  sourceLight[] = { 0.25f, 0.25f, 0.25f, 1.0f };
-    GLfloat	 lightPos[] = { 11.0f, 25.0f, 10.0f, 0.0f };
+    GLfloat lightModelIntensity[] = { 0.2f, 0.2f, 0.2f, 1.0f };
+    
+    GLfloat lightAmbient[]  = { 0.6f, 0.6f, 0.6f, 1.0f };
+    GLfloat lightDiffuse[]  = { 0.6f, 0.6f, 0.6f, 1.0f };
+    GLfloat lightSpecular[] = { 0.6f, 0.6f, 0.6f, 1.0f };
+    GLfloat lightPosition[] = { 0.0f, 1.0f, 0.0f, 0.0f }; /* Point down Y-Axis */
 
     glEnable(GL_DEPTH_TEST);	// Hidden surface removal
     glFrontFace(GL_CCW);		// Counter clock-wise polygons face out
@@ -726,10 +729,11 @@ void setupLighting()
     glEnable(GL_LIGHTING);
 
     // Setup and enable light 0
-    glLightModelfv(GL_LIGHT_MODEL_AMBIENT,whiteLight);
-    glLightfv(GL_LIGHT0,GL_AMBIENT,sourceLight);
-    glLightfv(GL_LIGHT0,GL_DIFFUSE,sourceLight);
-    glLightfv(GL_LIGHT0,GL_POSITION,lightPos);
+    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lightModelIntensity);
+    glLightfv(GL_LIGHT0, GL_AMBIENT, lightAmbient);
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, lightDiffuse);
+    glLightfv(GL_LIGHT0, GL_SPECULAR, lightSpecular);
+    glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
     glEnable(GL_LIGHT0);
 
     // Enable color tracking
@@ -742,8 +746,11 @@ void setupLighting()
     glClearColor(0.0f, 0.0f, 0.4f, 1.0f );
     
     // Enable Transparency
-    glEnable (GL_BLEND);
-    glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    
+    //Rescale Normals if needed
+    glEnable(GL_RESCALE_NORMAL);
 }
 
 int main (int argc, char **argv)
