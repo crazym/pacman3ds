@@ -704,7 +704,47 @@ void ProcessMenu(int value)
         case 18:
             glDisable(GL_COLOR_MATERIAL);
             break;
-
+            
+        /* Enable Light 1 */
+        case 19:
+            glEnable(GL_LIGHT1);
+            break;
+        
+        /* Disable Light 1 */
+        case 20:
+            glDisable(GL_LIGHT1);
+            break;
+        
+        /* Enable Light 2 */
+        case 21:
+            glEnable(GL_LIGHT2);
+            break;
+        
+        /* Disable Light 2 */
+        case 22:
+            glDisable(GL_LIGHT2);
+            break;
+        
+        /* Enable Light 3 */
+        case 23:
+            glEnable(GL_LIGHT3);
+            break;
+        
+        /* Disable Light 3 */
+        case 24:
+            glDisable(GL_LIGHT3);
+            break;
+        
+        /* Enable Light 4 */
+        case 25:
+            glEnable(GL_LIGHT4);
+            break;
+            
+        /* Disable Light 4 */
+        case 26:
+            glDisable(GL_LIGHT4);
+            break;
+            
         default:
             break;
 	}
@@ -785,6 +825,16 @@ int main (int argc, char **argv)
     glutAddMenuEntry("-------------", 0);
     glutAddMenuEntry("Enable Color Material", 17);
     glutAddMenuEntry("Disable Color Material", 18);
+    glutAddMenuEntry("-------------", 0);
+    glutAddMenuEntry("Enable Light 1", 19);
+    glutAddMenuEntry("Disable Light 1", 20);
+    glutAddMenuEntry("Enable Light 2", 21);
+    glutAddMenuEntry("Disable Light 2", 22);
+    glutAddMenuEntry("Enable Light 3", 23);
+    glutAddMenuEntry("Disable Light 3", 24);
+    glutAddMenuEntry("Enable Light 4", 25);
+    glutAddMenuEntry("Disable Light 4", 26);
+
 	glutAttachMenu(GLUT_RIGHT_BUTTON);
     
 	// Register call backs for standard tasks such as:
