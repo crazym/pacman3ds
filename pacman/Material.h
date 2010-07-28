@@ -19,7 +19,7 @@
 #endif
 
 GLfloat no_mat[] = { 0.0, 0.0, 0.0, 1.0 };
-GLfloat mat_ambient[] = { 0.7, 0.7, 0.7, 1.0 };
+GLfloat mat_ambient[] = { 0.5, 0.5, 0.5, 1.0 };
 GLfloat mat_ambient_color[] = { 0.8, 0.8, 0.2, 1.0 };
 GLfloat mat_diffuse[] = { 0.1, 0.5, 0.8, 1.0 };
 GLfloat mat_specular[] = { 1.0, 1.0, 1.0, 1.0 };
@@ -28,5 +28,19 @@ GLfloat no_shininess[] = { 0.0 };
 GLfloat low_shininess[] = { 5.0 };
 GLfloat high_shininess[] = { 100.0 };
 GLfloat mat_emission[] = { 0.3, 0.2, 0.2, 0.0 };
+
+GLfloat pacman_body_ambient[] = { 1.0, 1.0, 1.0, 1.0 };
+GLfloat pacman_body_diffuse[] = { 1.0, 1.0, 0.0, 1.0 };
+GLfloat pacman_palate[] = { 1.0, 0.0, 0.0, 1.0 };
+GLfloat pacman_retina[] = { 0.0, 0.0, 0.0, 1.0 };
+GLfloat pacman_pupil[] = { 1.0, 1.0, 1.0, 1.0 };
+
+
+/* ghost body is determined when you initialize a ghost */
+GLfloat ghost_body[] = { 0.75, 0.75, 0.75, 0.65 };
+GLfloat ghost_white[] = { 1.0, 1.0, 1.0, 1.0 };
+GLfloat ghost_pupil[] = { 0.0, 0.0, 1.0, 1.0 };
+
+GLfloat group_number[] = { 0.0, 0.0, 0.0, 1.0 };
 
 #endif
