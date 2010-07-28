@@ -715,11 +715,11 @@ void ProcessMenu(int value)
 void setupLighting()
 {
     // Light values and coordinates
-    GLfloat lightModelIntensity[] = { 0.2f, 0.2f, 0.2f, 1.0f };
+    GLfloat lightModelIntensity[] = { 0.1f, 0.1f, 0.1f, 1.0f };
     
-    GLfloat lightAmbient[]  = { 0.6f, 0.6f, 0.6f, 1.0f };
-    GLfloat lightDiffuse[]  = { 0.6f, 0.6f, 0.6f, 1.0f };
-    GLfloat lightSpecular[] = { 0.6f, 0.6f, 0.6f, 1.0f };
+    GLfloat lightAmbient[]  = { 0.7f, 0.7f, 0.7f, 1.0f };
+    GLfloat lightDiffuse[]  = { 0.7f, 0.7f, 0.7f, 1.0f };
+    GLfloat lightSpecular[] = { 0.7f, 0.7f, 0.7f, 1.0f };
     GLfloat lightPosition[] = { 0.0f, 1.0f, 0.0f, 0.0f }; /* Point down Y-Axis */
 
     glEnable(GL_DEPTH_TEST);	// Hidden surface removal
