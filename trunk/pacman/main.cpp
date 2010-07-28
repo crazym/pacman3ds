@@ -254,7 +254,6 @@ void resetViewParameters()
 {
 	// resets 3D synthetic camera parameters to default values
 
-
 	viewWindowLeft =  -60;
 	viewWindowRight  = 60;
 	viewWindowBottom =  -60;
@@ -270,8 +269,6 @@ void resetViewParameters()
     fw_rw=0;
     up_dn=0;
     lt_rt=0;
-    
-
 }
 
 
@@ -675,6 +672,101 @@ void ProcessMenu(int value)
         case 4:
             glShadeModel(GL_FLAT);
             break;
+        
+        case 5:
+            eye_x = pacman->x;
+            eye_y = pacman->y+1.0;
+            eye_z = pacman->z;
+            
+            center_x = pacman->x;
+            center_y = pacman->y;
+            center_z = pacman->z+5.0;
+            
+            fw_rw=0;
+            up_dn=0;
+            lt_rt=0;
+            
+            alpha = 0;
+            beta = 0;
+            yamma = 0;   
+            
+            break;
+            
+        case 6:
+            eye_x = ghost1->x;
+            eye_y = ghost1->y+1.0;
+            eye_z = ghost1->z;
+            
+            center_x = ghost1->x;
+            center_y = ghost1->y;
+            center_z = ghost1->z+5.0;
+            
+            fw_rw=0;
+            up_dn=0;
+            lt_rt=0;
+            
+            alpha = 0;
+            beta = 0;
+            yamma = 0;   
+            
+            break;
+            
+        case 7:
+            eye_x = ghost2->x;
+            eye_y = ghost2->y+1.0;
+            eye_z = ghost2->z;
+            
+            center_x = ghost2->x;
+            center_y = ghost2->y;
+            center_z = ghost2->z+5.0;
+            
+            fw_rw=0;
+            up_dn=0;
+            lt_rt=0;
+            
+            alpha = 0;
+            beta = 0;
+            yamma = 0;   
+            
+            break;
+            
+        case 8:
+            eye_x = ghost3->x;
+            eye_y = ghost3->y+1.0;
+            eye_z = ghost3->z;
+            
+            center_x = ghost3->x;
+            center_y = ghost3->y;
+            center_z = ghost3->z+5.0;            
+            
+            fw_rw=0;
+            up_dn=0;
+            lt_rt=0;
+            
+            alpha = 0;
+            beta = 0;
+            yamma = 0;   
+            
+            break;
+            
+        case 9:
+            eye_x = ghost4->x;
+            eye_y = ghost4->y+1.0;
+            eye_z = ghost4->z;
+            
+            center_x = ghost4->x;
+            center_y = ghost4->y;
+            center_z = ghost4->z+5.0;            
+            
+            fw_rw=0;
+            up_dn=0;
+            lt_rt=0;
+            
+            alpha = 0;
+            beta = 0;
+            yamma = 0;   
+            
+            break;
 
         default:
             break;
@@ -732,6 +824,11 @@ int main (int argc, char **argv)
 	glutAddMenuEntry("Wire",2);
     glutAddMenuEntry("Smooth Shading", 3);
     glutAddMenuEntry("Flat Shading", 4);
+    glutAddMenuEntry("Pacman-Cam", 5);
+    glutAddMenuEntry("Ghost1-Cam", 6);
+    glutAddMenuEntry("Ghost2-Cam", 7);
+    glutAddMenuEntry("Ghost3-Cam", 8);
+    glutAddMenuEntry("Ghost4-Cam", 9);
 	glutAttachMenu(GLUT_RIGHT_BUTTON);
     
 	// Register call backs for standard tasks such as:
