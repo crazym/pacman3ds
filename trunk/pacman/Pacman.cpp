@@ -12,37 +12,124 @@
  */
 
 
-//#include <stdlib.h>
-
-#ifdef __APPLE__
-#include <cstdlib>
-#include <GLUT/glut.h>
-#else 
-#include <stdlib.h>
-#include <GL/glut.h>
-#endif
+#include "Pacman.h"
+#include "Common.h"
 
 #include <cmath>
 
-void number8()
+Pacman::Pacman()
 {
-	float radius = 1.0;
-	float vectorX = 0.0;
-	float vectorY = 0.0;
-    glLineWidth(3.0);
-	glBegin(GL_LINE_STRIP);			
-	
-	for(float angle = 0.0; angle<=(2.0*3.14159); angle+=0.01)
-	{		
-		vectorX = (radius*(float)sin((double)angle));
-		vectorY = (radius*(float)cos((double)angle));
-		glVertex2d(vectorX,vectorY);	
-	}
-	glEnd();
-    glLineWidth(1.0);
+    this->listID = glGenLists(1);
+    glNewList(listID, GL_COMPILE);
+
+   	//Top and bottom parts of Pacman--
+    glPushMatrix();
+    glColor3f(1, 1, 0);
+    glTranslated(0.0, 0.0, 0.0);
+    glRotatef(90, 0.0, 1, 0.0);
+    top_pacman(2, 40, 40);
+    bottom_pacman(2, 40, 40);
+    glPopMatrix();
+	//--------------------------------
+	//Palate--------------------------
+    glPushMatrix();
+    glColor3f(1, 0, 0);	
+    glRotatef(58, 1, 0, 0.0);
+    glTranslated(0.0, 0.0, 0.0);
+    palate(4.0);
+    glPopMatrix();
+	//--------------------------------
+	//Bottom of mouth-----------------
+    glPushMatrix();
+    glColor3f(1, 0, 0);	
+    glRotatef(116, 1, 0, 0.0);
+    glTranslated(0.0, 0.0, 0.0);
+    palate(4.0);
+    glPopMatrix();
+	//--------------------------------
+	//Pupils--------------------------
+    //Right Pupil-----------------
+    glPushMatrix();
+    glTranslated(1.3, 2.4, 2);
+    glRotatef(70, 1, 0, 0);
+    glRotatef(80, 0, 1, 0);
+    glTranslated(0.0, 0.0, 0.0);
+    pupil();
+    glPopMatrix();
+    //----------------------------
+    
+    //Left Pupil------------------
+    glPushMatrix();
+    glTranslated(-1.3, 2.4, 2);
+    glRotatef(70, 1, 0, 0);
+    glRotatef(80, 0, 1, 0);
+    glTranslated(0.0, 0.0, 0.0);
+    pupil();
+    glPopMatrix();
+    //----------------------------
+	//--------------------------------
+	//Retina--------------------------
+    //Right Retina----------------
+    glPushMatrix();
+    glTranslated(1.2, 2.7, 2.8);
+    glRotatef(70, 1, 0, 0);
+    glRotatef(80, 0, 1, 0);
+    glTranslated(0.0, 0.0, 0.0);
+    retina();
+    glPopMatrix();
+    //----------------------------
+    
+    //Left Retina-----------------
+    glPushMatrix();
+    glTranslated(-1.2, 2.7, 2.8);
+    glRotatef(70, 1, 0, 0);
+    glRotatef(80, 0, 1, 0);
+    glTranslated(0.0, 0.0, 0.0);
+    retina();
+    glPopMatrix();
+    //----------------------------
+	//--------------------------------
+	//Group Number--------------------
+    //Top part of number 8--------
+    glPushMatrix();
+    glColor3f(0, 0, 0);
+    glTranslated(0, 3.9, 0);
+    glRotatef(90, 1, 0, 0);
+    glScalef(10.0, 10.0, 10.0);
+    number();
+    glPopMatrix();
+    //----------------------------
+    //Bottom part of number 8-----
+    glPushMatrix();
+    glColor3f(0, 0, 0);
+    glTranslated(0, 3.4, -1.9);
+    glRotatef(-120, 1, 0, 0);
+    glScalef(10.0, 10.0, 10.0);
+    number();
+    glPopMatrix();
+    //----------------------------
+    
+    glEndList();
 }
 
-void hemisphere(double r, int lats, int longs) 
+void Pacman::initPosition(GLfloat x, GLfloat y, GLfloat z)
+{
+    this->x = x;
+    this->y = y;
+    this->z = z;
+}
+
+void Pacman::draw()
+{
+    glPushMatrix();
+    glTranslatef(this->x, this->y, this->z);
+    glScalef(0.125, 0.125, 0.125);
+    glCallList(this->listID);
+    glPopMatrix();
+}
+
+
+void Pacman::hemisphere(double r, int lats, int longs) 
 {
 	int i, j;
 	for(i = 1; i <= lats; i++) 
@@ -72,7 +159,8 @@ void hemisphere(double r, int lats, int longs)
 	}
 }
 
-void top_pacman(double r, int lats, int longs) 
+
+void Pacman::top_pacman(double r, int lats, int longs) 
 {
 	int i, j;
 	for(i = 1; i <= lats; i++) 
@@ -102,7 +190,7 @@ void top_pacman(double r, int lats, int longs)
 	}
 }
 
-void palate(double r)
+void Pacman::palate(double r)
 {
 	float radius = r;
 	float vectorX = 0.0;
@@ -117,7 +205,7 @@ void palate(double r)
 	glEnd();
 }
 
-void bottom_pacman(double r, int lats, int longs) 
+void Pacman::bottom_pacman(double r, int lats, int longs) 
 {
 	int i, j;
 	for(i = 1; i <= lats; i++) 
@@ -146,7 +234,7 @@ void bottom_pacman(double r, int lats, int longs)
 	}
 }
 
-void pupil()
+void Pacman::pupil()
 {
 	glPushMatrix();
 	glColor3f(255, 255, 255);
@@ -154,101 +242,10 @@ void pupil()
 	glPopMatrix();
 }
 
-void retina()
+void Pacman::retina()
 {
 	glPushMatrix();
 	glColor3f(0, 0, 0);
 	hemisphere(0.6, 8, 8);
 	glPopMatrix();
-}
-
-void DrawPacman()
-{
-	//Top and bottom parts of Pacman--
-    glPushMatrix();
-		glColor3f(1, 1, 0);
-		glTranslated(0.0, 0.0, 0.0);
-		glRotatef(90, 0.0, 1, 0.0);
-		top_pacman(2, 40, 40);
-		bottom_pacman(2, 40, 40);
-    glPopMatrix();
-	//--------------------------------
-	//Palate--------------------------
-		glPushMatrix();
-		glColor3f(1, 0, 0);	
-		glRotatef(58, 1, 0, 0.0);
-		glTranslated(0.0, 0.0, 0.0);
-		palate(4.0);
-		glPopMatrix();
-	//--------------------------------
-	//Bottom of mouth-----------------
-		glPushMatrix();
-		glColor3f(1, 0, 0);	
-		glRotatef(116, 1, 0, 0.0);
-		glTranslated(0.0, 0.0, 0.0);
-		palate(4.0);
-		glPopMatrix();
-	//--------------------------------
-	//Pupils--------------------------
-		//Right Pupil-----------------
-			glPushMatrix();
-			glTranslated(1.3, 2.4, 2);
-			glRotatef(70, 1, 0, 0);
-			glRotatef(80, 0, 1, 0);
-			glTranslated(0.0, 0.0, 0.0);
-			pupil();
-			glPopMatrix();
-		//----------------------------
-
-		//Left Pupil------------------
-			glPushMatrix();
-			glTranslated(-1.3, 2.4, 2);
-			glRotatef(70, 1, 0, 0);
-			glRotatef(80, 0, 1, 0);
-			glTranslated(0.0, 0.0, 0.0);
-			pupil();
-			glPopMatrix();
-		//----------------------------
-	//--------------------------------
-	//Retina--------------------------
-		//Right Retina----------------
-			glPushMatrix();
-			glTranslated(1.2, 2.7, 2.8);
-			glRotatef(70, 1, 0, 0);
-			glRotatef(80, 0, 1, 0);
-			glTranslated(0.0, 0.0, 0.0);
-			retina();
-			glPopMatrix();
-		//----------------------------
-
-		//Left Retina-----------------
-			glPushMatrix();
-			glTranslated(-1.2, 2.7, 2.8);
-			glRotatef(70, 1, 0, 0);
-			glRotatef(80, 0, 1, 0);
-			glTranslated(0.0, 0.0, 0.0);
-			retina();
-			glPopMatrix();
-		//----------------------------
-	//--------------------------------
-	//Group Number--------------------
-		//Top part of number 8--------
-			glPushMatrix();
-			glColor3f(0, 0, 0);
-			glTranslated(0, 3.9, 0);
-			glRotatef(90, 1, 0, 0);
-			glTranslated(0.0, 0.0, 0.0);
-			number8();
-			glPopMatrix();
-		//----------------------------
-		//Bottom part of number 8-----
-			glPushMatrix();
-			glColor3f(0, 0, 0);
-			glTranslated(0, 3.4, -1.9);
-			glRotatef(-120, 1, 0, 0);
-			glTranslated(0.0, 0.0, 0.0);
-			number8();
-			glPopMatrix();
-		//----------------------------
-
 }

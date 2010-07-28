@@ -22,16 +22,20 @@
 class Ghost {
 public:    
     explicit Ghost();
-    Ghost(GLfloat red, GLfloat green, GLfloat blue, bool isWireframe);
+    Ghost(GLfloat red, GLfloat green, GLfloat blue);
     ~Ghost();
     void draw();
     
-    void initializeModel(bool isWireframe);
+    void initializeModel();
+    void initPosition(GLfloat x, GLfloat y, GLfloat z);
     
     GLuint listID;
     GLfloat red;
     GLfloat green;
     GLfloat blue;
+    GLfloat x;
+    GLfloat y;
+    GLfloat z;
     
 private:
     GLUquadricObj *cylinder;

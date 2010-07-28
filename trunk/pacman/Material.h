@@ -10,13 +10,20 @@
 #ifndef _MATERIAL_H_
 #define _MATERIAL_H_
 
-#include <GLUT/GLUT.h>
+#ifdef __APPLE__
+#include <cstdlib>
+#include <GLUT/glut.h>
+#else 
+#include <stdlib.h>
+#include <GL/glut.h>
+#endif
 
 GLfloat no_mat[] = { 0.0, 0.0, 0.0, 1.0 };
 GLfloat mat_ambient[] = { 0.7, 0.7, 0.7, 1.0 };
 GLfloat mat_ambient_color[] = { 0.8, 0.8, 0.2, 1.0 };
 GLfloat mat_diffuse[] = { 0.1, 0.5, 0.8, 1.0 };
 GLfloat mat_specular[] = { 1.0, 1.0, 1.0, 1.0 };
+GLfloat no_specular[] = { 0.0, 0.0, 0.0, 1.0 };
 GLfloat no_shininess[] = { 0.0 };
 GLfloat low_shininess[] = { 5.0 };
 GLfloat high_shininess[] = { 100.0 };

@@ -51,19 +51,55 @@
 #include <iostream>
 #include <sstream>
 #include <iomanip>
+#include <vector>
 
-#include "Maze.h"
 #include "Ghost.h"
 #include "Pacman.h"
 #include "Material.h"
 
+#include "Map.h"
+#include "Tile.h"
+
 using namespace std;
 
+
+/**************************
+ Game Objects
+ **************************/
+static Pacman *pacman;
 static Ghost *ghost1;
 static Ghost *ghost2;
 static Ghost *ghost3;
 static Ghost *ghost4;
+static Map *map1;
 
+static char map[483] = {										 
+    
+    'W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W',	 // Current map
+    'W','Z','Z','Z','Z','Z','Z','Z','Z','Z','W','Z','Z','Z','Z','Z','Z','Z','Z','Z','W',
+    'W','Z','W','W','W','Z','W','W','W','Z','W','Z','W','W','W','Z','W','W','W','Z','W',
+    'W','Z','W','W','W','Z','W','W','W','Z','W','Z','W','W','W','Z','W','W','W','Z','W',
+    'W','Z','Z','Z','Z','Z','Z','Z','Z','Z','W','Z','Z','Z','Z','Z','Z','Z','Z','Z','W',
+    'W','Z','W','W','W','Z','W','Z','W','W','W','W','W','Z','W','Z','W','W','W','Z','W',
+    'W','Z','Z','Z','Z','Z','W','Z','Z','Z','W','Z','Z','Z','W','Z','Z','Z','Z','Z','W',
+    'W','W','W','W','W','Z','W','W','W','Z','W','Z','W','W','W','Z','W','W','W','W','W',
+    'Y','Y','Y','Y','W','Z','W','Z','Z','Z','Z','Z','Z','Z','W','Z','W','Y','Y','Y','Y',
+    'W','W','W','W','W','Z','W','Z','W','W','Y','W','W','Z','W','Z','W','W','W','W','W',
+    'Y','Y','Y','Y','Y','Z','Z','Z','W','Y','Y','Y','W','Z','Z','Z','Y','Y','Y','Y','Y',
+    'W','W','W','W','W','Z','W','Z','W','Y','Y','Y','W','Z','W','Z','W','W','W','W','W',
+    'Y','Y','Y','Y','W','Z','W','Z','W','W','W','W','W','Z','W','Z','W','Y','Y','Y','Y',
+    'Y','Y','Y','Y','W','Z','W','Z','Z','Z','Z','Z','Z','Z','W','Z','W','Y','Y','Y','Y',
+    'W','W','W','W','W','Z','W','Z','W','W','W','W','W','Z','W','Z','W','W','W','W','W',
+    'W','Z','Z','Z','Z','Z','Z','Z','Z','Z','W','Z','Z','Z','Z','Z','Z','Z','Z','Z','W',
+    'W','Z','W','W','W','Z','W','W','W','Z','W','Z','W','W','W','Z','W','W','W','Z','W',
+    'W','Z','Z','Z','W','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','W','Z','Z','Z','W',
+    'W','W','W','Z','W','Z','W','Z','W','W','W','W','W','Z','W','Z','W','Z','W','W','W',
+    'W','Z','Z','Z','Z','Z','W','Z','Z','Z','W','Z','Z','Z','W','Z','Z','Z','Z','Z','W',
+    'W','Z','W','W','W','W','W','W','W','Z','W','Z','W','W','W','W','W','W','W','Z','W',
+    'W','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','W',
+    'W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W'
+    
+};
 
 // Initial size of graphics window on your screen.
 const int WIDTH  = 600; // in pixels
@@ -101,22 +137,27 @@ double beta = 0;                                   // rotation angle about X axi
 double yamma = 0;
 double halfway = - (farPlane + nearPlane) / 2;	   // half way between near and far planes
 
-//camera
-double fw_rw=0;
-double up_dn=0;
-double lt_rt=0;
+/* Camera */
 
-double eye_x=12.0;
-double eye_y=20.0;
-double eye_z=65.0;
+//Initial values
+const GLdouble initial_eye[3] = {10.0, 30.0, 35.0};
+const GLdouble initial_center[3] = {10.0, 2.0, 11.0};
 
-double center_x=12.0;
-double center_y=0.0;
-double center_z=0.0;
+GLdouble fw_rw=0;
+GLdouble up_dn=0;
+GLdouble lt_rt=0;
 
-double up_x=0.0;
-double up_y=1.0;
-double up_z=0.0;
+GLdouble eye_x=10.0;
+GLdouble eye_y=30.0;
+GLdouble eye_z=35.0;
+
+GLdouble center_x=10.0;
+GLdouble center_y=2.0;
+GLdouble center_z=11.0;
+
+GLdouble up_x=0.0;
+GLdouble up_y=1.0;
+GLdouble up_z=0.0;
 
 //////////////////// Default Camera Positions ///////////////
 /*
@@ -238,7 +279,7 @@ void setView()
 	// Must set it up in Projection Matrix
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-
+    
 	if(projType) {
         gluPerspective(fovy, (GLfloat) 1.0, nearPlane, farPlane);
     }
@@ -274,7 +315,7 @@ void zoom(unsigned char direction)
 }
 
 void drawAxes(){
-/*
+
 	glPushMatrix();
 		glBegin(GL_LINES);
 		// X axis
@@ -291,117 +332,7 @@ void drawAxes(){
 		glVertex3f(0, 0, 10);
 		glEnd();
     glPopMatrix();
-*/
-
-
 }
-
-void drawMaze(GLdouble x, GLdouble y, GLdouble z)
-{
-	// Draw everything as wireframe only, if flag is set
-		if(isWireFrame)
-			glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
-		else
-			glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
-
-	char map[483] = {										 
-        
-        'W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W',	 // Current map
-        'W','Z','Z','Z','Z','Z','Z','Z','Z','Z','W','Z','Z','Z','Z','Z','Z','Z','Z','Z','W',
-        'W','Z','W','W','W','Z','W','W','W','Z','W','Z','W','W','W','Z','W','W','W','Z','W',
-        'W','Z','W','W','W','Z','W','W','W','Z','W','Z','W','W','W','Z','W','W','W','Z','W',
-        'W','Z','Z','Z','Z','Z','Z','Z','Z','Z','W','Z','Z','Z','Z','Z','Z','Z','Z','Z','W',
-        'W','Z','W','W','W','Z','W','Z','W','W','W','W','W','Z','W','Z','W','W','W','Z','W',
-        'W','Z','Z','Z','Z','Z','W','Z','Z','Z','W','Z','Z','Z','W','Z','Z','Z','Z','Z','W',
-        'W','W','W','W','W','Z','W','W','W','Z','W','Z','W','W','W','Z','W','W','W','W','W',
-        'Y','Y','Y','Y','W','Z','W','Z','Z','Z','Z','Z','Z','Z','W','Z','W','Y','Y','Y','Y',
-        'W','W','W','W','W','Z','W','Z','W','W','Z','W','W','Z','W','Z','W','W','W','W','W',
-        'Y','Y','Y','Y','Y','Z','Z','Z','W','Y','Y','Y','W','Z','Z','Z','Y','Y','Y','Y','Y',
-        'W','W','W','W','W','Z','W','Z','W','Y','Y','Y','W','Z','W','Z','W','W','W','W','W',
-        'Y','Y','Y','Y','W','Z','W','Z','W','W','W','W','W','Z','W','Z','W','Y','Y','Y','Y',
-        'Y','Y','Y','Y','W','Z','W','Z','Z','Z','Z','Z','Z','Z','W','Z','W','Y','Y','Y','Y',
-        'W','W','W','W','W','Z','W','Z','W','W','W','W','W','Z','W','Z','W','W','W','W','W',
-        'W','Z','Z','Z','Z','Z','Z','Z','Z','Z','W','Z','Z','Z','Z','Z','Z','Z','Z','Z','W',
-        'W','Z','W','W','W','Z','W','W','W','Z','W','Z','W','W','W','Z','W','W','W','Z','W',
-        'W','Z','Z','Z','W','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','W','Z','Z','Z','W',
-        'W','W','W','Z','W','Z','W','Z','W','W','W','W','W','Z','W','Z','W','Z','W','W','W',
-        'W','Z','Z','Z','Z','Z','W','Z','Z','Z','W','Z','Z','Z','W','Z','Z','Z','Z','Z','W',
-        'W','Z','W','W','W','W','W','W','W','Z','W','Z','W','W','W','W','W','W','W','Z','W',
-        'W','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','W',
-        'W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W'
-        
-    };
-    glPushMatrix();
-            glScalef(0.2,0.2,0.2);
-            glTranslatef(x,y,z);
-            DrawMaze(map);
-		glPopMatrix();
-
-}
-
-void drawPacman(GLdouble x, GLdouble y, GLdouble z)
-{
-
-	// Draw everything as wireframe only, if flag is set
-    if(isWireFrame) {
-        glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
-    } else {
-        glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
-    }
-    
-	glPushMatrix();
-
-		glTranslatef(x,y,z);
-		glScalef(0.2,0.2,0.2);
-		DrawPacman();
-	glPopMatrix();
-
-}
-
-void drawGhost(GLdouble x, GLdouble y, GLdouble z, Ghost *ghost)
-{
-    
-	// Draw everything as wireframe only, if flag is set
-    if(isWireFrame) {
-        glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
-    } else {
-        glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
-    }
-    
-    glPushMatrix();
-    
-        glTranslatef(x,y,z);
-        glScalef(1,1,1);
-        ghost->draw();
-    
-    glPopMatrix();
-    
-}
-
-
-void drawSpecial(GLdouble Radius, GLdouble x, GLdouble y, GLdouble z)
-{
-
-	//anything else we might want to draw..
-
-}
-
-
-
-void drawScene(GLdouble scenewidth, GLdouble sceneheight, GLdouble scenedepth)
-{
-
-	glPushMatrix();
-		drawMaze(-40,-40,-40);
-
-		drawPacman(-5,-6,3);
-		drawGhost(10,-6,14, ghost1);
-        drawGhost(0,-6,5, ghost2);
-        drawGhost(13,-6,14, ghost3);
-        drawGhost(-6,-6,24, ghost4);
-	glPopMatrix();
-}
-
 
 // This function is called to display the scene.
 void display ()
@@ -412,7 +343,7 @@ void display ()
 	glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     gluLookAt(eye_x, eye_y, eye_z, center_x, center_y, center_z, up_x, up_y, up_z);
-    
+
     //translate along Z, Y, X
 	glTranslatef(0,0,fw_rw);
 	glTranslatef(0,up_dn,0);
@@ -423,12 +354,25 @@ void display ()
 	glRotatef(yamma, 0, 0, 1);
 
 	// Draw model axes in centre of room.
-    drawAxes();
-    
+    //drawAxes();
+
     // Draw the scene in double buffer.
     glColor3f(0, 1, 1);
-    drawScene(20.0, 20.0, 20.0);
-
+    //drawScene(20.0, 20.0, 20.0);
+    
+    if(isWireFrame) {
+        glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
+    } else {
+        glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
+    }
+    
+    map1->draw();
+    pacman->draw();
+    ghost1->draw();
+    ghost2->draw();
+    ghost3->draw();
+    ghost4->draw();
+    
     // now swap buffer
     glutSwapBuffers();
 }
@@ -519,12 +463,22 @@ void graphicKeys (unsigned char key, int x, int y)
 	switch (key)
 	{
 		case 'c':
-			eye_x=12.0;
-			eye_y=20.0;
-			eye_z=65.0;
-			center_x=12.0;
-			center_y=0.0;
-			center_z=0.0;
+            eye_x = initial_eye[0];
+            eye_y = initial_eye[1];
+            eye_z = initial_eye[2];
+            
+            center_x = initial_center[0];
+            center_y = initial_center[1];
+            center_z = initial_center[2];
+            
+            fw_rw=0;
+            up_dn=0;
+            lt_rt=0;
+            
+            alpha = 0;
+            beta = 0;
+            yamma = 0;            
+            
             break;   
 		case '1':
             eye_x+=0.5;
@@ -547,62 +501,80 @@ void graphicKeys (unsigned char key, int x, int y)
 			cout << "eye_z : " << eye_z << endl;
             break;
 		case '6':
-            eye_x=-10.0;
-			eye_y=2.5;
-			eye_z=40.5;
-			center_x=28.0;
-			center_y=0.0;
-			center_z=0.0;
+            eye_x = -2;
+            eye_y = 3.5;
+            eye_z = -2;
+            center_x = initial_center[0];
+            center_y = initial_center[1];
+            center_z = initial_center[2];
+            
+            fw_rw=0;
+            up_dn=0;
+            lt_rt=0;
+            
+            alpha = 0;
+            beta = 0;
+            yamma = 0;            
+            
             break;
  		case '7':
-            eye_x=37.0;
-			eye_y=2.5;
-			eye_z=39.5;
-			center_x=2.0;
-			center_y=0.0;
-			center_z=0.0;
+            eye_x = 23;
+            eye_y = 3.5;
+            eye_z = -2;
+            center_x = initial_center[0];
+            center_y = initial_center[1];
+            center_z = initial_center[2];
+            
+            fw_rw=0;
+            up_dn=0;
+            lt_rt=0;
+            
+            alpha = 0;
+            beta = 0;
+            yamma = 0;                        
+            
             break;
 		case '8':
-			eye_x=35.5;
-			eye_y=2.5;
-			eye_z=-6.5;
-			center_x=27.5;
-			center_y=0.0;
-			center_z=0.0;
+			eye_x=-2;
+			eye_y=3.5;
+			eye_z=24;
+            center_x = initial_center[0];
+            center_y = initial_center[1];
+            center_z = initial_center[2];
+            
+            fw_rw=0;
+            up_dn=0;
+            lt_rt=0;
+            
             break;
 		case '9':
-			eye_x=-7.5;
-			eye_y=2.5;
-			eye_z=-11.5;
-			center_x=0.0;
-			center_y=0.0;
-			center_z=0.0;
+			eye_x=22;
+			eye_y=3.5;
+			eye_z=24;
+            center_x = initial_center[0];
+            center_y = initial_center[1];
+            center_z = initial_center[2];
+            
+            fw_rw=0;
+            up_dn=0;
+            lt_rt=0;
+            
+            alpha = 0;
+            beta = 0;
+            yamma = 0;                        
+            
             break;
-		case '0':
-            center_y-=0.5;
-			cout << "center_y : " << center_y << endl;
-            break;
-		case '-':
-            center_z+=0.5;
-			cout << "center_z : " << center_z << endl;
-            break;
-		case '=':
-            center_z-=0.5;
-			cout << "center_z : " << center_z << endl;
-            break;
-
 		case 'h':
             help();
             break;
             
         case 27:
             exit(0);
-
+            break;
      
         case 'w':
             fw_rw += 0.2*mvSTEP;
             break;
-            
         case 's':
             fw_rw -= 0.2*mvSTEP;
             break;
@@ -695,12 +667,8 @@ void setupLighting()
     // Light values and coordinates
     GLfloat  whiteLight[] = { 0.45f, 0.45f, 0.45f, 1.0f };
     GLfloat  sourceLight[] = { 0.25f, 0.25f, 0.25f, 1.0f };
-    GLfloat	 lightPos[] = { -50.f, 25.0f, 250.0f, 0.0f };
-
-    glPushMatrix();
-		glTranslatef(-50.f, 25.0f, 250.0f);
-		drawAxes();
-    glPopMatrix();
+    //GLfloat	 lightPos[] = { -50.0f, 25.0f, 250.0f, 0.0f };
+    GLfloat	 lightPos[] = { 10.0f, 8.0f, 2.0f, 0.0f };
 
     glEnable(GL_DEPTH_TEST);	// Hidden surface removal
     glFrontFace(GL_CCW);		// Counter clock-wise polygons face out
@@ -722,7 +690,7 @@ void setupLighting()
     glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
 
     // Black blue background
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f );
+    glClearColor(0.0f, 0.0f, 0.4f, 1.0f );
     
     // Enable Transparency
     glEnable (GL_BLEND);
@@ -758,16 +726,32 @@ int main (int argc, char **argv)
     //init scene
     setupLighting();
     
-	//initialise models
-    //maze = new maze
-    ghost1 = new Ghost(1.0, 0.0, 0.0, false);
-    ghost2 = new Ghost(0.0, 1.0, 0.0, false);
-    ghost3 = new Ghost(1.0, 0.5, 0.7, false);
-    ghost4 = new Ghost(1.0, 0.5, 0.0, false);
+	/* init ghosts */
+    pacman = new Pacman();
+    pacman->initPosition(1.0f, 0.2f, 1.0f);
     
-    //pacman = new pacman
+    ghost1 = new Ghost(1.0, 0.0, 0.0);
+    ghost2 = new Ghost(0.0, 1.0, 0.0);
+    ghost3 = new Ghost(1.0, 0.5, 0.7);
+    ghost4 = new Ghost(1.0, 0.5, 0.0);
+    
+    ghost1->initPosition(9.0f,  0.2f, 11.0f);
+    ghost2->initPosition(10.0f, 0.2f, 11.0f);
+    ghost3->initPosition(11.0f, 0.2f, 11.0f);
+    ghost4->initPosition(10.0f, 0.2f, 10.0f);
+
+    /* init map */
+    srand(time(NULL));
+    map1 = new Map(map, 23, 21);
     
     // Enter GLUT loop.
 	glutMainLoop();
+    
+    /* Clean up */
+    delete ghost1;
+    delete ghost2;
+    delete ghost3;
+    delete ghost4;
+    delete map1;
 }
 
