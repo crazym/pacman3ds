@@ -35,12 +35,15 @@ GLfloat pacman_palate[] = { 1.0, 0.0, 0.0, 1.0 };
 GLfloat pacman_retina[] = { 0.0, 0.0, 0.0, 1.0 };
 GLfloat pacman_pupil[] = { 1.0, 1.0, 1.0, 1.0 };
 
-
-/* ghost body is determined when you initialize a ghost */
 GLfloat ghost_body[] = { 0.75, 0.75, 0.75, 0.65 };
 GLfloat ghost_white[] = { 1.0, 1.0, 1.0, 1.0 };
 GLfloat ghost_pupil[] = { 0.0, 0.0, 1.0, 1.0 };
 
 GLfloat group_number[] = { 0.0, 0.0, 0.0, 1.0 };
 
+GLfloat lamp_emission_on[] = { 0.4, 0.4, 0.0, 0.0};
+GLfloat lamp_emission_off[] = { 0.0, 0.0, 0.0, 0.0};
+GLfloat lamp_specular_on[] = { 1.0, 1.0, 0.0, 1.0 };
+GLfloat lamp_ambient_diffuse[] = { 1.0, 1.0, 0.0, 1.0 };
+GLfloat pole_ambient_diffuse[] = { 0.6, 0.6, 0.6, 1.0 };
 #endif

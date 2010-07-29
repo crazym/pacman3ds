@@ -10,22 +10,49 @@
 #include "Lamp.h"
 #include <iostream>
 
+extern GLfloat lamp_emission_on[];
+extern GLfloat lamp_emission_off[];
+extern GLfloat lamp_specular_on[];
+extern GLfloat lamp_ambient_diffuse[];
+extern GLfloat pole_ambient_diffuse[];
+extern GLfloat no_specular[];
+
 Lamp::Lamp(GLenum light, GLfloat* direction)
 {
+    GLfloat lamp_color[] = { 1.0, 1.0, 0.0, 1.0 };
+    GLfloat pole_color[] = { 0.6, 0.6, 0.6, 1.0 };
+    
     this->light = light;
-    this->listID = glGenLists(1);
+    this->listID = glGenLists(2);
+    this->isOn = false;
+    this->cylinder = gluNewQuadric();
     
     glLightf(this->light, GL_SPOT_CUTOFF, 45.0);
     glLightfv(this->light, GL_SPOT_DIRECTION, direction);
     
-    glNewList(listID, GL_COMPILE);
-        glutSolidSphere(1.0, 20, 20);
+    /* List for Pole */
+    glNewList(this->listID, GL_COMPILE);
+    glPushMatrix();
+        glColor4fv(pole_color);
+        glRotatef(90, 1.0, 0.0, 0.0);
+        gluCylinder(cylinder, 0.2, 0.2, 1.0, 20, 20);
+    glPopMatrix();
+    glEndList();
+    
+    /* List for Bulb */
+    glNewList(this->listID+1, GL_COMPILE);
+    glPushMatrix();
+        glColor4fv(lamp_color);
+        glTranslatef(0.0, 0.2, 0.0);
+        glutSolidSphere(0.3, 20, 20);
+    glPopMatrix();
     glEndList();
 }
 
 Lamp::~Lamp()
 {
-    glDeleteLists(this->listID, 1);
+    glDeleteLists(this->listID, 2);
+    gluDeleteQuadric(cylinder);
 }
 
 void Lamp::setPosition(GLfloat* position)
@@ -47,13 +74,43 @@ void Lamp::setAmbDiffSpec(GLfloat* ambient, GLfloat* diffuse, GLfloat* specular)
 void Lamp::draw()
 {
     glPushMatrix();
-        GLfloat position[] = {this->x, this->y, this->z, 1.0};
-        glLightfv(this->light, GL_POSITION, position);
-
         glPushMatrix();
             glTranslatef(this->x, this->y, this->z);
-            glScalef(0.3, 0.3, 0.3);
+            //glScalef(0.3, 0.3, 0.3);
+            
+            glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, pole_ambient_diffuse);
+            /* Draw Pole */
             glCallList(this->listID);
+
+    
+            /* Setup and Draw Bulb */
+            if (isOn) {
+                glMaterialfv(GL_FRONT, GL_EMISSION, lamp_emission_on);
+                glMaterialfv(GL_FRONT, GL_SPECULAR, lamp_specular_on);
+            } else {
+                glMaterialfv(GL_FRONT, GL_EMISSION, lamp_emission_off);
+                glMaterialfv(GL_FRONT, GL_SPECULAR, no_specular);
+            }
+            glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, lamp_ambient_diffuse);
+            glCallList(this->listID+1);
+            
+            glMaterialfv(GL_FRONT, GL_EMISSION, lamp_emission_off);
+            glMaterialfv(GL_FRONT, GL_SPECULAR, no_specular);
         glPopMatrix();
+        
+        GLfloat position[] = {this->x, this->y, this->z, 1.0};
+        glLightfv(this->light, GL_POSITION, position);
     glPopMatrix();
+}
+
+void Lamp::turnOn()
+{
+    glEnable(this->light);
+    this->isOn = true;
+}
+
+void Lamp::turnOff()
+{
+    glDisable(this->light);
+    this->isOn = false;
 }

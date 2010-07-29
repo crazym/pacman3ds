@@ -276,10 +276,6 @@ void display ()
 
 	// Draw model axes in centre of room.
     //drawAxes();
-
-    // Draw the scene in double buffer.
-    glColor3f(0, 1, 1);
-    //drawScene(20.0, 20.0, 20.0);
     
     if(isWireFrame) {
         glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
@@ -716,58 +712,58 @@ void ProcessMenu(int value)
             
         /* Enable Light 1 */
         case 19:
-            glEnable(GL_LIGHT1);
+            lamp1->turnOn();
             break;
         
         /* Disable Light 1 */
         case 20:
-            glDisable(GL_LIGHT1);
+            lamp1->turnOff();
             break;
         
         /* Enable Light 2 */
         case 21:
-            glEnable(GL_LIGHT2);
+            lamp2->turnOn();
             break;
         
         /* Disable Light 2 */
         case 22:
-            glDisable(GL_LIGHT2);
+            lamp2->turnOff();
             break;
         
         /* Enable Light 3 */
         case 23:
-            glEnable(GL_LIGHT3);
+            lamp3->turnOn();
             break;
         
         /* Disable Light 3 */
         case 24:
-            glDisable(GL_LIGHT3);
+            lamp3->turnOff();
             break;
         
         /* Enable Light 4 */
         case 25:
-            glEnable(GL_LIGHT4);
+            lamp4->turnOn();
             break;
             
         /* Disable Light 4 */
         case 26:
-            glDisable(GL_LIGHT4);
+            lamp4->turnOff();
             break;
             
         /* Enable Lamps */
         case 27:
-            glEnable(GL_LIGHT1);
-            glEnable(GL_LIGHT2);
-            glEnable(GL_LIGHT3);
-            glEnable(GL_LIGHT4);
+            lamp1->turnOn();
+            lamp2->turnOn();
+            lamp3->turnOn();
+            lamp4->turnOn();
             break;
             
         /* Disable Lamps */
         case 28:
-            glDisable(GL_LIGHT1);
-            glDisable(GL_LIGHT2);
-            glDisable(GL_LIGHT3);
-            glDisable(GL_LIGHT4);
+            lamp1->turnOff();
+            lamp2->turnOff();
+            lamp3->turnOff();
+            lamp4->turnOff();
             break;
             
         default:
