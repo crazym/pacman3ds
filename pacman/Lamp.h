@@ -27,12 +27,18 @@ public:
     void setPosition(GLfloat* position);
     void setAmbDiffSpec(GLfloat* ambient, GLfloat* diffuse, GLfloat* specular);
     void draw();
+    void turnOn();
+    void turnOff();
     
+    bool isOn;
     GLuint listID;
     GLenum light;
     GLfloat x;
     GLfloat y;
     GLfloat z;
+    
+private:
+    GLUquadricObj *cylinder;
 };
 
 #endif
