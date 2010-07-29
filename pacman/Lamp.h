@@ -24,15 +24,20 @@ public:
     Lamp(GLenum light, GLfloat* direction);
     ~Lamp();
     
-    void setPosition(GLfloat* position);
+    void setLightPosition(GLfloat* position); // position of the light
+    void setModelPosition(GLfloat* position);
     void setAmbDiffSpec(GLfloat* ambient, GLfloat* diffuse, GLfloat* specular);
     void draw();
     void turnOn();
     void turnOff();
     
     bool isOn;
+    //bool firstTime; //used as a hack to fix an annoying bug
     GLuint listID;
     GLenum light;
+    
+    GLfloat lightPosition[4];
+    
     GLfloat x;
     GLfloat y;
     GLfloat z;

@@ -28,13 +28,15 @@
 //   2. F2 : toggle between continuous rotation about y-axis and stop rotation
 //   3. Up and Down Arrow keys for rotating view about  x-axis
 //	 4. Left and Right Arrow keys for rotating about z-axis
-//	 5.	F10: reset view in case your view parameters get out of control.
-//	 6. W : Forward
-//   7. S : Backward
-//   8. A : Strafe Left
-//   9. D : Strafe Right
-//   10. , : Lower Camera
-//   11. . : Raise Camera
+//   5. [ and ] for roll
+//	 6.	F10: reset view in case your view parameters get out of control.
+//	 7. W : Forward
+//   8. S : Backward
+//   9. A : Strafe Left
+//   10. D : Strafe Right
+//   11. , : Lower Camera
+//   12. . : Raise Camera
+//  
 
 
 // Link with: opengl32.lib, glu32.lib, glut32.lib.
@@ -137,9 +139,9 @@ double farPlane  = 120;
 double fovy = 60;
 
 /* Rotation */
-double alpha = 0;                                  // rotation angle about Y axis.
-double beta = 0;                                   // rotation angle about X axis.
-double yamma = 0;
+double yaw = 0;                                  // rotation angle about Y axis.
+double pitch = 0;                                   // rotation angle about X axis.
+double roll = 0;
 
 /* misc */
 double halfway = - (farPlane + nearPlane) / 2;	   // half way between near and far planes
@@ -182,9 +184,9 @@ void resetViewParameters()
 	farPlane  = 120;
     
 	fovy = 60;
-	alpha = 0.0;
-	beta = 0.0;
-	yamma = 0.0;
+	yaw = 0.0;
+	pitch = 0.0;
+	roll = 0.0;
     
 	projType = 1;
 	idleEnable = 0;
@@ -258,22 +260,52 @@ void drawAxes(){
 // This function is called to display the scene.
 void display ()
 {
+    GLfloat spotlightPosition1[] = { 0.0f, 1.0f, 0.0f, 1.0f };
+    GLfloat spotlightPosition2[] = { 20.0f, 1.0f, 0.0f, 1.0f };
+    GLfloat spotlightPosition3[] = { 0.0f, 1.0f, 22.0f, 1.0f };
+    GLfloat spotlightPosition4[] = { 20.0f, 1.0f, 22.0f, 1.0f };
+    
+    GLfloat eye_position[3] = { eye_x+lt_rt, eye_y+up_dn, eye_z+fw_rw };
+    GLfloat center_position[3] = { center_x+lt_rt, center_y+up_dn, center_z+fw_rw };
+    
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
     // set modelling mode
 	glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    gluLookAt(eye_x, eye_y, eye_z, center_x, center_y, center_z, up_x, up_y, up_z);
-
+    
+    //gluLookAt(eye_x, eye_y, eye_z, center_x, center_y, center_z, up_x, up_y, up_z);
+    gluLookAt(eye_position[0], eye_position[1], eye_position[2], 
+              center_position[0], center_position[1], center_position[2], 
+              0.0, 1.0, 0.0);
+    
+    
+    /*GLfloat spotlightPosition1[] = { 0.0f + eye_x, 1.0f + eye_y, 0.0f + eye_z, 1.0f };
+    GLfloat spotlightPosition2[] = { 20.0f, 1.0f, 0.0f, 1.0f };
+    GLfloat spotlightPosition3[] = { 0.0f, 1.0f, 22.0f, 1.0f };
+    GLfloat spotlightPosition4[] = { 20.0f, 1.0f, 22.0f, 1.0f }; */
+    
+    /*
     //translate along Z, Y, X
 	glTranslatef(0,0,fw_rw);
 	glTranslatef(0,up_dn,0);
 	glTranslatef(lt_rt,0,0);
+    */
     
-	glRotatef(beta, 1, 0, 0);
-	glRotatef(alpha, 0, 1, 0);
-	glRotatef(yamma, 0, 0, 1);
+    lamp1->setLightPosition(spotlightPosition1);
+    lamp2->setLightPosition(spotlightPosition2);
+    lamp3->setLightPosition(spotlightPosition3);
+    lamp4->setLightPosition(spotlightPosition4);                    
+    
+	glRotatef(pitch, 1, 0, 0);
+	glRotatef(yaw, 0, 1, 0);
+	glRotatef(roll, 0, 0, 1);
+   
+    
 
+//    if (eye_x == initial_eye[0] || eye_y == initial_eye[1] || eye_z == initial_eye[2]) {
+//    }
+    
 	// Draw model axes in centre of room.
     //drawAxes();
     
@@ -282,7 +314,7 @@ void display ()
     } else {
         glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
     }
-    
+        
     map1->draw();
     pacman->draw();
     ghost1->draw();
@@ -304,9 +336,9 @@ void idle ()
 
    if (idleEnable)
    {	
-       alpha += RotSTEP;
-       if (alpha > ALL_ROUND){
-           alpha -= ALL_ROUND;           
+       yaw += RotSTEP;
+       if (yaw > ALL_ROUND){
+           yaw -= ALL_ROUND;           
        }
        // Display normalized coordinates in title bar.
        const int BUFSIZE = 200;
@@ -322,10 +354,10 @@ void idle ()
             << setprecision(0) 
             << ").  Alpha=" 
             << setw(3) 
-            << alpha 
+            << yaw 
             << ".  Beta=" 
             << setw(3) 
-            << beta 
+            << pitch 
             << setprecision(2)
             << ". Distance=" 
             << halfway 
@@ -368,6 +400,7 @@ void help()
 		<< "F2 : toggle between continuous rotation about y-axis and stop rotation" << endl
 		<< "Up and Down Arrow keys for rotating view about  x-axis" << endl
 		<< "Left and Right Arrow keys for rotating about z-axis" << endl
+        << "[ and ] for roll" << endl
 		<< "F10: reset view in case your view parameters get out of control" << endl
 		<< "W : Forward" << endl
 		<< "S : Backward" << endl
@@ -394,23 +427,36 @@ void graphicKeys (unsigned char key, int x, int y)
             break;
      
         case 'w':
-            fw_rw += 0.2*mvSTEP;
-            break;
-        case 's':
             fw_rw -= 0.2*mvSTEP;
             break;
-        case 'a':
-            lt_rt += 0.2*mvSTEP;
+        case 's':
+            fw_rw += 0.2*mvSTEP;
             break;
-        case 'd':
+        case 'a':
             lt_rt -= 0.2*mvSTEP;
             break;
-		case ',':
-			up_dn += 0.2*mvSTEP;
+        case 'd':
+            lt_rt += 0.2*mvSTEP;
             break;
-		case '.':
+		case ',':
 			up_dn -= 0.2*mvSTEP;
             break;
+		case '.':
+			up_dn += 0.2*mvSTEP;
+            break;
+        case ']':
+            roll -= 10*RotSTEP;
+		    if (roll < -ALL_ROUND) {
+                roll += ALL_ROUND;
+            }
+            break;
+        case '[':
+            roll += 10*RotSTEP;
+            if (roll > -ALL_ROUND) {
+                roll += ALL_ROUND;
+            }
+            break;
+
         default:
             cout << key << endl;
 	}
@@ -444,28 +490,28 @@ void functionKeys (int key, int x, int y)
            break;
            
        case GLUT_KEY_UP:
-           beta += 10*RotSTEP;
-           if (beta > ALL_ROUND)
-               beta -= ALL_ROUND;
+           pitch += 10*RotSTEP;
+           if (pitch > ALL_ROUND)
+               pitch -= ALL_ROUND;
            break;
            
        case GLUT_KEY_DOWN:
-           beta -= 10*RotSTEP;
-           if (beta < -ALL_ROUND)
-               beta += ALL_ROUND;
+           pitch -= 10*RotSTEP;
+           if (pitch < -ALL_ROUND)
+               pitch += ALL_ROUND;
            break; 
 
 		case GLUT_KEY_RIGHT:
-            alpha -= 10*RotSTEP;
-		    if (alpha < -ALL_ROUND) {
-                alpha += ALL_ROUND;
+            yaw -= 10*RotSTEP;
+		    if (yaw < -ALL_ROUND) {
+                yaw += ALL_ROUND;
             }
             break;
            
         case GLUT_KEY_LEFT:
-            alpha += 10*RotSTEP;
-            if (alpha > -ALL_ROUND) {
-                alpha += ALL_ROUND;
+            yaw += 10*RotSTEP;
+            if (yaw > -ALL_ROUND) {
+                yaw += ALL_ROUND;
             }
             break;  
    }
@@ -508,9 +554,9 @@ void ProcessMenu(int value)
             up_dn = 0;
             lt_rt = 0;
             
-            alpha = 0;
-            beta  = 0;
-            yamma = 0;   
+            yaw = 0;
+            pitch  = 0;
+            roll = 0;   
             
             break;
             
@@ -528,9 +574,9 @@ void ProcessMenu(int value)
             up_dn = 0;
             lt_rt = 0;
             
-            alpha = 0;
-            beta  = 0;
-            yamma = 0;   
+            yaw = 0;
+            pitch  = 0;
+            roll = 0;   
             
             break;
             
@@ -548,9 +594,9 @@ void ProcessMenu(int value)
             up_dn = 0;
             lt_rt = 0;
             
-            alpha = 0;
-            beta  = 0;
-            yamma = 0;   
+            yaw = 0;
+            pitch  = 0;
+            roll = 0;   
             
             break;
          
@@ -568,9 +614,9 @@ void ProcessMenu(int value)
             up_dn = 0;
             lt_rt = 0;
             
-            alpha = 0;
-            beta  = 0;
-            yamma = 0;   
+            yaw = 0;
+            pitch  = 0;
+            roll = 0;   
             
             break;
         
@@ -588,9 +634,9 @@ void ProcessMenu(int value)
             up_dn = 0;
             lt_rt = 0;
             
-            alpha = 0;
-            beta  = 0;
-            yamma = 0;   
+            yaw = 0;
+            pitch  = 0;
+            roll = 0;   
             
             break;
             
@@ -607,9 +653,9 @@ void ProcessMenu(int value)
             up_dn = 0;
             lt_rt = 0;
             
-            alpha = 0;
-            beta  = 0;
-            yamma = 0;
+            yaw = 0;
+            pitch  = 0;
+            roll = 0;
             
             break;
         
@@ -626,9 +672,9 @@ void ProcessMenu(int value)
             up_dn = 0;
             lt_rt = 0;
             
-            alpha = 0;
-            beta  = 0;
-            yamma = 0;   
+            yaw = 0;
+            pitch  = 0;
+            roll = 0;   
             
             break;
             
@@ -645,9 +691,9 @@ void ProcessMenu(int value)
             up_dn = 0;
             lt_rt = 0;
             
-            alpha = 0;
-            beta  = 0;
-            yamma = 0;                        
+            yaw = 0;
+            pitch  = 0;
+            roll = 0;                        
             
             break;
            
@@ -664,9 +710,9 @@ void ProcessMenu(int value)
             up_dn = 0;
             lt_rt = 0;
             
-            alpha = 0;
-            beta  = 0;
-            yamma = 0;                        
+            yaw = 0;
+            pitch  = 0;
+            roll = 0;                        
             
             break;
             
@@ -694,9 +740,9 @@ void ProcessMenu(int value)
             up_dn = 0;
             lt_rt = 0;
             
-            alpha = 0;
-            beta  = 0;
-            yamma = 0;            
+            yaw = 0;
+            pitch  = 0;
+            roll = 0;            
             
             break;
             
@@ -791,7 +837,7 @@ void setupLighting()
     GLfloat spotlightPosition1[] = { 0.0f, 1.0f, 0.0f, 1.0f };
     GLfloat spotlightPosition2[] = { 20.0f, 1.0f, 0.0f, 1.0f };
     GLfloat spotlightPosition3[] = { 0.0f, 1.0f, 22.0f, 1.0f };
-    GLfloat spotlightPosition4[] = { 20.0f, 1.0f, 22.0f, 1.0f }; 
+    GLfloat spotlightPosition4[] = { 20.0f, 1.0f, 22.0f, 1.0f };
     GLfloat spotlightDirection1[] = { 1.0f, 0.0f, 1.0f};
     GLfloat spotlightDirection2[] = { -1.0f, 0.0f, 1.0f};
     GLfloat spotlightDirection3[] = { 1.0f, 0.0f, -1.0f};
@@ -803,17 +849,16 @@ void setupLighting()
     lamp3 = new Lamp(GL_LIGHT3, spotlightDirection3);
     lamp4 = new Lamp(GL_LIGHT4, spotlightDirection4);
         
-    lamp1->setPosition(spotlightPosition1);
     lamp1->setAmbDiffSpec(spotlightAmbient, spotlightDiffuse, spotlightSpecular);
-    
-    lamp2->setPosition(spotlightPosition2);
     lamp2->setAmbDiffSpec(spotlightAmbient, spotlightDiffuse, spotlightSpecular);
-
-    lamp3->setPosition(spotlightPosition3);
     lamp3->setAmbDiffSpec(spotlightAmbient, spotlightDiffuse, spotlightSpecular);
-
-    lamp4->setPosition(spotlightPosition4);
     lamp4->setAmbDiffSpec(spotlightAmbient, spotlightDiffuse, spotlightSpecular);
+
+    /* setup where the lamps are modeled */
+    lamp1->setModelPosition(spotlightPosition1);
+    lamp2->setModelPosition(spotlightPosition2);
+    lamp3->setModelPosition(spotlightPosition3);
+    lamp4->setModelPosition(spotlightPosition4);
 
     glEnable(GL_DEPTH_TEST);	// Hidden surface removal
     glFrontFace(GL_CCW);		// Counter clock-wise polygons face out
