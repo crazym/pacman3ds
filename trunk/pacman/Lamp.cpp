@@ -25,6 +25,7 @@ Lamp::Lamp(GLenum light, GLfloat* direction)
     this->light = light;
     this->listID = glGenLists(2);
     this->isOn = false;
+    //this->firstTime = true;
     this->cylinder = gluNewQuadric();
     
     glLightf(this->light, GL_SPOT_CUTOFF, 45.0);
@@ -55,13 +56,25 @@ Lamp::~Lamp()
     gluDeleteQuadric(cylinder);
 }
 
-void Lamp::setPosition(GLfloat* position)
+void Lamp::setLightPosition(GLfloat* position)
+{
+    GLfloat x = position[0];
+    GLfloat y = position[1];
+    GLfloat z = position[2];
+    
+    this->lightPosition[0] = x;
+    this->lightPosition[1] = y;
+    this->lightPosition[2] = z;
+    this->lightPosition[3] = 1.0f;
+    
+    glLightfv(this->light, GL_POSITION, position);
+}
+
+void Lamp::setModelPosition(GLfloat* position)
 {
     this->x = position[0];
     this->y = position[1];
-    this->z = position[2];    
-    
-    glLightfv(this->light, GL_POSITION, position);
+    this->z = position[2];
 }
 
 void Lamp::setAmbDiffSpec(GLfloat* ambient, GLfloat* diffuse, GLfloat* specular)
@@ -97,9 +110,7 @@ void Lamp::draw()
             glMaterialfv(GL_FRONT, GL_EMISSION, lamp_emission_off);
             glMaterialfv(GL_FRONT, GL_SPECULAR, no_specular);
         glPopMatrix();
-        
-        GLfloat position[] = {this->x, this->y, this->z, 1.0};
-        glLightfv(this->light, GL_POSITION, position);
+
     glPopMatrix();
 }
 
