@@ -59,6 +59,7 @@
 
 #include "Map.h"
 #include "Tile.h"
+#include "Lamp.h"
 
 using namespace std;
 
@@ -72,6 +73,10 @@ static Ghost *ghost2;
 static Ghost *ghost3;
 static Ghost *ghost4;
 static Map *map1;
+static Lamp *lamp1;
+static Lamp *lamp2;
+static Lamp *lamp3;
+static Lamp *lamp4;
 
 static char map[483] = {										 
     
@@ -288,6 +293,10 @@ void display ()
     ghost2->draw();
     ghost3->draw();
     ghost4->draw();
+    lamp1->draw();
+    lamp2->draw();
+    lamp3->draw();
+    lamp4->draw();
     
     // now swap buffer
     glutSwapBuffers();
@@ -745,6 +754,22 @@ void ProcessMenu(int value)
             glDisable(GL_LIGHT4);
             break;
             
+        /* Enable Lamps */
+        case 27:
+            glEnable(GL_LIGHT1);
+            glEnable(GL_LIGHT2);
+            glEnable(GL_LIGHT3);
+            glEnable(GL_LIGHT4);
+            break;
+            
+        /* Disable Lamps */
+        case 28:
+            glDisable(GL_LIGHT1);
+            glDisable(GL_LIGHT2);
+            glDisable(GL_LIGHT3);
+            glDisable(GL_LIGHT4);
+            break;
+            
         default:
             break;
 	}
@@ -757,10 +782,42 @@ void setupLighting()
     // Light values and coordinates
     GLfloat lightModelIntensity[] = { 0.1f, 0.1f, 0.1f, 1.0f };
     
+    /* Ambient Light Values */
     GLfloat lightAmbient[]  = { 0.7f, 0.7f, 0.7f, 1.0f };
     GLfloat lightDiffuse[]  = { 0.7f, 0.7f, 0.7f, 1.0f };
     GLfloat lightSpecular[] = { 0.7f, 0.7f, 0.7f, 1.0f };
     GLfloat lightPosition[] = { 0.0f, 1.0f, 0.0f, 0.0f }; /* Point down Y-Axis */
+    
+    /* Spotlight Values */
+    GLfloat spotlightAmbient[]  = { 0.5f, 0.5f, 0.0f, 1.0f };
+    GLfloat spotlightDiffuse[]  = { 0.5f, 0.5f, 0.0f, 1.0f };
+    GLfloat spotlightSpecular[] = { 0.5f, 0.5f, 0.0f, 1.0f };
+    GLfloat spotlightPosition1[] = { 0.0f, 1.0f, 0.0f, 1.0f };
+    GLfloat spotlightPosition2[] = { 20.0f, 1.0f, 0.0f, 1.0f };
+    GLfloat spotlightPosition3[] = { 0.0f, 1.0f, 22.0f, 1.0f };
+    GLfloat spotlightPosition4[] = { 20.0f, 1.0f, 22.0f, 1.0f }; 
+    GLfloat spotlightDirection1[] = { 1.0f, 0.0f, 1.0f};
+    GLfloat spotlightDirection2[] = { -1.0f, 0.0f, 1.0f};
+    GLfloat spotlightDirection3[] = { 1.0f, 0.0f, -1.0f};
+    GLfloat spotlightDirection4[] = { -1.0f, 0.0f, -1.0f};
+
+    
+    lamp1 = new Lamp(GL_LIGHT1, spotlightDirection1);
+    lamp2 = new Lamp(GL_LIGHT2, spotlightDirection2);
+    lamp3 = new Lamp(GL_LIGHT3, spotlightDirection3);
+    lamp4 = new Lamp(GL_LIGHT4, spotlightDirection4);
+        
+    lamp1->setPosition(spotlightPosition1);
+    lamp1->setAmbDiffSpec(spotlightAmbient, spotlightDiffuse, spotlightSpecular);
+    
+    lamp2->setPosition(spotlightPosition2);
+    lamp2->setAmbDiffSpec(spotlightAmbient, spotlightDiffuse, spotlightSpecular);
+
+    lamp3->setPosition(spotlightPosition3);
+    lamp3->setAmbDiffSpec(spotlightAmbient, spotlightDiffuse, spotlightSpecular);
+
+    lamp4->setPosition(spotlightPosition4);
+    lamp4->setAmbDiffSpec(spotlightAmbient, spotlightDiffuse, spotlightSpecular);
 
     glEnable(GL_DEPTH_TEST);	// Hidden surface removal
     glFrontFace(GL_CCW);		// Counter clock-wise polygons face out
@@ -768,13 +825,16 @@ void setupLighting()
     // Enable lighting
     glEnable(GL_LIGHTING);
 
-    // Setup and enable light 0
+    /* Setup and enable light 0 */    
     glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lightModelIntensity);
     glLightfv(GL_LIGHT0, GL_AMBIENT, lightAmbient);
     glLightfv(GL_LIGHT0, GL_DIFFUSE, lightDiffuse);
     glLightfv(GL_LIGHT0, GL_SPECULAR, lightSpecular);
     glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
     glEnable(GL_LIGHT0);
+    
+    /* Setup Spotlights */
+
 
     // Enable color tracking
     //glEnable(GL_COLOR_MATERIAL);
@@ -826,14 +886,16 @@ int main (int argc, char **argv)
     glutAddMenuEntry("Enable Color Material", 17);
     glutAddMenuEntry("Disable Color Material", 18);
     glutAddMenuEntry("-------------", 0);
-    glutAddMenuEntry("Enable Light 1", 19);
-    glutAddMenuEntry("Disable Light 1", 20);
-    glutAddMenuEntry("Enable Light 2", 21);
-    glutAddMenuEntry("Disable Light 2", 22);
-    glutAddMenuEntry("Enable Light 3", 23);
-    glutAddMenuEntry("Disable Light 3", 24);
-    glutAddMenuEntry("Enable Light 4", 25);
-    glutAddMenuEntry("Disable Light 4", 26);
+    glutAddMenuEntry("Enable Lamp 1", 19);
+    glutAddMenuEntry("Disable Lamp 1", 20);
+    glutAddMenuEntry("Enable Lamp 2", 21);
+    glutAddMenuEntry("Disable Lamp 2", 22);
+    glutAddMenuEntry("Enable Lamp 3", 23);
+    glutAddMenuEntry("Disable Lamp 3", 24);
+    glutAddMenuEntry("Enable Lamp 4", 25);
+    glutAddMenuEntry("Disable Lamp 4", 26);
+    glutAddMenuEntry("Enable All Lamps", 27);
+    glutAddMenuEntry("Disable All Lamps", 28);
 
 	glutAttachMenu(GLUT_RIGHT_BUTTON);
     
@@ -881,5 +943,9 @@ int main (int argc, char **argv)
     delete ghost3;
     delete ghost4;
     delete map1;
+    delete lamp1;
+    delete lamp2;
+    delete lamp3;
+    delete lamp4;
 }
 
