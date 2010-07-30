@@ -24,7 +24,7 @@ public:
     Lamp(GLenum light, GLfloat* direction);
     ~Lamp();
     
-    void setLightPosition(GLfloat* position); // position of the light
+    void setLightPosition(GLfloat* position, GLfloat* direction); // position of the light
     void setModelPosition(GLfloat* position);
     void setAmbDiffSpec(GLfloat* ambient, GLfloat* diffuse, GLfloat* specular);
     void draw();

@@ -25,18 +25,18 @@ Lamp::Lamp(GLenum light, GLfloat* direction)
     this->light = light;
     this->listID = glGenLists(2);
     this->isOn = false;
-    //this->firstTime = true;
     this->cylinder = gluNewQuadric();
     
-    glLightf(this->light, GL_SPOT_CUTOFF, 45.0);
-    glLightfv(this->light, GL_SPOT_DIRECTION, direction);
+    glLightf(this->light, GL_SPOT_CUTOFF, 25.0);
     
     /* List for Pole */
     glNewList(this->listID, GL_COMPILE);
     glPushMatrix();
         glColor4fv(pole_color);
+        glTranslatef(0.0, 3.0, 0.0);
         glRotatef(90, 1.0, 0.0, 0.0);
-        gluCylinder(cylinder, 0.2, 0.2, 1.0, 20, 20);
+        /* The height of the lamp post is 4 */
+        gluCylinder(cylinder, 0.2, 0.2, 4.0, 20, 20);
     glPopMatrix();
     glEndList();
     
@@ -44,7 +44,7 @@ Lamp::Lamp(GLenum light, GLfloat* direction)
     glNewList(this->listID+1, GL_COMPILE);
     glPushMatrix();
         glColor4fv(lamp_color);
-        glTranslatef(0.0, 0.2, 0.0);
+        glTranslatef(0.0, 2.8, 0.0);
         glutSolidSphere(0.3, 20, 20);
     glPopMatrix();
     glEndList();
@@ -56,7 +56,7 @@ Lamp::~Lamp()
     gluDeleteQuadric(cylinder);
 }
 
-void Lamp::setLightPosition(GLfloat* position)
+void Lamp::setLightPosition(GLfloat* position, GLfloat* direction)
 {
     GLfloat x = position[0];
     GLfloat y = position[1];
@@ -68,6 +68,7 @@ void Lamp::setLightPosition(GLfloat* position)
     this->lightPosition[3] = 1.0f;
     
     glLightfv(this->light, GL_POSITION, position);
+    glLightfv(this->light, GL_SPOT_DIRECTION, direction);
 }
 
 void Lamp::setModelPosition(GLfloat* position)
