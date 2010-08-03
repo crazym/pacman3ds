@@ -30,6 +30,7 @@ public:
     void initPosition(GLfloat x, GLfloat y, GLfloat z);
     
     GLuint listID;
+    GLuint textureID;
     GLfloat color[4];
     GLfloat x;
     GLfloat y;

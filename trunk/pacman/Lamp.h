@@ -34,6 +34,7 @@ public:
     bool isOn;
     //bool firstTime; //used as a hack to fix an annoying bug
     GLuint listID;
+    GLuint textureID;
     GLenum light;
     
     GLfloat lightPosition[4];

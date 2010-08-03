@@ -8,6 +8,7 @@
  */
 
 #include "Lamp.h"
+#include "tga.h"
 #include <iostream>
 
 extern GLfloat lamp_emission_on[];
@@ -21,16 +22,34 @@ Lamp::Lamp(GLenum light, GLfloat* direction)
 {
     GLfloat lamp_color[] = { 1.0, 1.0, 0.0, 1.0 };
     GLfloat pole_color[] = { 0.6, 0.6, 0.6, 1.0 };
-    
+
     this->light = light;
-    this->listID = glGenLists(2);
     this->isOn = false;
+
+    //this->textureID = 40;
+    glGenTextures(1, &this->textureID);
+    
+    if (loadTGA((char*)"metal_4.tga", this->textureID) == TGA_FILE_NOT_FOUND)
+    {
+        std::cerr << "Lamp post texture not found!" << std::endl;
+    }
+    
+    this->listID = glGenLists(2);
     this->cylinder = gluNewQuadric();
+    gluQuadricTexture(this->cylinder, GL_TRUE);
+    gluQuadricNormals(this->cylinder, GLU_SMOOTH);
     
     glLightf(this->light, GL_SPOT_CUTOFF, 25.0);
     
     /* List for Pole */
     glNewList(this->listID, GL_COMPILE);
+    
+    //glEnable(GL_TEXTURE_2D);
+    glEnable(GL_TEXTURE_GEN_S);
+    glEnable(GL_TEXTURE_GEN_T);
+    
+    glBindTexture(GL_TEXTURE_2D, this->textureID);
+    
     glPushMatrix();
         glColor4fv(pole_color);
         glTranslatef(0.0, 3.0, 0.0);
@@ -38,6 +57,11 @@ Lamp::Lamp(GLenum light, GLfloat* direction)
         /* The height of the lamp post is 4 */
         gluCylinder(cylinder, 0.2, 0.2, 4.0, 20, 20);
     glPopMatrix();
+    
+    glDisable(GL_TEXTURE_GEN_S);
+    glDisable(GL_TEXTURE_GEN_T);
+    //glDisable(GL_TEXTURE_2D);
+    
     glEndList();
     
     /* List for Bulb */
