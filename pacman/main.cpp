@@ -161,6 +161,8 @@ double roll = 0;
 /* misc */
 double halfway = - (farPlane + nearPlane) / 2;	   // half way between near and far planes
 int ambient_light = 0;
+int textures_enabled = 1;
+int color_material_enabled = 0;
 
 /* Camera */
 /* Set initial values */
@@ -326,20 +328,48 @@ void display ()
     } else {
         glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
     }
-        
+    
+    if (textures_enabled) glEnable(GL_TEXTURE_2D);
+
+    pacman->draw();
     map1->draw();
+
+    /* TEMPORARILY DISABLE THESE TEXTURES UNTIL 
+     WE FINALIZE WHAT TEXTURES WE WILL USE */ 
+    //glDisable(GL_TEXTURE_2D);
+    
     lamp1->draw();
     lamp2->draw();
     lamp3->draw();
     lamp4->draw();    
-    pacman->draw();
     ghost1->draw();
     ghost2->draw();
     ghost3->draw();
     ghost4->draw();
+
+    if (textures_enabled) glDisable(GL_TEXTURE_2D);
+
+    /* SPHERE MAP EXAMPLE
+    glEnable(GL_TEXTURE_2D);
+    GLUquadricObj *quadric = gluNewQuadric();
+    gluQuadricNormals(quadric, GLU_SMOOTH);
+    gluQuadricTexture(quadric, GL_TRUE);
+    
+    glEnable(GL_TEXTURE_GEN_S);
+    glEnable(GL_TEXTURE_GEN_T);
+    
+    glBindTexture(GL_TEXTURE_2D, pacman->textureID);
+    glColor4f(1.0, 1.0, 0.0, 1.0);
+    gluSphere(quadric, 10.0, 20, 20);
+    glDisable(GL_TEXTURE_GEN_S);
+    glDisable(GL_TEXTURE_GEN_T);
+    glDisable(GL_TEXTURE_2D);
+    */
     
     // now swap buffer
     glutSwapBuffers();
+   
+    //gluDeleteQuadric(quadric);
 }
 
 // This function is called when there is nothing else to do.
@@ -447,7 +477,7 @@ void graphicKeys (unsigned char key, int x, int y)
         case 27:
             exit(0);
             break;
-     
+            
         case 'w':
             fw_rw -= 0.2*mvSTEP;
             break;
@@ -762,14 +792,14 @@ void ProcessMenu(int value)
             
             break;
             
-            /* Enable Color Material */
+            /* Enable/Disable Color Material */
         case 17:
-            glEnable(GL_COLOR_MATERIAL);
-            break;
-            
-            /* Disable Color Material */
-        case 18:
-            glDisable(GL_COLOR_MATERIAL);
+            color_material_enabled = 1 - color_material_enabled;
+            if (color_material_enabled) {
+                glEnable(GL_COLOR_MATERIAL);
+            } else {
+                glDisable(GL_COLOR_MATERIAL);
+            }
             break;
             
             /* Enable Light 1 */
@@ -828,6 +858,11 @@ void ProcessMenu(int value)
             lamp4->turnOff();
             break;
             
+            /* Enable/Disable Textures */
+        case 29:
+            textures_enabled = 1 - textures_enabled;
+            break;
+
         default:
             break;
 	}
@@ -1014,7 +1049,7 @@ void setupLighting()
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     
     //Rescale Normals if needed
-    glEnable(GL_RESCALE_NORMAL);
+    glEnable(GL_NORMALIZE);
 }
 
 void cleanup()
@@ -1039,7 +1074,7 @@ int main (int argc, char **argv)
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
 	glutInitWindowSize(width, height);
-	glutCreateWindow("Pacman3D Assignment2");
+	glutCreateWindow("Pacman3D Assignment3");
     
 	int nModeMenu; // menu identifier used when calling glutsetmenu
 	nModeMenu = glutCreateMenu(ProcessMenu);
@@ -1063,8 +1098,7 @@ int main (int argc, char **argv)
     glutAddMenuEntry("Enable Ambient Light", 14);
     glutAddMenuEntry("Disable Ambient Light",15);
     glutAddMenuEntry("-------------", 0);
-    glutAddMenuEntry("Enable Color Material", 17);
-    glutAddMenuEntry("Disable Color Material", 18);
+    glutAddMenuEntry("Enable/Disable Color Material", 17);
     glutAddMenuEntry("-------------", 0);
     glutAddMenuEntry("Enable Lamp 1", 19);
     glutAddMenuEntry("Disable Lamp 1", 20);
@@ -1076,6 +1110,8 @@ int main (int argc, char **argv)
     glutAddMenuEntry("Disable Lamp 4", 26);
     glutAddMenuEntry("Enable All Lamps", 27);
     glutAddMenuEntry("Disable All Lamps", 28);
+    glutAddMenuEntry("-------------", 0);
+    glutAddMenuEntry("Enable/Disable Textures", 29);
 
 	glutAttachMenu(GLUT_RIGHT_BUTTON);
     
@@ -1108,10 +1144,14 @@ int main (int argc, char **argv)
     ghost2->initPosition(10.0f, 0.2f, 11.0f);
     ghost3->initPosition(11.0f, 0.2f, 11.0f);
     ghost4->initPosition(10.0f, 0.2f, 10.0f);
-
+        
     /* init map */
     srand(time(NULL)); //seed rand for pellet colours
-    map1 = new Map(map, 23, 21);
+    map1 = new Map(map, 23, 21);        
+    
+    glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
+    glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
+    
     
     atexit(cleanup);
     
