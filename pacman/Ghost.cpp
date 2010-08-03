@@ -55,6 +55,8 @@ Ghost::~Ghost()
 
 void Ghost::initializeModel()
 {    
+    glGenTextures(1, &this->textureID);
+
     this->listID = glGenLists(1);
     glNewList(listID, GL_COMPILE);
     cylinder = gluNewQuadric();

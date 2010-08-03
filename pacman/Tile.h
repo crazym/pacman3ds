@@ -26,6 +26,10 @@ public:
     char type;
     bool pellet;
     
+    GLuint floorTextureID;
+    GLuint wallTextureID;
+    GLuint pelletTextureID;
+    
     GLint x;
     GLint z;
     

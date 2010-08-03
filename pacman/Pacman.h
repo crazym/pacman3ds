@@ -30,6 +30,7 @@ public:
     
     GLfloat x, y, z;
     GLuint listID;
+    GLuint textureID;
 
 private:
     void top_pacman(double r, int lats, int longs);
