@@ -14,6 +14,7 @@
 
 #include "Pacman.h"
 #include "Common.h"
+#include "tga.h"
 
 #include <cmath>
 #include <iostream>
@@ -32,6 +33,16 @@ Pacman::Pacman()
 #ifdef DEBUG
     cout << "Allocating Pacman" << endl;
 #endif
+    int textureIsEnabled = 0;
+    
+    //this->textureID = 30;
+    glGenTextures(1, &this->textureID);
+
+    if (loadTGA((char*)"stone.tga", this->textureID) == TGA_FILE_NOT_FOUND)
+    {
+        cout << "pacman texture not found!" << endl;
+    }
+
     this->listID = glGenLists(1);
     glNewList(listID, GL_COMPILE);
 
@@ -45,7 +56,10 @@ Pacman::Pacman()
     top_pacman(2, 40, 40);
     bottom_pacman(2, 40, 40);
     glPopMatrix();
-	//--------------------------------
+        
+	glDisable(GL_TEXTURE_2D);
+    
+    //--------------------------------
 	//Palate--------------------------
     glPushMatrix();
     glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, pacman_palate);
@@ -148,11 +162,20 @@ void Pacman::initPosition(GLfloat x, GLfloat y, GLfloat z)
 
 void Pacman::draw()
 {
+    int texturesAreEnabled = 0;
+    if (glIsEnabled(GL_TEXTURE_2D)) {
+        texturesAreEnabled = 1;
+    }
+    
     glPushMatrix();
     glTranslatef(this->x, this->y, this->z);
     glScalef(0.125, 0.125, 0.125);
     glCallList(this->listID);
     glPopMatrix();
+    
+    if (texturesAreEnabled) {
+        glEnable(GL_TEXTURE_2D);
+    }
 }
 
 
@@ -177,9 +200,9 @@ void Pacman::hemisphere(double r, int lats, int longs)
 			double x = r*cos(lng);
 			double y = r*sin(lng);
     
-			//glNormal3f(x * zr0, y * zr0, r*z0);
+			glNormal3f(x * zr0, y * zr0, r*z0);
 			glVertex3f(x * zr0, y * zr0, r*z0);
-			//glNormal3f(x * zr1, y * zr1, r*z1);
+			glNormal3f(x * zr1, y * zr1, r*z1);
 			glVertex3f(x * zr1, y * zr1, r*z1);
 		}
 		glEnd();
@@ -190,6 +213,13 @@ void Pacman::hemisphere(double r, int lats, int longs)
 void Pacman::top_pacman(double r, int lats, int longs) 
 {
 	int i, j;
+
+    //glEnable(GL_TEXTURE_2D);
+    glEnable(GL_TEXTURE_GEN_S);
+    glEnable(GL_TEXTURE_GEN_T);
+    
+    glBindTexture(GL_TEXTURE_2D, this->textureID);
+        
 	for(i = 1; i <= lats; i++) 
 	{
 		double lat0 = 3.14159265 * (-0.5 + (double) (i - 1) / lats);
@@ -215,6 +245,10 @@ void Pacman::top_pacman(double r, int lats, int longs)
 		}
 		glEnd();
 	}
+    
+    glDisable(GL_TEXTURE_GEN_S);
+    glDisable(GL_TEXTURE_GEN_T);
+    //glDisable(GL_TEXTURE_2D);
 }
 
 void Pacman::palate(double r)
@@ -235,6 +269,13 @@ void Pacman::palate(double r)
 void Pacman::bottom_pacman(double r, int lats, int longs) 
 {
 	int i, j;
+
+    //glEnable(GL_TEXTURE_2D);
+    glEnable(GL_TEXTURE_GEN_S);
+    glEnable(GL_TEXTURE_GEN_T);
+    
+    glBindTexture(GL_TEXTURE_2D, this->textureID);
+    
 	for(i = 1; i <= lats; i++) 
 	{
 		double lat0 = 3.14159265 * (-0.5 + (double) (i - 1) / lats);
@@ -259,6 +300,10 @@ void Pacman::bottom_pacman(double r, int lats, int longs)
 		}
 		glEnd();
 	}
+    
+    glDisable(GL_TEXTURE_GEN_S);
+    glDisable(GL_TEXTURE_GEN_T);
+    //glDisable(GL_TEXTURE_2D);
 }
 
 void Pacman::pupil()
