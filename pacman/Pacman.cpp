@@ -36,9 +36,13 @@ Pacman::Pacman()
 #ifdef DEBUG
     cout << "Allocating Pacman" << endl;
 #endif        
-    this->textureID = LoadTextureRAW("pumpkin.raw", 1, 256, 256);
+    this->textureID[0] = LoadTextureRAW("pacman_skin.raw", 1, 256, 256);
+    this->textureID[1] = LoadTextureRAW("pumpkin.raw", 1, 256, 256);
+    this->textureID[2] = LoadTextureRAW("stone.raw", 1, 256, 256);
 
-    this->listID = glGenLists(2);
+    
+    this->listID = glGenLists(3);
+    
     /*****************/
     /* Normal Pacman */
     /*****************/
@@ -161,8 +165,8 @@ Pacman::Pacman()
     glColor4fv(pacman_body_diffuse);
     glTranslated(0.0, 0.0, 0.0);
     glRotatef(90, 0.0, 1, 0.0);
-    top_pacman(2, 40, 40);
-    bottom_pacman(2, 40, 40);
+    top_pacman(2, 40, 40, 1);
+    bottom_pacman(2, 40, 40, 1);
     glPopMatrix();
     
 	glDisable(GL_TEXTURE_2D);
@@ -259,6 +263,115 @@ Pacman::Pacman()
     /********************************/
     /* End of Jack-o-lantern pacman */
     /********************************/
+    
+    
+    
+    
+    /*****************/
+    /* Stone Pacman */
+    /*****************/
+    glNewList(listID+2, GL_COMPILE);
+    
+   	//Top and bottom parts of Pacman--
+    glPushMatrix();
+    glMaterialfv(GL_FRONT, GL_AMBIENT, pacman_body_ambient);
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, pacman_body_diffuse);
+    glColor4fv(pacman_body_diffuse);
+    glTranslated(0.0, 0.0, 0.0);
+    glRotatef(90, 0.0, 1, 0.0);
+    top_pacman(2, 40, 40, 2);
+    bottom_pacman(2, 40, 40, 2);
+    glPopMatrix();
+    
+	glDisable(GL_TEXTURE_2D);
+    
+    //--------------------------------
+	//Palate--------------------------
+    glPushMatrix();
+    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, pacman_palate);
+    glColor4fv(pacman_palate);	
+    glRotatef(58, 1, 0, 0.0);
+    glTranslated(0.0, 0.0, 0.0);
+    palate(4.0);
+    glPopMatrix();
+	//--------------------------------
+	//Bottom of mouth-----------------
+    glPushMatrix();
+    glRotatef(116, 1, 0, 0.0);
+    glTranslated(0.0, 0.0, 0.0);
+    palate(4.0);
+    glPopMatrix();
+	//--------------------------------
+	//Pupils--------------------------
+    //Right Pupil-----------------
+    glPushMatrix();
+    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, pacman_pupil);
+    glColor4fv(pacman_pupil);	
+    glTranslated(1.3, 2.4, 2);
+    glRotatef(70, 1, 0, 0);
+    glRotatef(80, 0, 1, 0);
+    glTranslated(0.0, 0.0, 0.0);
+    pupil();
+    glPopMatrix();
+    //----------------------------
+    
+    //Left Pupil------------------
+    glPushMatrix();
+    glTranslated(-1.3, 2.4, 2);
+    glRotatef(70, 1, 0, 0);
+    glRotatef(80, 0, 1, 0);
+    glTranslated(0.0, 0.0, 0.0);
+    pupil();
+    glPopMatrix();
+    //----------------------------
+	//--------------------------------
+	//Retina--------------------------
+    //Right Retina----------------
+    glPushMatrix();
+    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, pacman_retina);
+    glColor4fv(pacman_retina);
+    glTranslated(1.2, 2.7, 2.8);
+    glRotatef(70, 1, 0, 0);
+    glRotatef(80, 0, 1, 0);
+    glTranslated(0.0, 0.0, 0.0);
+    retina();
+    glPopMatrix();
+    //----------------------------
+    
+    //Left Retina-----------------
+    glPushMatrix();
+    glTranslated(-1.2, 2.7, 2.8);
+    glRotatef(70, 1, 0, 0);
+    glRotatef(80, 0, 1, 0);
+    glTranslated(0.0, 0.0, 0.0);
+    retina();
+    glPopMatrix();
+    //----------------------------
+	//--------------------------------
+	//Group Number--------------------
+    //Top part of number 8--------
+    glPushMatrix();
+    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, group_number);
+    glColor4fv(group_number);
+    glTranslated(0, 3.9, 0);
+    glRotatef(90, 1, 0, 0);
+    glScalef(10.0, 10.0, 10.0);
+    number();
+    glPopMatrix();
+    //----------------------------
+    //Bottom part of number 8-----
+    glPushMatrix();
+    glTranslated(0, 3.4, -1.9);
+    glRotatef(-120, 1, 0, 0);
+    glScalef(10.0, 10.0, 10.0);
+    number();
+    glPopMatrix();
+    //----------------------------
+    
+    glEndList();
+    /************************/
+    /* End of Stone Pacman */
+    /************************/
 }
 
 Pacman::~Pacman()
@@ -326,15 +439,14 @@ void Pacman::hemisphere(double r, int lats, int longs)
 }
 
 
-void Pacman::top_pacman(double r, int lats, int longs) 
+void Pacman::top_pacman(double r, int lats, int longs, int texture) 
 {
 	int i, j;
 
-    //glEnable(GL_TEXTURE_2D);
     glEnable(GL_TEXTURE_GEN_S);
     glEnable(GL_TEXTURE_GEN_T);
     
-    glBindTexture(GL_TEXTURE_2D, this->textureID);
+    glBindTexture(GL_TEXTURE_2D, this->textureID[texture]);
         
 	for(i = 1; i <= lats; i++) 
 	{
@@ -364,7 +476,6 @@ void Pacman::top_pacman(double r, int lats, int longs)
     
     glDisable(GL_TEXTURE_GEN_S);
     glDisable(GL_TEXTURE_GEN_T);
-    //glDisable(GL_TEXTURE_2D);
 }
 
 void Pacman::palate(double r)
@@ -382,15 +493,14 @@ void Pacman::palate(double r)
 	glEnd();
 }
 
-void Pacman::bottom_pacman(double r, int lats, int longs) 
+void Pacman::bottom_pacman(double r, int lats, int longs, int texture) 
 {
 	int i, j;
 
-    //glEnable(GL_TEXTURE_2D);
     glEnable(GL_TEXTURE_GEN_S);
     glEnable(GL_TEXTURE_GEN_T);
     
-    glBindTexture(GL_TEXTURE_2D, this->textureID);
+    glBindTexture(GL_TEXTURE_2D, this->textureID[texture]);
     
 	for(i = 1; i <= lats; i++) 
 	{
@@ -419,7 +529,6 @@ void Pacman::bottom_pacman(double r, int lats, int longs)
     
     glDisable(GL_TEXTURE_GEN_S);
     glDisable(GL_TEXTURE_GEN_T);
-    //glDisable(GL_TEXTURE_2D);
 }
 
 void Pacman::pupil(int model)

@@ -37,6 +37,7 @@ Tile::Tile(char type, GLint x, GLint z)
         case 'W':
             /* Init Wall */
             this->pellet = false;
+            this->powerPellet = false;
            
             this->tile_color[0] = 0.0f;
             this->tile_color[1] = 0.0f;
@@ -47,7 +48,8 @@ Tile::Tile(char type, GLint x, GLint z)
         case 'Y':
             /* Init Blank */
             this->pellet = false;
-            
+            this->powerPellet = false;
+
             this->tile_color[0] = 0.7f;
             this->tile_color[1] = 0.7f;
             this->tile_color[2] = 0.7f;
@@ -57,6 +59,8 @@ Tile::Tile(char type, GLint x, GLint z)
         case 'Z':
             /* Init Tile with Pellet */
             this->pellet = true;
+            this->powerPellet = false;
+
             this->pellet_color[0] = (rand()%255)/255.0f;
             this->pellet_color[1] = (rand()%255)/255.0f;
             this->pellet_color[2] = (rand()%255)/255.0f;
@@ -67,6 +71,24 @@ Tile::Tile(char type, GLint x, GLint z)
             this->tile_color[2] = 0.7f;
             this->tile_color[3] = 1.0f;
             break;
+        
+        case 'X':
+            /* Init Tile With Power Pellet */
+            this->pellet = false;
+            this->powerPellet = true;
+            
+            this->pellet_color[0] = (rand()%255)/255.0f;
+            this->pellet_color[1] = (rand()%255)/255.0f;
+            this->pellet_color[2] = (rand()%255)/255.0f;
+            this->pellet_color[3] = 1.0f;
+            
+            this->tile_color[0] = 0.7f;
+            this->tile_color[1] = 0.7f;
+            this->tile_color[2] = 0.7f;
+            this->tile_color[3] = 1.0f;
+            
+            break;
+
        
         default:
             break;
@@ -83,9 +105,6 @@ void Tile::draw()
     /* Draw */
     glPushMatrix();
     glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, tile_color);
-    //glMaterialfv(GL_FRONT, GL_AMBIENT, tile_color);
-    //glMaterialfv(GL_FRONT, GL_DIFFUSE, tile_color);
-    //glEnable(GL_TEXTURE_2D);
     
     switch (this->type) {
         case 'W':
@@ -150,16 +169,26 @@ void Tile::draw()
             */
             break;
             
+        case 'X':
+            /* Draw a Tile */
+            glPushMatrix();
+                glColor4fv(tile_color);
+                glTranslatef(0.0, -0.4, 0.0);
+                glScalef(1.0, 0.2, 1.0);
+                solidCube(1.0, this->floorTextureID);
+            glPopMatrix();
+            
+            break;
+
+            
         default:
             break;
             
     }
     glPopMatrix();
-    //glDisable(GL_TEXTURE_2D);
     
     /* Draw Pellet */
     if (this->pellet) {
-        //glEnable(GL_TEXTURE_2D);
         glEnable(GL_TEXTURE_GEN_S);
         glEnable(GL_TEXTURE_GEN_T);
         
@@ -168,14 +197,34 @@ void Tile::draw()
         glTranslatef(0.0, 0.1, 0.0);
         glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, pellet_color);
         glColor4fv(pellet_color);
-        //glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, high_shininess);
-        //glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, mat_specular);
+        glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, high_shininess);
+        glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, mat_specular);
         glutSolidSphere(0.2, 20, 20);
-        //glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, no_shininess);
-        //glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, no_specular);
+        glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, no_shininess);
+        glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, no_specular);
         
         glDisable(GL_TEXTURE_GEN_S);
         glDisable(GL_TEXTURE_GEN_T);
-        //glDisable(GL_TEXTURE_2D);
+    }
+    
+    /* Draw Power Pellet */
+    if (this->powerPellet) {
+        glEnable(GL_TEXTURE_GEN_S);
+        glEnable(GL_TEXTURE_GEN_T);
+        
+        glBindTexture(GL_TEXTURE_2D, this->pelletTextureID);
+        
+        glTranslatef(0.0, 0.1, 0.0);
+        glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, pellet_color);
+        glColor4fv(pellet_color);
+        glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, high_shininess);
+        glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, mat_specular);
+        glutSolidSphere(0.4, 20, 20);
+        glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, no_shininess);
+        glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, no_specular);
+        
+        glDisable(GL_TEXTURE_GEN_S);
+        glDisable(GL_TEXTURE_GEN_T);
+        
     }
 }

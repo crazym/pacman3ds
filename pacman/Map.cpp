@@ -43,6 +43,11 @@ void Map::initializeMap(char* map, int rows, int columns)
             case 'Z':
                 tiles.push_back(new Tile('Z', col_it, row_it));
                 break;
+            
+            case 'X':
+                tiles.push_back(new Tile('X', col_it, row_it));
+                break;
+
 
             default:
                 break;
