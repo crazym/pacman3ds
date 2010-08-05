@@ -105,7 +105,7 @@ void Lamp::setAmbDiffSpec(GLfloat* ambient, GLfloat* diffuse, GLfloat* specular)
 
 void Lamp::draw()
 {
-    int texturesAreEnabled = 0;
+    GLint texturesAreEnabled = 0;
     if (glIsEnabled(GL_TEXTURE_2D)) {
         texturesAreEnabled = 1;
     }    

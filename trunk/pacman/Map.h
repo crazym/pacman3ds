@@ -9,6 +9,20 @@
 #ifndef _MAP_H_
 #define _MAP_H_
 
+#ifdef __APPLE__ /* OS X */
+#include <cstdlib>
+#include <GLUT/glut.h>
+#elif defined(__linux__) /* LINUX */
+#include <stdlib.h>
+#include <GL/gl.h>
+#include <GL/glu.h>
+#include <GL/glut.h>
+#else /* WINDOWS */
+#include <stdlib.h>
+#include <windows.h>
+#include <GL/glut.h>
+#endif
+
 #include <vector>
 
 using namespace std;
@@ -17,15 +31,15 @@ class Tile;
 
 class Map {
 public:
-    Map(char* map, int rows, int columns);
+    Map(GLchar* map, GLint rows, GLint columns);
     ~Map();
     
-    void initializeMap(char* map, int rows, int columns);
-    void draw(int texturePellets, int texturePPellets);
+    void initializeMap(GLchar* map, GLint rows, GLint columns);
+    void draw(GLint texturePellets, GLint texturePPellets);
     
     vector<Tile*> tiles;
-    int size;
-    int rows;
-    int columns;
+    GLint size;
+    GLint rows;
+    GLint columns;
 };
 #endif

@@ -15,12 +15,12 @@
 
 using namespace std;
 
-Map::Map(char* map, int rows, int columns)
+Map::Map(GLchar* map, GLint rows, GLint columns)
 {
     initializeMap(map, rows, columns);
 }
 
-void Map::initializeMap(char* map, int rows, int columns)
+void Map::initializeMap(GLchar* map, GLint rows, GLint columns)
 {
     this->rows = rows;
     this->columns = columns;
@@ -29,7 +29,7 @@ void Map::initializeMap(char* map, int rows, int columns)
     GLint col_it = 0;
     GLint row_it = 0;    
     
-    for (int i = 0; i < size; ++i) {
+    for (GLint i = 0; i < size; ++i) {
         
         switch (map[i]) {
             case 'W':
@@ -72,7 +72,7 @@ Map::~Map()
 
 
 
-void Map::draw(int texturePellets, int texturePPellets)
+void Map::draw(GLint texturePellets, GLint texturePPellets)
 {
     vector<Tile*>::iterator t_it;
     

@@ -390,9 +390,9 @@ void Pacman::initPosition(GLfloat x, GLfloat y, GLfloat z)
     this->z = z;
 }
 
-void Pacman::draw(int outfit)
+void Pacman::draw(GLint outfit)
 {
-    int texturesAreEnabled = 0;
+    GLint texturesAreEnabled = 0;
     if (glIsEnabled(GL_TEXTURE_2D)) {
         texturesAreEnabled = 1;
     }
@@ -409,26 +409,26 @@ void Pacman::draw(int outfit)
 }
 
 
-void Pacman::hemisphere(double r, int lats, int longs) 
+void Pacman::hemisphere(GLdouble r, GLint lats, GLint longs) 
 {
-	int i, j;
+	GLint i, j;
 	for(i = 1; i <= lats; i++) 
 	{
-		double lat0 = 3.14159265 * (-0.5 + (double) (i - 1) / lats);
-		double z0  = r*sin(lat0);
-		double zr0 =  r*cos(lat0);
+		GLdouble lat0 = 3.14159265 * (-0.5 + (GLdouble) (i - 1) / lats);
+		GLdouble z0  = r*sin(lat0);
+		GLdouble zr0 =  r*cos(lat0);
     
-		double lat1 = 3.14159265 * (-0.5 + (double) i / lats);
-		double z1 = r*sin(lat1);
-		double zr1 = r*cos(lat1);
+		GLdouble lat1 = 3.14159265 * (-0.5 + (GLdouble) i / lats);
+		GLdouble z1 = r*sin(lat1);
+		GLdouble zr1 = r*cos(lat1);
     
 		//changing the longs +1 to -5 opens pacmans mouth
 		glBegin(GL_QUAD_STRIP);
 		for(j = 0; j <= longs; j++) 
 		{
-			double lng = 2*3.14159265 * (double) (j - 1) / longs/2;
-			double x = r*cos(lng);
-			double y = r*sin(lng);
+			GLdouble lng = 2*3.14159265 * (GLdouble) (j - 1) / longs/2;
+			GLdouble x = r*cos(lng);
+			GLdouble y = r*sin(lng);
     
 			glNormal3f(x * zr0, y * zr0, r*z0);
 			glVertex3f(x * zr0, y * zr0, r*z0);
@@ -440,9 +440,9 @@ void Pacman::hemisphere(double r, int lats, int longs)
 }
 
 
-void Pacman::top_pacman(double r, int lats, int longs, int texture) 
+void Pacman::top_pacman(GLdouble r, GLint lats, GLint longs, GLint texture) 
 {
-	int i, j;
+	GLint i, j;
 
     glEnable(GL_TEXTURE_GEN_S);
     glEnable(GL_TEXTURE_GEN_T);
@@ -451,21 +451,21 @@ void Pacman::top_pacman(double r, int lats, int longs, int texture)
         
 	for(i = 1; i <= lats; i++) 
 	{
-		double lat0 = 3.14159265 * (-0.5 + (double) (i - 1) / lats);
-		double z0  = r*sin(lat0);
-		double zr0 =  r*cos(lat0);
+		GLdouble lat0 = 3.14159265 * (-0.5 + (GLdouble) (i - 1) / lats);
+		GLdouble z0  = r*sin(lat0);
+		GLdouble zr0 =  r*cos(lat0);
     
-		double lat1 = 3.14159265 * (-0.5 + (double) i / lats);
-		double z1 = r*sin(lat1);
-		double zr1 = r*cos(lat1);
+		GLdouble lat1 = 3.14159265 * (-0.5 + (GLdouble) i / lats);
+		GLdouble z1 = r*sin(lat1);
+		GLdouble zr1 = r*cos(lat1);
     
 		//changing the longs +1 to -5 opens pacmans mouth
 		glBegin(GL_QUAD_STRIP);
 		for(j = 0; j <= longs-6; j++) 
 		{
-			double lng = 2*3.14159265 * (double) (j - 1) / longs/2;
-			double x = r*cos(lng);
-			double y = r*sin(lng);
+			GLdouble lng = 2*3.14159265 * (GLdouble) (j - 1) / longs/2;
+			GLdouble x = r*cos(lng);
+			GLdouble y = r*sin(lng);
     
 			glNormal3f(x * zr0, y * zr0, r*z0);
 			glVertex3f(x * zr0, y * zr0, r*z0);
@@ -479,24 +479,24 @@ void Pacman::top_pacman(double r, int lats, int longs, int texture)
     glDisable(GL_TEXTURE_GEN_T);
 }
 
-void Pacman::palate(double r)
+void Pacman::palate(GLdouble r)
 {
-	float radius = r;
-	float vectorX = 0.0;
-	float vectorY = 0.0;
+	GLfloat radius = r;
+	GLfloat vectorX = 0.0;
+	GLfloat vectorY = 0.0;
 	glBegin(GL_POLYGON);			
-	for(float angle = 3.14159/2; angle>=(-3.14159/2); angle-=0.01)
+	for(GLfloat angle = 3.14159/2; angle>=(-3.14159/2); angle-=0.01)
 	{		
-		vectorX = (radius*(float)sin((double)angle));
-		vectorY = (radius*(float)cos((double)angle));
+		vectorX = (radius*(GLfloat)sin((GLdouble)angle));
+		vectorY = (radius*(GLfloat)cos((GLdouble)angle));
 		glVertex2d(vectorX,vectorY);	
 	}
 	glEnd();
 }
 
-void Pacman::bottom_pacman(double r, int lats, int longs, int texture) 
+void Pacman::bottom_pacman(GLdouble r, GLint lats, GLint longs, GLint texture) 
 {
-	int i, j;
+	GLint i, j;
 
     glEnable(GL_TEXTURE_GEN_S);
     glEnable(GL_TEXTURE_GEN_T);
@@ -505,20 +505,20 @@ void Pacman::bottom_pacman(double r, int lats, int longs, int texture)
     
 	for(i = 1; i <= lats; i++) 
 	{
-		double lat0 = 3.14159265 * (-0.5 + (double) (i - 1) / lats);
-		double z0  = r*sin(lat0);
-		double zr0 =  r*cos(lat0);
+		GLdouble lat0 = 3.14159265 * (-0.5 + (GLdouble) (i - 1) / lats);
+		GLdouble z0  = r*sin(lat0);
+		GLdouble zr0 =  r*cos(lat0);
     
-		double lat1 = 3.14159265 * (-0.5 + (double) i / lats);
-		double z1 = r*sin(lat1);
-		double zr1 = r*cos(lat1);
+		GLdouble lat1 = 3.14159265 * (-0.5 + (GLdouble) i / lats);
+		GLdouble z1 = r*sin(lat1);
+		GLdouble zr1 = r*cos(lat1);
     
 		glBegin(GL_QUAD_STRIP);
 		for(j = 1; j <= longs-5; j++) 
 		{
-			double lng = -2*3.14159265 * (double) (j - 1) / longs/2;
-			double x = r*cos(lng);
-			double y = r*sin(lng);
+			GLdouble lng = -2*3.14159265 * (GLdouble) (j - 1) / longs/2;
+			GLdouble x = r*cos(lng);
+			GLdouble y = r*sin(lng);
     
 			glNormal3f(x * zr0, y * zr0, r*z0);
 			glVertex3f(x * zr0, y * zr0, r*z0);
@@ -532,7 +532,7 @@ void Pacman::bottom_pacman(double r, int lats, int longs, int texture)
     glDisable(GL_TEXTURE_GEN_T);
 }
 
-void Pacman::pupil(int model)
+void Pacman::pupil(GLint model)
 {
 	glPushMatrix();
     if (model == 0) 
@@ -542,9 +542,9 @@ void Pacman::pupil(int model)
     
     else if (model == 1) 
     {
-        int height=5;
-        int depth=5;
-        int width=5;
+        GLint height=5;
+        GLint depth=5;
+        GLint width=5;
 
         glBegin(GL_TRIANGLES);
         

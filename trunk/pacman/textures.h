@@ -1,9 +1,6 @@
 #ifndef textures_h__
 #define textures_h__
 
-
-
-
 #include <fstream>  
 
 #ifdef __APPLE__ /* OS X */
@@ -36,7 +33,6 @@
 #endif
 
 GLuint LoadTextureRAW( const char * filename, int wrap, int w, int h ) ;
-
 
 
 #endif textures_h__

@@ -23,7 +23,7 @@ extern GLfloat no_specular[];
 
 extern GLfloat group_number[];
 
-Tile::Tile(char type, GLint x, GLint z)
+Tile::Tile(GLchar type, GLint x, GLint z)
 {    
     this->type = type;
     this->x = x;
@@ -97,7 +97,7 @@ Tile::Tile(char type, GLint x, GLint z)
 
 }
 
-void Tile::draw(int texturePellets, int texturePPellets)
+void Tile::draw(GLint texturePellets, GLint texturePPellets)
 {
     /* Setup position */
     glTranslatef(this->x, 0.0, this->z);

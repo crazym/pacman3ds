@@ -27,16 +27,16 @@
 
 void number()
 {
-	float radius  = 0.1;
-	float vectorX = 0.0;
-	float vectorY = 0.0;
+	GLfloat radius  = 0.1;
+	GLfloat vectorX = 0.0;
+	GLfloat vectorY = 0.0;
     glLineWidth(2.0);
 	glBegin(GL_LINE_STRIP);			
 	
-	for(float angle = 0.0; angle<=(2.0*3.14159); angle+=0.01)
+	for(GLfloat angle = 0.0; angle<=(2.0*3.14159); angle+=0.01)
 	{		
-		vectorX = (radius*(float)sin((double)angle));
-		vectorY = (radius*(float)cos((double)angle));
+		vectorX = (radius*(GLfloat)sin((GLdouble)angle));
+		vectorY = (radius*(GLfloat)cos((GLdouble)angle));
 		glVertex2d(vectorX,vectorY);	
 	}
 	glEnd();

@@ -37,8 +37,7 @@ public:
     void turnOn();
     void turnOff();
     
-    bool isOn;
-    //bool firstTime; //used as a hack to fix an annoying bug
+    GLboolean isOn;
     GLuint listID;
     GLuint textureID;
     GLenum light;

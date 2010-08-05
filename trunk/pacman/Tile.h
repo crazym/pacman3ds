@@ -25,13 +25,13 @@
 
 class Tile{
 public:
-    Tile(char type, GLint x, GLint z);
+    Tile(GLchar type, GLint x, GLint z);
     
-    void draw(int texturePellets, int texturePPellets);
+    void draw(GLint texturePellets, GLint texturePPellets);
     
-    char type;
-    bool pellet;
-    bool powerPellet;
+    GLchar type;
+    GLboolean pellet;
+    GLboolean powerPellet;
     
     GLuint floorTextureID;
     GLuint wallTextureID;
