@@ -21,7 +21,7 @@ public:
     ~Map();
     
     void initializeMap(char* map, int rows, int columns);
-    void draw();
+    void draw(int texturePellets, int texturePPellets);
     
     vector<Tile*> tiles;
     int size;

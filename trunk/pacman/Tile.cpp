@@ -97,7 +97,7 @@ Tile::Tile(char type, GLint x, GLint z)
 
 }
 
-void Tile::draw()
+void Tile::draw(int texturePellets, int texturePPellets)
 {
     /* Setup position */
     glTranslatef(this->x, 0.0, this->z);
@@ -189,10 +189,13 @@ void Tile::draw()
     
     /* Draw Pellet */
     if (this->pellet) {
-        glEnable(GL_TEXTURE_GEN_S);
-        glEnable(GL_TEXTURE_GEN_T);
         
-        glBindTexture(GL_TEXTURE_2D, this->pelletTextureID);
+        if (texturePellets) {
+            glEnable(GL_TEXTURE_GEN_S);
+            glEnable(GL_TEXTURE_GEN_T);
+            
+            glBindTexture(GL_TEXTURE_2D, this->pelletTextureID);
+        }
         
         glTranslatef(0.0, 0.1, 0.0);
         glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, pellet_color);
@@ -203,16 +206,21 @@ void Tile::draw()
         glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, no_shininess);
         glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, no_specular);
         
-        glDisable(GL_TEXTURE_GEN_S);
-        glDisable(GL_TEXTURE_GEN_T);
+        if (texturePellets) {
+            glDisable(GL_TEXTURE_GEN_S);
+            glDisable(GL_TEXTURE_GEN_T);
+        }
     }
     
     /* Draw Power Pellet */
     if (this->powerPellet) {
-        glEnable(GL_TEXTURE_GEN_S);
-        glEnable(GL_TEXTURE_GEN_T);
         
-        glBindTexture(GL_TEXTURE_2D, this->pelletTextureID);
+        if (texturePPellets) {
+            glEnable(GL_TEXTURE_GEN_S);
+            glEnable(GL_TEXTURE_GEN_T);
+            
+            glBindTexture(GL_TEXTURE_2D, this->pelletTextureID);            
+        }
         
         glTranslatef(0.0, 0.1, 0.0);
         glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, pellet_color);
@@ -223,8 +231,10 @@ void Tile::draw()
         glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, no_shininess);
         glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, no_specular);
         
-        glDisable(GL_TEXTURE_GEN_S);
-        glDisable(GL_TEXTURE_GEN_T);
+        if (texturePPellets) {
+            glDisable(GL_TEXTURE_GEN_S);
+            glDisable(GL_TEXTURE_GEN_T);
+        }
         
     }
 }
