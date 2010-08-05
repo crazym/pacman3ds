@@ -9,8 +9,8 @@
 
 #include "Tile.h"
 #include "Common.h"
-#include "tga.h"
 #include "Cube.h"
+#include "textures.h"
 
 #include <iostream>
 #include <cmath>
@@ -23,53 +23,15 @@ extern GLfloat no_specular[];
 
 extern GLfloat group_number[];
 
-extern GLfloat wall_specular[];
-extern GLfloat wall_shininess[];
-
 Tile::Tile(char type, GLint x, GLint z)
-{
-    int error = 0;
-    
+{    
     this->type = type;
     this->x = x;
     this->z = z;
     
-    /*
-    this->floorTextureID  = 20;
-    this->wallTextureID   = 21;
-    this->pelletTextureID = 22;
-    */
-    glGenTextures(1, &this->floorTextureID);
-    glGenTextures(1, &this->wallTextureID);
-    glGenTextures(1, &this->pelletTextureID);
-    
-    error = loadTGA((char*)"floor.tga", this->floorTextureID);
-    if (error == TGA_FILE_NOT_FOUND ||
-        error == TGA_BAD_BITS ||
-        error == TGA_BAD_DATA ||
-        error == TGA_BAD_DIMENSION ||
-        error == TGA_BAD_IMAGE_TYPE ) {
-        std::cerr << "Floor Error " << error << std::endl;
-    }
-    
-   
-    error = loadTGA((char*)"brick_teal.tga", this->wallTextureID);
-    if (error == TGA_FILE_NOT_FOUND ||
-        error == TGA_BAD_BITS ||
-        error == TGA_BAD_DATA ||
-        error == TGA_BAD_DIMENSION ||
-        error == TGA_BAD_IMAGE_TYPE ) {
-        std::cerr << "Wall Error " << error << std::endl;
-    }
-    
-    error = loadTGA((char*)"stone.tga", this->pelletTextureID);
-    if (error == TGA_FILE_NOT_FOUND ||
-        error == TGA_BAD_BITS ||
-        error == TGA_BAD_DATA ||
-        error == TGA_BAD_DIMENSION ||
-        error == TGA_BAD_IMAGE_TYPE ) {
-        std::cerr << "Pellet Error " << error << std::endl;
-    }
+    this->wallTextureID   = LoadTextureRAW("teal_brick.raw", 1, 256, 256);
+    this->pelletTextureID = LoadTextureRAW("stone.raw", 1, 256, 256);
+    this->floorTextureID  = LoadTextureRAW("floor.raw", 1, 256, 256);    
     
     switch (type) {
         case 'W':
@@ -121,6 +83,8 @@ void Tile::draw()
     /* Draw */
     glPushMatrix();
     glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, tile_color);
+    //glMaterialfv(GL_FRONT, GL_AMBIENT, tile_color);
+    //glMaterialfv(GL_FRONT, GL_DIFFUSE, tile_color);
     //glEnable(GL_TEXTURE_2D);
     
     switch (this->type) {
@@ -204,11 +168,11 @@ void Tile::draw()
         glTranslatef(0.0, 0.1, 0.0);
         glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, pellet_color);
         glColor4fv(pellet_color);
-        glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, high_shininess);
-        glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, mat_specular);
+        //glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, high_shininess);
+        //glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, mat_specular);
         glutSolidSphere(0.2, 20, 20);
-        glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, no_shininess);
-        glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, no_specular);
+        //glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, no_shininess);
+        //glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, no_specular);
         
         glDisable(GL_TEXTURE_GEN_S);
         glDisable(GL_TEXTURE_GEN_T);

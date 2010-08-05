@@ -14,7 +14,7 @@
 
 #include "Pacman.h"
 #include "Common.h"
-#include "tga.h"
+#include "textures.h"
 
 #include <cmath>
 #include <iostream>
@@ -28,22 +28,20 @@ extern GLfloat pacman_retina[];
 extern GLfloat pacman_pupil[];
 extern GLfloat group_number[];
 
+extern GLfloat pacman_palate_jacko[];
+extern GLfloat pacman_pupil_jacko[];
+
 Pacman::Pacman()
 {
 #ifdef DEBUG
     cout << "Allocating Pacman" << endl;
-#endif
-    int textureIsEnabled = 0;
-    
-    //this->textureID = 30;
-    glGenTextures(1, &this->textureID);
+#endif        
+    this->textureID = LoadTextureRAW("pumpkin.raw", 1, 256, 256);
 
-    if (loadTGA((char*)"stone.tga", this->textureID) == TGA_FILE_NOT_FOUND)
-    {
-        cout << "pacman texture not found!" << endl;
-    }
-
-    this->listID = glGenLists(1);
+    this->listID = glGenLists(2);
+    /*****************/
+    /* Normal Pacman */
+    /*****************/
     glNewList(listID, GL_COMPILE);
 
    	//Top and bottom parts of Pacman--
@@ -143,6 +141,124 @@ Pacman::Pacman()
     //----------------------------
     
     glEndList();
+    /************************/
+    /* End of Normal Pacman */
+    /************************/
+    
+    
+    
+    
+    
+    /*************************/
+    /* Jack-o-lantern Pacman */
+    /*************************/
+    glNewList(listID+1, GL_COMPILE);
+   	
+    //Top and bottom parts of Pacman--
+    glPushMatrix();
+    glMaterialfv(GL_FRONT, GL_AMBIENT, pacman_body_ambient);
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, pacman_body_diffuse);
+    glColor4fv(pacman_body_diffuse);
+    glTranslated(0.0, 0.0, 0.0);
+    glRotatef(90, 0.0, 1, 0.0);
+    top_pacman(2, 40, 40);
+    bottom_pacman(2, 40, 40);
+    glPopMatrix();
+    
+	glDisable(GL_TEXTURE_2D);
+    
+    //--------------------------------
+	//Palate--------------------------
+    glPushMatrix();
+    
+    glColor4fv(pacman_palate_jacko);
+    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, pacman_palate_jacko);
+    
+    glRotatef(58, 1, 0, 0.0);
+    glTranslated(0.0, 0.0, 0.0);
+    palate(4.0);
+    glPopMatrix();
+	//--------------------------------
+	//Bottom of mouth-----------------
+    glPushMatrix();
+    glRotatef(116, 1, 0, 0.0);
+    glTranslated(0.0, 0.0, 0.0);
+    palate(4.0);
+    glPopMatrix();
+	//--------------------------------
+	
+    //Pupils--------------------------
+    //Right Pupil-----------------
+    glPushMatrix();
+    glColor4fv(pacman_palate_jacko);
+    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, pacman_pupil_jacko);
+    glColor4f(0,0,0,1);
+    glTranslated(1.3, 2.4, 1.4);
+    glRotatef(-35, 1, 0, 0);
+    glRotatef(0, 0, 1, 0);
+    glScalef(0.3,0.3,0.3);
+    glTranslated(0.0, 0.0, 0.0);
+    pupil(1);
+    glPopMatrix();
+    //----------------------------
+    
+    //Left Pupil------------------
+    glPushMatrix();
+    glTranslated(-1.3, 2.4, 1.4);
+    glRotatef(-35, 1, 0, 0);
+    //glRotatef(80, 0, 1, 0);
+    glScalef(0.3,0.3,0.3);
+    glTranslated(0.0, 0.0, 0.0);
+    pupil(1);
+    glPopMatrix();
+    //----------------------------
+	//--------------------------------
+	
+    //Retina--------------------------
+    //Right Retina----------------
+    glPushMatrix();
+    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, pacman_retina);
+    glColor4fv(pacman_retina);
+    glTranslated(1.2, 2.7, 2.8);
+    glRotatef(70, 1, 0, 0);
+    glRotatef(80, 0, 1, 0);
+    glTranslated(0.0, 0.0, 0.0);
+    glPopMatrix();
+    //----------------------------
+    
+    //Left Retina-----------------
+    glPushMatrix();
+    glTranslated(-1.2, 2.7, 2.8);
+    glRotatef(70, 1, 0, 0);
+    glRotatef(80, 0, 1, 0);
+    glTranslated(0.0, 0.0, 0.0);
+    glPopMatrix();
+    //----------------------------
+	//--------------------------------
+	
+    //Group Number--------------------
+    //Top part of number 8--------
+    glPushMatrix();
+    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, group_number);
+    glColor4fv(group_number);
+    glTranslated(0, 3.9, 0);
+    glRotatef(90, 1, 0, 0);
+    glScalef(10.0, 10.0, 10.0);
+    number();
+    glPopMatrix();
+    //----------------------------
+    //Bottom part of number 8-----
+    glPushMatrix();
+    glTranslated(0, 3.4, -1.9);
+    glRotatef(-120, 1, 0, 0);
+    glScalef(10.0, 10.0, 10.0);
+    number();
+    glPopMatrix();
+    //----------------------------	
+    glEndList();
+    /********************************/
+    /* End of Jack-o-lantern pacman */
+    /********************************/
 }
 
 Pacman::~Pacman()
@@ -150,7 +266,7 @@ Pacman::~Pacman()
 #ifdef DEBUG
     cout << "Deallocating Pacman" << endl;
 #endif
-    glDeleteLists(this->listID, 1);
+    glDeleteLists(this->listID, 2);
 }
 
 void Pacman::initPosition(GLfloat x, GLfloat y, GLfloat z)
@@ -160,7 +276,7 @@ void Pacman::initPosition(GLfloat x, GLfloat y, GLfloat z)
     this->z = z;
 }
 
-void Pacman::draw()
+void Pacman::draw(int outfit)
 {
     int texturesAreEnabled = 0;
     if (glIsEnabled(GL_TEXTURE_2D)) {
@@ -170,7 +286,7 @@ void Pacman::draw()
     glPushMatrix();
     glTranslatef(this->x, this->y, this->z);
     glScalef(0.125, 0.125, 0.125);
-    glCallList(this->listID);
+    glCallList(this->listID+outfit);
     glPopMatrix();
     
     if (texturesAreEnabled) {
@@ -306,10 +422,57 @@ void Pacman::bottom_pacman(double r, int lats, int longs)
     //glDisable(GL_TEXTURE_2D);
 }
 
-void Pacman::pupil()
+void Pacman::pupil(int model)
 {
 	glPushMatrix();
-	hemisphere(1, 8, 8);
+    if (model == 0) 
+    {
+        hemisphere(1, 8, 8);
+    } 
+    
+    else if (model == 1) 
+    {
+        int height=5;
+        int depth=5;
+        int width=5;
+
+        glBegin(GL_TRIANGLES);
+        
+		//Front Face
+		glVertex3f(-width/2,0.0,depth);
+		glVertex3f(width/2,0.0,depth);
+		glVertex3f(0,height,depth);
+        
+		//Back Face
+		glVertex3f(-width/2,0.0,0);
+		glVertex3f(width/2,0.0,0);
+		glVertex3f(0,height,0);
+		glEnd();
+        
+		glBegin(GL_QUAD_STRIP);
+		//Right Side
+		glVertex3f(0,height,0);
+		glVertex3f(0,height,depth);
+		glVertex3f(width/2,0.0,0);
+		glVertex3f(width/2,0.0,depth);
+        
+		//Left Side
+		glVertex3f(0,height,0);
+		glVertex3f(0,height,depth);
+		glVertex3f(-width/2,0.0,0);
+		glVertex3f(-width/2,0.0,depth);
+        
+		//Bottom Face
+		glVertex3f(-width/2,0.0,0);
+		glVertex3f(-width/2,0.0,depth);
+		//glVertex3f(0,5.0,10);
+		//glVertex3f(0,5.0,15);
+		glVertex3f(width/2,0.0,0);
+		glVertex3f(width/2,0.0,depth);
+
+		glEnd();
+
+    }
 	glPopMatrix();
 }
 
