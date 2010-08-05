@@ -37,6 +37,7 @@
  *              Various: OpenGl Superbible, fourth edition, Richard S. Wright, Jr et al, Addison-Wesley
  *              Pumpkin: http://www.filterforge.com/filters/7893.html
  *              Floor Tile: Autodesk 3DsMax
+ *              Paper: http://www.cgtextures.com/
  */
 
 // This program uses sampleprogram.cpp as a template

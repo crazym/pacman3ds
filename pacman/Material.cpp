@@ -28,7 +28,7 @@ GLfloat pacman_pupil[]        = { 1.0, 1.0, 1.0, 1.0 };
 GLfloat pacman_palate_jacko[] = { 0.0, 0.0, 0.0, 1.0 };
 GLfloat pacman_pupil_jacko[]  = { 0.0, 0.0, 0.0, 1.0 };
 
-
+GLfloat pacman_paper_ambient_diffuse[] = { 1.0, 1.0, 1.0, 1.0 };
 
 GLfloat ghost_body[]  = { 0.75, 0.75, 0.75, 0.65 };
 GLfloat ghost_white[] = { 1.0, 1.0, 1.0, 1.0 };
