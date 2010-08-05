@@ -36,11 +36,11 @@ public:
     
     GLfloat x, y, z;
     GLuint listID;
-    GLuint textureID;
+    GLuint textureID[3];
 
 private:
-    void top_pacman(double r, int lats, int longs);
-    void bottom_pacman(double r, int lats, int longs);
+    void top_pacman(double r, int lats, int longs, int texture = 0);
+    void bottom_pacman(double r, int lats, int longs, int texture = 0);
     void hemisphere(double r, int lats, int longs);
     void palate(double r);
     void pupil(int model = 0);

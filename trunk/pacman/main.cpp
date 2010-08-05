@@ -104,7 +104,7 @@ static char map[483] = {
     //23 Rows
     //21 Cols
     'W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W',	 // Current map
-    'W','Z','Z','Z','Z','Z','Z','Z','Z','Z','W','Z','Z','Z','Z','Z','Z','Z','Z','Z','W',
+    'W','X','Z','Z','Z','Z','Z','Z','Z','Z','W','Z','Z','Z','Z','Z','Z','Z','Z','X','W',
     'W','Z','W','W','W','Z','W','W','W','Z','W','Z','W','W','W','Z','W','W','W','Z','W',
     'W','Z','W','W','W','Z','W','W','W','Z','W','Z','W','W','W','Z','W','W','W','Z','W',
     'W','Z','Z','Z','Z','Z','Z','Z','Z','Z','W','Z','Z','Z','Z','Z','Z','Z','Z','Z','W',
@@ -113,7 +113,7 @@ static char map[483] = {
     'W','W','W','W','W','Z','W','W','W','Z','W','Z','W','W','W','Z','W','W','W','W','W',
     'Y','Y','Y','Y','W','Z','W','Z','Z','Z','Z','Z','Z','Z','W','Z','W','Y','Y','Y','Y',
     'W','W','W','W','W','Z','W','Z','W','W','Y','W','W','Z','W','Z','W','W','W','W','W',
-    'Y','Y','Y','Y','Y','Z','Z','Z','W','Y','Y','Y','W','Z','Z','Z','Y','Y','Y','Y','Y',
+    'Y','Y','Y','Y','Y','X','Z','Z','W','Y','Y','Y','W','Z','Z','X','Y','Y','Y','Y','Y',
     'W','W','W','W','W','Z','W','Z','W','Y','Y','Y','W','Z','W','Z','W','W','W','W','W',
     'Y','Y','Y','Y','W','Z','W','Z','W','W','W','W','W','Z','W','Z','W','Y','Y','Y','Y',
     'Y','Y','Y','Y','W','Z','W','Z','Z','Z','Z','Z','Z','Z','W','Z','W','Y','Y','Y','Y',
@@ -124,7 +124,7 @@ static char map[483] = {
     'W','W','W','Z','W','Z','W','Z','W','W','W','W','W','Z','W','Z','W','Z','W','W','W',
     'W','Z','Z','Z','Z','Z','W','Z','Z','Z','W','Z','Z','Z','W','Z','Z','Z','Z','Z','W',
     'W','Z','W','W','W','W','W','W','W','Z','W','Z','W','W','W','W','W','W','W','Z','W',
-    'W','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','W',
+    'W','X','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','X','W',
     'W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W'
     
 };
@@ -884,6 +884,11 @@ void ProcessMenu(int value)
         case 31:
             pacman_outfit = 1;
             break;
+            
+            /* Pacman Outfit 3 */
+        case 32:
+            pacman_outfit = 2;
+            break;
 
 
         default:
@@ -1144,6 +1149,7 @@ int main (int argc, char **argv)
     glutAddMenuEntry("-------------", 0);
     glutAddMenuEntry("Pacman Outfit 1", 30);
     glutAddMenuEntry("Pacman Outfit 2", 31);
+    glutAddMenuEntry("Pacman Outfit 3", 32);
 
 	glutAttachMenu(GLUT_RIGHT_BUTTON);
     

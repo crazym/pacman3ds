@@ -31,6 +31,7 @@ public:
     
     char type;
     bool pellet;
+    bool powerPellet;
     
     GLuint floorTextureID;
     GLuint wallTextureID;
