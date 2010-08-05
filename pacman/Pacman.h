@@ -31,7 +31,7 @@ public:
     Pacman();
     ~Pacman();
     
-    void draw(int outfit = 0);
+    void draw(GLint outfit = 0);
     void initPosition(GLfloat x, GLfloat y, GLfloat z);
     
     GLfloat x, y, z;
@@ -39,11 +39,11 @@ public:
     GLuint textureID[3];
 
 private:
-    void top_pacman(double r, int lats, int longs, int texture = 0);
-    void bottom_pacman(double r, int lats, int longs, int texture = 0);
-    void hemisphere(double r, int lats, int longs);
-    void palate(double r);
-    void pupil(int model = 0);
+    void top_pacman(GLdouble r, GLint lats, GLint longs, GLint texture = 0);
+    void bottom_pacman(GLdouble r, GLint lats, GLint longs, GLint texture = 0);
+    void hemisphere(GLdouble r, GLint lats, GLint longs);
+    void palate(GLdouble r);
+    void pupil(GLint model = 0);
     void retina();
 };
 

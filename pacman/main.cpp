@@ -100,7 +100,7 @@
 
 using namespace std;
 
-void ProcessMenu(int value);
+void ProcessMenu(GLint value);
 void resetViewParameters();
 void functionKeys (int key, int x, int y);
 void graphicKeys (unsigned char key, int x, int y);
@@ -120,7 +120,7 @@ static Lamp *lamp2;
 static Lamp *lamp3;
 static Lamp *lamp4;
 
-static char map[483] = {										 
+static GLchar map[483] = {										 
     //23 Rows
     //21 Cols
     'W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W',	 // Current map
@@ -154,35 +154,35 @@ const GLint WIDTH  = 800; // in pixels
 const GLint HEIGHT = 600; //
 
 // increment for idle function rotation and zoom
-const double RotSTEP = 0.2;
-const double mvSTEP = 5.0;
-const double ALL_ROUND = 360;
-const double ZoomSTEP = 0.9;
-const double zoomFactor = 1.03;
+const GLdouble RotSTEP = 0.2;
+const GLdouble mvSTEP = 5.0;
+const GLdouble ALL_ROUND = 360;
+const GLdouble ZoomSTEP = 0.9;
+const GLdouble zoomFactor = 1.03;
 
 // Current size of window (will change when you resize window)
-int width  = WIDTH;
-int height = HEIGHT;
+GLint width  = WIDTH;
+GLint height = HEIGHT;
 
 // Mouse positions, normalized to [0,1].
-double xMouse = 0.5;
-double yMouse = 0.5;
+GLdouble xMouse = 0.5;
+GLdouble yMouse = 0.5;
 
 // Bounds of viewing frustum, maintain uniform scaling.
-double viewWindowLeft =  -40;
-double viewWindowRight  = 40;
-double viewWindowBottom =  -40;
-double viewWindowTop  = 40;
-double nearPlane =  1.5;
-double farPlane  = 120;
+GLdouble viewWindowLeft =  -40;
+GLdouble viewWindowRight  = 40;
+GLdouble viewWindowBottom =  -40;
+GLdouble viewWindowTop  = 40;
+GLdouble nearPlane =  1.5;
+GLdouble farPlane  = 120;
 
 // Viewing angle.
-double fovy = 60;
+GLdouble fovy = 60;
 
 /* Rotation */
-double yaw = 0;                                  // rotation angle about Y axis.
-double pitch = 0;                                   // rotation angle about X axis.
-double roll = 0;
+GLdouble yaw = 0;                                  // rotation angle about Y axis.
+GLdouble pitch = 0;                                   // rotation angle about X axis.
+GLdouble roll = 0;
 
 /* misc */
 static GLdouble halfway = - (farPlane + nearPlane) / 2;	   // half way between near and far planes
@@ -215,9 +215,9 @@ GLdouble up_x=0.0;
 GLdouble up_y=1.0;
 GLdouble up_z=0.0;
 
-bool idleEnable = 0;	// flags that set continuous rotation on/off
-bool projType = 1;      // flag for proj type; ortho = 0, perspective = 1
-bool isWireFrame =0;    // flag for setting wire frame mode
+GLboolean idleEnable = 0;	// flags that set continuous rotation on/off
+GLboolean projType = 1;      // flag for proj type; ortho = 0, perspective = 1
+GLboolean isWireFrame =0;    // flag for setting wire frame mode
 
 void resetViewParameters()
 {
@@ -374,23 +374,6 @@ void display ()
     ghost4->draw();
 
     if (textures_enabled) glDisable(GL_TEXTURE_2D);
-
-    /* SPHERE MAP EXAMPLE
-    glEnable(GL_TEXTURE_2D);
-    GLUquadricObj *quadric = gluNewQuadric();
-    gluQuadricNormals(quadric, GLU_SMOOTH);
-    gluQuadricTexture(quadric, GL_TRUE);
-    
-    glEnable(GL_TEXTURE_GEN_S);
-    glEnable(GL_TEXTURE_GEN_T);
-    
-    glBindTexture(GL_TEXTURE_2D, pacman->textureID);
-    glColor4f(1.0, 1.0, 0.0, 1.0);
-    gluSphere(quadric, 10.0, 20, 20);
-    glDisable(GL_TEXTURE_GEN_S);
-    glDisable(GL_TEXTURE_GEN_T);
-    glDisable(GL_TEXTURE_2D);
-    */
     
     // now swap buffer
     glutSwapBuffers();
@@ -579,7 +562,7 @@ void graphicKeys (unsigned char key, int x, int y)
 }
 
 //updates the scene according to menu selection
-void ProcessMenu(int value)
+void ProcessMenu(GLint value)
 {
 	switch(value)
 	{
@@ -1062,11 +1045,6 @@ void setupLighting()
     GLfloat lightDiffuse[]  = { 0.7f, 0.7f, 0.7f, 1.0f };
     GLfloat lightSpecular[] = { 0.7f, 0.7f, 0.7f, 1.0f };
     GLfloat lightPosition[] = { 0.0f, 1.0f, 0.0f, 0.0f }; /* Point down Y-Axis */
-/*
-    GLfloat lightAmbient[]  = { 1.0f, 1.0f, 1.0f, 1.0f };
-    GLfloat lightDiffuse[]  = { 1.0f, 1.0f, 1.0f, 1.0f };
-    GLfloat lightSpecular[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-    GLfloat lightPosition[] = { 0.0f, -1.0f, 0.0f, 0.0f };*/ /* Point down Y-Axis */
     
     /* Spotlight Values */
     GLfloat spotlightAmbient[]  = { 0.5f, 0.5f, 0.0f, 1.0f };
@@ -1150,7 +1128,7 @@ int main (int argc, char **argv)
 	glutInitWindowSize(width, height);
 	glutCreateWindow("Pacman3D Assignment3");
     
-	int nModeMenu; // menu identifier used when calling glutsetmenu
+	GLint nModeMenu; // menu identifier used when calling glutsetmenu
 	nModeMenu = glutCreateMenu(ProcessMenu);
 	glutAddMenuEntry("Solid",1);
 	glutAddMenuEntry("Wire",2);
