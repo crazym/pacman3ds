@@ -11,6 +11,7 @@
 #include "Ghost.h"
 
 #include "Common.h"
+#include "textures.h"
 
 using namespace std;
 
@@ -55,11 +56,16 @@ Ghost::~Ghost()
 
 void Ghost::initializeModel()
 {    
-    glGenTextures(1, &this->textureID);
-
+    this->textureID = LoadTextureRAW("ghostbody.raw", 1, 256, 256);
+    
     this->listID = glGenLists(1);
     glNewList(listID, GL_COMPILE);
-    cylinder = gluNewQuadric();
+    this->cylinder = gluNewQuadric();
+    
+    gluQuadricNormals(this->cylinder, GLU_SMOOTH);
+    gluQuadricTexture(this->cylinder, GL_TRUE);
+    
+    glBindTexture(GL_TEXTURE_2D, this->textureID);
        
     glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, ghost_body);
     glColor4fv(color);
@@ -103,11 +109,18 @@ void Ghost::initializeModel()
         gluCylinder(cylinder, 0.8, 0.8, 0.8, 20, 20);
     glPopMatrix();
     
+    
+    glEnable(GL_TEXTURE_GEN_S);
+    glEnable(GL_TEXTURE_GEN_T);    
+        
     //Draw the top spherical head
     glPushMatrix();
         glTranslatef(0.5, 0.8, 0.0);
         glutSolidSphere(0.8, 20, 20);
     glPopMatrix();
+    
+    glDisable(GL_TEXTURE_GEN_S);
+    glDisable(GL_TEXTURE_GEN_T);
     
     //Draw the eyes
     glPushMatrix();
@@ -122,6 +135,7 @@ void Ghost::initializeModel()
             glColor4fv(ghost_white);
             glutSolidSphere(0.2, 20, 20);
     
+            /*
             //Draw its pupil
             glPushMatrix();
                 glTranslatef(0.1, 0.0, 0.17);
@@ -130,6 +144,7 @@ void Ghost::initializeModel()
                 glutSolidSphere(0.1, 20, 20);
 
             glPopMatrix();
+            */
         glPopMatrix();
     
     
@@ -142,6 +157,7 @@ void Ghost::initializeModel()
             glColor4fv(ghost_white);
             glutSolidSphere(0.2, 20, 20);
     
+            /*
             //Draw its pupil
             glPushMatrix();
                 glTranslatef(0.06, 0.0, 0.17);
@@ -150,9 +166,10 @@ void Ghost::initializeModel()
                 glutSolidSphere(0.1, 20, 20);
 
             glPopMatrix();
+            */
         glPopMatrix();
     glPopMatrix();
-    
+        
     glEndList();
     
 }

@@ -30,6 +30,7 @@ Lamp::Lamp(GLenum light, GLfloat* direction)
     
     this->listID = glGenLists(2);
     this->cylinder = gluNewQuadric();
+    
     gluQuadricTexture(this->cylinder, GL_TRUE);
     gluQuadricNormals(this->cylinder, GLU_SMOOTH);
     
@@ -38,7 +39,6 @@ Lamp::Lamp(GLenum light, GLfloat* direction)
     /* List for Pole */
     glNewList(this->listID, GL_COMPILE);
     
-    //glEnable(GL_TEXTURE_2D);
     glEnable(GL_TEXTURE_GEN_S);
     glEnable(GL_TEXTURE_GEN_T);
     
@@ -54,7 +54,6 @@ Lamp::Lamp(GLenum light, GLfloat* direction)
     
     glDisable(GL_TEXTURE_GEN_S);
     glDisable(GL_TEXTURE_GEN_T);
-    //glDisable(GL_TEXTURE_2D);
     
     glEndList();
     
