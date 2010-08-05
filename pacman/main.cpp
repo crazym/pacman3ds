@@ -130,8 +130,8 @@ static char map[483] = {
 };
 
 // Initial size of graphics window on your screen.
-const int WIDTH  = 800; // in pixels
-const int HEIGHT = 600; //
+const GLint WIDTH  = 800; // in pixels
+const GLint HEIGHT = 600; //
 
 // increment for idle function rotation and zoom
 const double RotSTEP = 0.2;
@@ -165,11 +165,14 @@ double pitch = 0;                                   // rotation angle about X ax
 double roll = 0;
 
 /* misc */
-double halfway = - (farPlane + nearPlane) / 2;	   // half way between near and far planes
-int ambient_light = 0;
-int textures_enabled = 1;
-int color_material_enabled = 0;
-int pacman_outfit = 0;
+static GLdouble halfway = - (farPlane + nearPlane) / 2;	   // half way between near and far planes
+static GLint ambient_light = 0;
+static GLint textures_enabled = 1;
+static GLint color_material_enabled = 0;
+static GLint pacman_outfit = 0;
+
+static GLint texturePellets = 1;
+static GLint texturePPellets = 1;
 
 /* Camera */
 /* Set initial values */
@@ -339,11 +342,7 @@ void display ()
     if (textures_enabled) glEnable(GL_TEXTURE_2D);
 
     pacman->draw(pacman_outfit);
-    map1->draw();
-
-    /* TEMPORARILY DISABLE THESE TEXTURES UNTIL 
-     WE FINALIZE WHAT TEXTURES WE WILL USE */ 
-    //glDisable(GL_TEXTURE_2D);
+    map1->draw(texturePellets, texturePPellets);
     
     lamp1->draw();
     lamp2->draw();
@@ -890,6 +889,27 @@ void ProcessMenu(int value)
             pacman_outfit = 2;
             break;
 
+            /* Enable/Disable Pellet Texture */
+        case 33:
+            texturePellets = 1 - texturePellets;
+            break;
+
+            /* Enable/Disable Power Pellet Texture */
+        case 34:
+            texturePPellets = 1 - texturePPellets;
+            break;
+
+            /* Enable/Disable All Pellet Texture */
+        case 35:
+            if (texturePellets || texturePPellets) {
+                texturePellets = 0;
+                texturePPellets = 0;
+            } else {
+                texturePellets = 1;
+                texturePPellets = 1;
+            }
+            break;
+            
 
         default:
             break;
@@ -1150,6 +1170,11 @@ int main (int argc, char **argv)
     glutAddMenuEntry("Pacman Outfit 1", 30);
     glutAddMenuEntry("Pacman Outfit 2", 31);
     glutAddMenuEntry("Pacman Outfit 3", 32);
+    glutAddMenuEntry("-------------", 0);
+    glutAddMenuEntry("Enable/Disable Pellet Texture", 33);
+    glutAddMenuEntry("Enable/Disable Power Pellet Texture", 34);
+    glutAddMenuEntry("Enable/Disable All Pellet Texture", 35);
+
 
 	glutAttachMenu(GLUT_RIGHT_BUTTON);
     

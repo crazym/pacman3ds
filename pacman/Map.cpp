@@ -72,13 +72,13 @@ Map::~Map()
 
 
 
-void Map::draw()
+void Map::draw(int texturePellets, int texturePPellets)
 {
     vector<Tile*>::iterator t_it;
     
     for (t_it = this->tiles.begin(); t_it != this->tiles.end(); ++t_it) {
         glPushMatrix();
-            (*t_it)->draw();
+            (*t_it)->draw(texturePellets, texturePPellets);
         glPopMatrix();
     }
 }

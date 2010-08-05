@@ -27,7 +27,7 @@ class Tile{
 public:
     Tile(char type, GLint x, GLint z);
     
-    void draw();
+    void draw(int texturePellets, int texturePPellets);
     
     char type;
     bool pellet;
