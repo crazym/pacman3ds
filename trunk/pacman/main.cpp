@@ -4,20 +4,39 @@
  *
  *  Created by carlos, bronson, sid, andrew, allan on 10-07-16.
  *  Copyright 2010 Concordia University. All rights reserved.
-	Carlos Pinto (Team Leader)
-	ID: 9343911
+ *	Carlos Pinto (Team Leader)
+ *	ID: 9343911
+ *
+ *	Bronson Zgeb
+ *	ID: 9402268
+ *
+ *	Andrew Wolczak
+ *	ID: 9095543
+ *
+ *	Allan Tran
+ *	ID: 9099824
+ *
+ *	Siddhartha Kattoju
+ *	ID: 9209905
+ */
 
-	Bronson Zgeb
-	ID: 9402268
+/*
+ *  References:
+ *      OpenGl Superbible, fourth edition, Richard S. Wright, Jr et al, Addison-Wesley
+ *      http://www.opengl.org/documentation/red_book/
+ *      http://users.encs.concordia.ca/~c371_1/skeleton.cpp
+ *      http://ozark.hendrix.edu/~burch/cs/490/sched/feb8/
+ *      http://www.codersger.de/mags/cscene/CS6/CS6-06.html
+ *      http://users.encs.concordia.ca/~c371_1/skeleton.cpp
+ *      http://www.nullterminator.net/gltexture.html
+ */
 
-	Andrew Wolczak
-	ID: 9095543
 
-	Allan Tran
-	ID: 9099824
-
-	Siddhartha Kattoju
-	ID: 9209905
+/*
+ *  Texture Sources: 
+ *              Various: OpenGl Superbible, fourth edition, Richard S. Wright, Jr et al, Addison-Wesley
+ *              Pumpkin: http://www.filterforge.com/filters/7893.html
+ *              Floor Tile: Autodesk 3DsMax
  */
 
 // This program uses sampleprogram.cpp as a template
