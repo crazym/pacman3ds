@@ -31,6 +31,8 @@ extern GLfloat group_number[];
 extern GLfloat pacman_palate_jacko[];
 extern GLfloat pacman_pupil_jacko[];
 
+extern GLfloat pacman_paper_ambient_diffuse[];
+
 Pacman::Pacman()
 {
 #ifdef DEBUG
@@ -38,7 +40,7 @@ Pacman::Pacman()
 #endif        
     this->textureID[0] = LoadTextureRAW("pacman_skin.raw", 1, 256, 256);
     this->textureID[1] = LoadTextureRAW("pumpkin.raw", 1, 256, 256);
-    this->textureID[2] = LoadTextureRAW("stone.raw", 1, 256, 256);
+    this->textureID[2] = LoadTextureRAW("paper.raw", 1, 256, 256);
 
     
     this->listID = glGenLists(3);
@@ -268,15 +270,14 @@ Pacman::Pacman()
     
     
     /*****************/
-    /* Stone Pacman */
+    /* Paper Pacman */
     /*****************/
     glNewList(listID+2, GL_COMPILE);
     
    	//Top and bottom parts of Pacman--
     glPushMatrix();
-    glMaterialfv(GL_FRONT, GL_AMBIENT, pacman_body_ambient);
-    glMaterialfv(GL_FRONT, GL_DIFFUSE, pacman_body_diffuse);
-    glColor4fv(pacman_body_diffuse);
+    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, pacman_paper_ambient_diffuse);
+    glColor4fv(pacman_paper_ambient_diffuse);
     glTranslated(0.0, 0.0, 0.0);
     glRotatef(90, 0.0, 1, 0.0);
     top_pacman(2, 40, 40, 2);
@@ -370,7 +371,7 @@ Pacman::Pacman()
     
     glEndList();
     /************************/
-    /* End of Stone Pacman */
+    /* End of Paper Pacman */
     /************************/
 }
 
