@@ -6,10 +6,17 @@
 
 #include <fstream>  
 
-#ifdef __APPLE__
+#ifdef __APPLE__ /* OS X */
+#include <cstdlib>
 #include <GLUT/glut.h>
-#else 
-#include <windows.h> 
+#elif defined(__linux__) /* LINUX */
+#include <stdlib.h>
+#include <GL/gl.h>
+#include <GL/glu.h>
+#include <GL/glut.h>
+#else /* WINDOWS */
+#include <stdlib.h>
+#include <windows.h>
 #include <GL/glut.h>
 #endif
 

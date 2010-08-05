@@ -9,11 +9,17 @@
 #ifndef _TILE_H_
 #define _TILE_H_
 
-#ifdef __APPLE__
+#ifdef __APPLE__ /* OS X */
 #include <cstdlib>
 #include <GLUT/glut.h>
-#else 
+#elif defined(__linux__) /* LINUX */
 #include <stdlib.h>
+#include <GL/gl.h>
+#include <GL/glu.h>
+#include <GL/glut.h>
+#else /* WINDOWS */
+#include <stdlib.h>
+#include <windows.h>
 #include <GL/glut.h>
 #endif
 
