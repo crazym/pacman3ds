@@ -8,7 +8,7 @@
  */
 
 #include "Lamp.h"
-#include "tga.h"
+#include "textures.h"
 #include <iostream>
 
 extern GLfloat lamp_emission_on[];
@@ -25,14 +25,8 @@ Lamp::Lamp(GLenum light, GLfloat* direction)
 
     this->light = light;
     this->isOn = false;
-
-    //this->textureID = 40;
-    glGenTextures(1, &this->textureID);
     
-    if (loadTGA((char*)"metal_4.tga", this->textureID) == TGA_FILE_NOT_FOUND)
-    {
-        std::cerr << "Lamp post texture not found!" << std::endl;
-    }
+    this->textureID = LoadTextureRAW("metal.raw", 1, 256, 256);
     
     this->listID = glGenLists(2);
     this->cylinder = gluNewQuadric();
@@ -111,6 +105,11 @@ void Lamp::setAmbDiffSpec(GLfloat* ambient, GLfloat* diffuse, GLfloat* specular)
 
 void Lamp::draw()
 {
+    int texturesAreEnabled = 0;
+    if (glIsEnabled(GL_TEXTURE_2D)) {
+        texturesAreEnabled = 1;
+    }    
+    
     glPushMatrix();
         glPushMatrix();
             glTranslatef(this->x, this->y, this->z);
@@ -119,8 +118,8 @@ void Lamp::draw()
             glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, pole_ambient_diffuse);
             /* Draw Pole */
             glCallList(this->listID);
-
     
+            glDisable(GL_TEXTURE_2D);
             /* Setup and Draw Bulb */
             if (isOn) {
                 glMaterialfv(GL_FRONT, GL_EMISSION, lamp_emission_on);
@@ -137,6 +136,9 @@ void Lamp::draw()
         glPopMatrix();
 
     glPopMatrix();
+    if (texturesAreEnabled) {
+        glEnable(GL_TEXTURE_2D);
+    }
 }
 
 void Lamp::turnOn()

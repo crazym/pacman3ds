@@ -25,7 +25,7 @@ public:
     Pacman();
     ~Pacman();
     
-    void draw();
+    void draw(int outfit = 0);
     void initPosition(GLfloat x, GLfloat y, GLfloat z);
     
     GLfloat x, y, z;
@@ -37,7 +37,7 @@ private:
     void bottom_pacman(double r, int lats, int longs);
     void hemisphere(double r, int lats, int longs);
     void palate(double r);
-    void pupil();
+    void pupil(int model = 0);
     void retina();
 };
 

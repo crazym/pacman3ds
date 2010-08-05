@@ -163,6 +163,7 @@ double halfway = - (farPlane + nearPlane) / 2;	   // half way between near and f
 int ambient_light = 0;
 int textures_enabled = 1;
 int color_material_enabled = 0;
+int pacman_outfit = 0;
 
 /* Camera */
 /* Set initial values */
@@ -331,7 +332,7 @@ void display ()
     
     if (textures_enabled) glEnable(GL_TEXTURE_2D);
 
-    pacman->draw();
+    pacman->draw(pacman_outfit);
     map1->draw();
 
     /* TEMPORARILY DISABLE THESE TEXTURES UNTIL 
@@ -427,12 +428,17 @@ void mouseMovement (int mx, int my)
 // Parameters give new window size in pixels.
 void reshapeMainWindow (int newWidth, int newHeight)
 {
+    GLfloat eye_position[3] = { eye_x+lt_rt, eye_y+up_dn, eye_z+fw_rw };
+    GLfloat center_position[3] = { center_x+lt_rt, center_y+up_dn, center_z+fw_rw };
+
 	width = newWidth;
 	height = newHeight;
 	glViewport(0, 0, width, height);
     setView();
 	glMatrixMode (GL_MODELVIEW);
-    gluLookAt(eye_x, eye_y, eye_z, center_x, center_y, center_z, up_x, up_y, up_z);
+    gluLookAt(eye_position[0], eye_position[1], eye_position[2], 
+              center_position[0], center_position[1], center_position[2], 
+              up_x, up_y, up_z);
 }
 
 // Display Help.
@@ -862,6 +868,17 @@ void ProcessMenu(int value)
         case 29:
             textures_enabled = 1 - textures_enabled;
             break;
+        
+            /* Pacman Outfit 1 */
+        case 30:
+            pacman_outfit = 0;
+            break;
+            
+            /* Pacman Outfit 2 */
+        case 31:
+            pacman_outfit = 1;
+            break;
+
 
         default:
             break;
@@ -989,10 +1006,16 @@ void setupLighting()
     GLfloat lightModelIntensity[] = { 0.1f, 0.1f, 0.1f, 1.0f };
     
     /* Ambient Light Values */
+    
     GLfloat lightAmbient[]  = { 0.7f, 0.7f, 0.7f, 1.0f };
     GLfloat lightDiffuse[]  = { 0.7f, 0.7f, 0.7f, 1.0f };
     GLfloat lightSpecular[] = { 0.7f, 0.7f, 0.7f, 1.0f };
     GLfloat lightPosition[] = { 0.0f, 1.0f, 0.0f, 0.0f }; /* Point down Y-Axis */
+/*
+    GLfloat lightAmbient[]  = { 1.0f, 1.0f, 1.0f, 1.0f };
+    GLfloat lightDiffuse[]  = { 1.0f, 1.0f, 1.0f, 1.0f };
+    GLfloat lightSpecular[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+    GLfloat lightPosition[] = { 0.0f, -1.0f, 0.0f, 0.0f };*/ /* Point down Y-Axis */
     
     /* Spotlight Values */
     GLfloat spotlightAmbient[]  = { 0.5f, 0.5f, 0.0f, 1.0f };
@@ -1112,6 +1135,9 @@ int main (int argc, char **argv)
     glutAddMenuEntry("Disable All Lamps", 28);
     glutAddMenuEntry("-------------", 0);
     glutAddMenuEntry("Enable/Disable Textures", 29);
+    glutAddMenuEntry("-------------", 0);
+    glutAddMenuEntry("Pacman Outfit 1", 30);
+    glutAddMenuEntry("Pacman Outfit 2", 31);
 
 	glutAttachMenu(GLUT_RIGHT_BUTTON);
     
