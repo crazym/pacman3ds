@@ -1,5 +1,5 @@
-#ifndef textures_h__
-#define textures_h__
+#ifndef textures_h_
+#define textures_h_
 
 #include <fstream>  
 
@@ -7,9 +7,7 @@
 #include <cstdlib>
 #include <GLUT/glut.h>
 #elif defined(__linux__) /* LINUX */
-#include <stdlib.h>
-#include <GL/gl.h>
-#include <GL/glu.h>
+#include <cstdlib>
 #include <GL/glut.h>
 #else /* WINDOWS */
 #include <stdlib.h>
@@ -35,7 +33,7 @@
 GLuint LoadTextureRAW( const char * filename, int wrap, int w, int h ) ;
 
 
-#endif textures_h__
+#endif
 
 
 

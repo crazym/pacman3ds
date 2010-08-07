@@ -127,6 +127,7 @@ Pacman::Pacman()
     //----------------------------
 	//--------------------------------
 	//Group Number--------------------
+
     //Top part of number 8--------
     glPushMatrix();
     glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, group_number);
@@ -146,6 +147,7 @@ Pacman::Pacman()
     glPopMatrix();
     //----------------------------
     
+
     glEndList();
     /************************/
     /* End of Normal Pacman */

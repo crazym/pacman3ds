@@ -55,7 +55,7 @@
 </toolChain>
 </folderInfo>
 <sourceEntries>
-<entry excluding="scene.cpp|ghost_main.cpp|maze_main.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+<entry excluding="Common.cpp|quiz3.cpp|ghost2.cpp|scene.cpp|ghost_main.cpp|maze_main.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 </sourceEntries>
 </configuration>
 </storageModule>
@@ -519,7 +519,7 @@
 </toolChain>
 </folderInfo>
 <sourceEntries>
-<entry excluding="scene.cpp|ghost_main.cpp|maze_main.cpp|main.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+<entry excluding="Common.cpp|quiz3.cpp|ghost2.cpp|Ghost.cpp|scene.cpp|ghost_main.cpp|maze_main.cpp|main.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 </sourceEntries>
 </configuration>
 </storageModule>

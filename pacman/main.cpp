@@ -74,9 +74,7 @@
 #include <cstdlib>
 #include <GLUT/glut.h>
 #elif defined(__linux__) /* LINUX */
-#include <stdlib.h>
-#include <GL/gl.h>
-#include <GL/glu.h>
+#include <cstdlib>
 #include <GL/glut.h>
 #else /* WINDOWS */
 #include <stdlib.h>
@@ -93,10 +91,14 @@
 #include "Ghost.h"
 #include "Pacman.h"
 #include "Material.h"
+#include "Common.h"
 
 #include "Map.h"
 #include "Tile.h"
 #include "Lamp.h"
+#include "Timer.h"
+#include "stdio.h"
+#include "string.h"
 
 using namespace std;
 
@@ -119,6 +121,7 @@ static Lamp *lamp1;
 static Lamp *lamp2;
 static Lamp *lamp3;
 static Lamp *lamp4;
+static Timer *timer1;
 
 static GLchar map[483] = {										 
     //23 Rows
@@ -305,6 +308,7 @@ void drawAxes(){
     glPopMatrix();
 }
 
+
 // This function is called to display the scene.
 void display ()
 {
@@ -326,6 +330,7 @@ void display ()
     GLfloat eye_position[3] = { eye_x+lt_rt, eye_y+up_dn, eye_z+fw_rw };
     GLfloat center_position[3] = { center_x+lt_rt, center_y+up_dn, center_z+fw_rw };
     
+    glClearColor(0,0,0,1);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
     // set modelling mode
@@ -373,13 +378,30 @@ void display ()
     ghost3->draw();
     ghost4->draw();
 
+    glPushMatrix();
+
+    glColor3f(1,1,1);
+    glLineWidth(2.0);
+    glTranslatef(1,1,0);
+		for(char n=0; n<10; n++){
+
+			glTranslatef(1.5,0,0);
+			number(n);
+		}
+    glPopMatrix();
+
     if (textures_enabled) glDisable(GL_TEXTURE_2D);
-    
+
+    glTranslatef(2,2,0);
+    timer1->drawTimer();
+
     // now swap buffer
     glutSwapBuffers();
    
     //gluDeleteQuadric(quadric);
 }
+
+
 
 // This function is called when there is nothing else to do.
 void idle ()
@@ -392,8 +414,8 @@ void idle ()
            yaw -= ALL_ROUND;           
        }
        // Display normalized coordinates in title bar.
-       const int BUFSIZE = 200;
-       static char buffer[BUFSIZE];
+       //const int BUFSIZE = 200;
+       //static char buffer[BUFSIZE];
        //ostringstream s(buffer, BUFSIZE);
        ostringstream s;
        s    << resetiosflags(ios::floatfield) 
@@ -415,7 +437,8 @@ void idle ()
             << "." 
             << ends;
 
-       glutSetWindowTitle(buffer);
+       string tmp = s.str();
+       glutSetWindowTitle(tmp.c_str());
 
        glutPostRedisplay();
    }
@@ -554,6 +577,8 @@ void graphicKeys (unsigned char key, int x, int y)
             ProcessMenu(16);
             break;
 
+        case 't' :
+        	timer1->startTimer();
 
         default:
             cout << key << endl;
@@ -1213,6 +1238,7 @@ int main (int argc, char **argv)
     glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
     glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
     
+    timer1 = new Timer();
     
     atexit(cleanup);
     
