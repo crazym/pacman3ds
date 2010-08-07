@@ -12,5 +12,6 @@
 #define DEBUG
 
 void number();
+void number(char);
 
 #endif
