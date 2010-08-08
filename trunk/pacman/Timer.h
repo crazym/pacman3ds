@@ -22,12 +22,12 @@ public:
 	void startTimer();
 	void stopTimer();
 	string timer_string;
+	bool timerIsOn;
 
 private:
 	string runTimer(time_t);
 	time_t currentTime;
 	time_t startTime;
-	bool timerIsOn;
 };
 
 #endif /* TIMER_H_ */
