@@ -27,6 +27,7 @@ void Timer::startTimer(){
 
 	timerIsOn = true;
 	startTime = time(NULL);
+	cout << "starting timer .." << endl;
 
 }
 
@@ -37,20 +38,23 @@ void print_stroke_string(void* font, char* s){
          s++;
       }
    }
+   glutPostRedisplay();
 }
 
 void Timer::drawTimer(){
 
-    //get current time
+	if(timerIsOn){
+	//get current time
     currentTime = time(NULL);
     timer_string = Timer::runTimer(currentTime - startTime);
 
-    char* thing;
-    thing = new char[timer_string.length()+1];
-    strcpy(thing,timer_string.c_str());
-    print_stroke_string(GLUT_STROKE_ROMAN,thing);
-    cout << timer_string << endl;
+		char* thing;
+		thing = new char[timer_string.length()+1];
+		strcpy(thing,timer_string.c_str());
 
+		print_stroke_string(GLUT_STROKE_ROMAN,thing);
+    }
+	else print_stroke_string(GLUT_STROKE_ROMAN,"PRESS START");
 }
 
 void Timer::stopTimer(){
@@ -61,15 +65,13 @@ void Timer::stopTimer(){
 
 string Timer::runTimer(time_t seconds){
 
-	double years;
-	double months;
-	double days;
-	double hours;
-	double minutes;
+	int years;
+	int months;
+	int days;
+	int hours;
+	int minutes;
 	int secs;
 	ostringstream timestamp;
-
-	if(timerIsOn){
 
 		years = seconds/31556926;
 		secs = seconds%31556926;
@@ -86,17 +88,29 @@ string Timer::runTimer(time_t seconds){
 		minutes = secs/60;
 		secs = secs%60;
 
-		timestamp << "timer output "
-				<< years << "years"
-				<< months << "months"
-				<< days << "days"
-				<< hours << "hours"
-				<< minutes << "minutes"
-				<< seconds << "seconds"
-		<< endl;
+		if(years){
+
+			timestamp << years << " : ";
+		}
+		else if(months){
+
+			timestamp << months << " : ";
+		}
+		else if(days){
+
+			timestamp << days << " : ";
+		}
+		else{
+
+		timestamp
+				<< hours << " : "
+				<< minutes << " : "
+				<< secs
+				<< endl;
+		}
 
 		return timestamp.str();
 
-	}
+
 
 }
