@@ -54,8 +54,11 @@
 </tool>
 </toolChain>
 </folderInfo>
+<fileInfo id="cdt.managedbuild.config.gnu.exe.debug.300238048.1085362170" name="Common.cpp" rcbsApplicability="disable" resourcePath="Common.cpp" toolsToInvoke="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.189163792.68729063">
+<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.189163792.68729063" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.189163792"/>
+</fileInfo>
 <sourceEntries>
-<entry excluding="Common.cpp|quiz3.cpp|ghost2.cpp|scene.cpp|ghost_main.cpp|maze_main.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+<entry excluding="quiz3.cpp|ghost2.cpp|scene.cpp|ghost_main.cpp|maze_main.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 </sourceEntries>
 </configuration>
 </storageModule>

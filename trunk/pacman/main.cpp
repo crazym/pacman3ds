@@ -191,7 +191,7 @@ GLdouble roll = 0;
 static GLdouble halfway = - (farPlane + nearPlane) / 2;	   // half way between near and far planes
 static GLint ambient_light = 0;
 static GLint textures_enabled = 1;
-static GLint color_material_enabled = 0;
+static GLint color_material_enabled = 1;
 static GLint pacman_outfit = 0;
 
 static GLint texturePellets = 1;
@@ -308,6 +308,19 @@ void drawAxes(){
     glPopMatrix();
 }
 
+void numbertest(){
+
+	glPushMatrix();
+	    glColor3f(1,1,1);
+	    glLineWidth(2.0);
+	    glTranslatef(1,1,0);
+			for(char n=0; n<10; n++){
+
+				glTranslatef(1.5,0,0);
+				number(n);
+			}
+    glPopMatrix();
+}
 
 // This function is called to display the scene.
 void display ()
@@ -358,13 +371,15 @@ void display ()
 	// Draw model axes in centre of room.
     //drawAxes();
     
-    if(isWireFrame) {
-        glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
-    } else {
-        glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
-    }
-    
+    if(isWireFrame) glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
+    else glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
+
+    if(color_material_enabled) glEnable(GL_COLOR_MATERIAL);
+    else glDisable(GL_COLOR_MATERIAL);
+
     if (textures_enabled) glEnable(GL_TEXTURE_2D);
+    else glDisable(GL_TEXTURE_2D);
+
 
     pacman->draw(pacman_outfit);
     map1->draw(texturePellets, texturePPellets);
@@ -378,22 +393,12 @@ void display ()
     ghost3->draw();
     ghost4->draw();
 
-    glPushMatrix();
-
-    glColor3f(1,1,1);
-    glLineWidth(2.0);
-    glTranslatef(1,1,0);
-		for(char n=0; n<10; n++){
-
-			glTranslatef(1.5,0,0);
-			number(n);
-		}
-    glPopMatrix();
-
-    if (textures_enabled) glDisable(GL_TEXTURE_2D);
-
-    glTranslatef(2,2,0);
-    timer1->drawTimer();
+    //glPopMatrix();
+		glColor3f(1,1,1);
+		glTranslatef(6,4,0);
+		glScalef(0.01,0.01,0.01);
+		timer1->drawTimer();
+	//glPushMatrix();
 
     // now swap buffer
     glutSwapBuffers();
@@ -438,7 +443,12 @@ void idle ()
             << ends;
 
        string tmp = s.str();
-       glutSetWindowTitle(tmp.c_str());
+
+       char* thing;
+       thing = new char[tmp.length()+1];
+       strcpy(thing,tmp.c_str());
+
+       glutSetWindowTitle(thing);
 
        glutPostRedisplay();
    }
@@ -833,11 +843,11 @@ void ProcessMenu(GLint value)
             
             /* Enable/Disable Color Material */
         case 17:
-            color_material_enabled = 1 - color_material_enabled;
             if (color_material_enabled) {
-                glEnable(GL_COLOR_MATERIAL);
+                color_material_enabled = false;
             } else {
-                glDisable(GL_COLOR_MATERIAL);
+                color_material_enabled = true;
+
             }
             break;
             
@@ -1221,6 +1231,8 @@ int main (int argc, char **argv)
     pacman = new Pacman();
     pacman->initPosition(1.0f, 0.2f, 3.0f);
     
+    timer1 = new Timer();
+
     ghost1 = new Ghost(1.0, 0.0, 0.0);
     ghost2 = new Ghost(0.0, 1.0, 0.0);
     ghost3 = new Ghost(1.0, 0.5, 0.7);
@@ -1237,9 +1249,7 @@ int main (int argc, char **argv)
     
     glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
     glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
-    
-    timer1 = new Timer();
-    
+
     atexit(cleanup);
     
     // Enter GLUT loop.
