@@ -19,7 +19,7 @@ using namespace std;
 Timer::Timer(){
 
 	time(&currentTime);
-	//bool timerIsOn = false;
+	timerIsOn = false;
 
 }
 
@@ -43,18 +43,30 @@ void print_stroke_string(void* font, char* s){
 
 void Timer::drawTimer(){
 
-	if(timerIsOn){
-	//get current time
-    currentTime = time(NULL);
-    timer_string = Timer::runTimer(currentTime - startTime);
+		char* timerstring;
+		if(timerIsOn){
 
-		char* thing;
-		thing = new char[timer_string.length()+1];
-		strcpy(thing,timer_string.c_str());
+			//get current time
+			currentTime = time(NULL);
+			//get timer string
+			timer_string = Timer::runTimer(currentTime - startTime);
 
-		print_stroke_string(GLUT_STROKE_ROMAN,thing);
-    }
-	else print_stroke_string(GLUT_STROKE_ROMAN,"PRESS START");
+			//copy timer_string into char array
+			timerstring = new char[timer_string.length()+1];
+			strcpy(timerstring,timer_string.c_str());
+
+	//draw timer string
+	print_stroke_string(GLUT_STROKE_ROMAN,timerstring);
+
+	}
+	else{
+
+		timer_string = "PRESS START";
+		timerstring = new char[timer_string.length()+1];
+		strcpy(timerstring,timer_string.c_str());
+
+		print_stroke_string(GLUT_STROKE_ROMAN,timerstring);
+	}
 }
 
 void Timer::stopTimer(){
@@ -100,17 +112,16 @@ string Timer::runTimer(time_t seconds){
 
 			timestamp << days << " : ";
 		}
+		else if(hours){
+
+			timestamp << hours << " : ";
+		}
 		else{
 
-		timestamp
-				<< hours << " : "
-				<< minutes << " : "
-				<< secs
-				<< endl;
+			timestamp << minutes << " : " << secs << endl;
 		}
 
+		//cout << timestamp.str();
 		return timestamp.str();
-
-
 
 }

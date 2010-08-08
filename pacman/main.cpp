@@ -445,9 +445,9 @@ void idle ()
        string tmp = s.str();
 
        char* thing;
+
        thing = new char[tmp.length()+1];
        strcpy(thing,tmp.c_str());
-
        glutSetWindowTitle(thing);
 
        glutPostRedisplay();
@@ -588,7 +588,9 @@ void graphicKeys (unsigned char key, int x, int y)
             break;
 
         case 't' :
-        	timer1->startTimer();
+        	if(timer1->timerIsOn)
+        	timer1->stopTimer();
+        	else timer1->startTimer();
 
         default:
             cout << key << endl;
