@@ -15,12 +15,12 @@
 
 using namespace std;
 
-Map::Map(GLchar* map, GLint rows, GLint columns)
+Map::Map(char* map, GLint rows, GLint columns)
 {
     initializeMap(map, rows, columns);
 }
 
-void Map::initializeMap(GLchar* map, GLint rows, GLint columns)
+void Map::initializeMap(char* map, GLint rows, GLint columns)
 {
     this->rows = rows;
     this->columns = columns;

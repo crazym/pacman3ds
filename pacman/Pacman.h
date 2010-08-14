@@ -32,19 +32,33 @@ public:
     ~Pacman();
     
     void draw(GLint outfit = 0);
+    
     void initPosition(GLfloat x, GLfloat y, GLfloat z);
+    void move();
+    void setDirection(char direction);
+    void collide(GLint n, GLint s, GLint e, GLint w);
     
     GLfloat x, y, z;
-    GLuint listID;
     GLuint textureID[3];
+    GLfloat xVelocity;
+    GLfloat zVelocity;
 
 private:
+    void pacman_1();
+    void pacman_2();
+    void pacman_3();
+    
     void top_pacman(GLdouble r, GLint lats, GLint longs, GLint texture = 0);
     void bottom_pacman(GLdouble r, GLint lats, GLint longs, GLint texture = 0);
     void hemisphere(GLdouble r, GLint lats, GLint longs);
     void palate(GLdouble r);
     void pupil(GLint model = 0);
     void retina();
+    
+    void drawNumberEight();
+    void drawBothRetinas();
+    void drawBothPupils(GLint model = 0);
+    void drawBothPalates();
 };
 
-#endif /* PACMAN_H_ */
+#endif

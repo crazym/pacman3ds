@@ -11,6 +11,14 @@
 #include "textures.h"
 #include <iostream>
 
+#ifdef __APPLE__ /* OS X */
+#define lampTexture "metal.raw"
+#elif defined(__linux__) /* LINUX */
+#define lampTexture "data/Textures/metal.raw"
+#else /* WINDOWS */
+#define lampTexture "data/Textures/metal.raw"
+#endif
+
 extern GLfloat lamp_emission_on[];
 extern GLfloat lamp_emission_off[];
 extern GLfloat lamp_specular_on[];
@@ -26,7 +34,7 @@ Lamp::Lamp(GLenum light, GLfloat* direction)
     this->light = light;
     this->isOn = false;
     
-    this->textureID = LoadTextureRAW("metal.raw", 1, 256, 256);
+    this->textureID = LoadTextureRAW(lampTexture, 1, 64, 64);
     
     this->listID = glGenLists(2);
     this->cylinder = gluNewQuadric();

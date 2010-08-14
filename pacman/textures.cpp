@@ -3,7 +3,7 @@
  *  Reference: http://www.nullterminator.net/gltexture.html
  *
  */
-GLuint LoadTextureRAW( const GLchar * filename, GLint wrap, GLint w, GLint h ) 
+GLuint LoadTextureRAW( const char * filename, GLint wrap, GLint w, GLint h ) 
 {
 	GLuint tex; 
 	GLint width, height; 
