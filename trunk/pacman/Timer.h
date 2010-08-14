@@ -16,7 +16,7 @@ class Timer{
 public:
 
 	Timer();
-	~Timer();
+	//~Timer();
 
 	void drawTimer();
 	void startTimer();

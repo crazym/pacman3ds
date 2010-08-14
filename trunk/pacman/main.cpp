@@ -54,8 +54,8 @@
 //   8. S : Backward
 //   9. A : Strafe Left
 //   10. D : Strafe Right
-//   11. , : Lower Camera
-//   12. . : Raise Camera
+//   11. + : Zoom In Camera
+//   12. - : Zoom Out Camera
 //   13. F5: Light 1 on/off
 //   14. F6: Light 2 on/off
 //   15. F7: Light 3 on/off
@@ -63,9 +63,10 @@
 //   17. F9: All Lights on/off
 //   18. F11: Ambient Light on/off
 //   19. 1: Pacman Cam
-//   20. 2-3-4-5: Ghost1-2-3-4 Cam
-//   21. 6-7-8-9: Light1-2-3-4 Cam
+//   20. 2, 3, 4, 5: Ghost1, 2, 3, 4 Cam
+//   21. 6, 7, 8, 9: Light1, 2, 3, 4 Cam
 //   22. 0: Initial Cam
+//   23. p: pause
 
 
 // Link with: opengl32.lib, glu32.lib, glut32.lib.
@@ -74,12 +75,15 @@
 #include <cstdlib>
 #include <GLUT/glut.h>
 #elif defined(__linux__) /* LINUX */
-#include <cstdlib>
+#include <stdlib.h>
+#include <GL/gl.h>
+#include <GL/glu.h>
 #include <GL/glut.h>
 #else /* WINDOWS */
 #include <stdlib.h>
 #include <windows.h>
 #include <GL/glut.h>
+#include <ctime>
 #endif
 
 #include <cmath>
@@ -91,22 +95,25 @@
 #include "Ghost.h"
 #include "Pacman.h"
 #include "Material.h"
-#include "Common.h"
-
+#include "Timer.h"
 #include "Map.h"
 #include "Tile.h"
 #include "Lamp.h"
-#include "Timer.h"
-#include "stdio.h"
-#include "string.h"
+#include "Camera.h"
+#include "Vector.h"
+#include "Common.h"
 
 using namespace std;
+
+void init();
+void initMenu();
+void setupLighting();
+void cleanup();
 
 void ProcessMenu(GLint value);
 void resetViewParameters();
 void functionKeys (int key, int x, int y);
 void graphicKeys (unsigned char key, int x, int y);
-
 
 /**************************
  Game Objects
@@ -121,9 +128,10 @@ static Lamp *lamp1;
 static Lamp *lamp2;
 static Lamp *lamp3;
 static Lamp *lamp4;
+static Camera *camera;
 static Timer *timer1;
 
-static GLchar map[483] = {										 
+static char map[483] = {										 
     //23 Rows
     //21 Cols
     'W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W',	 // Current map
@@ -157,10 +165,10 @@ const GLint WIDTH  = 800; // in pixels
 const GLint HEIGHT = 600; //
 
 // increment for idle function rotation and zoom
-const GLdouble RotSTEP = 0.2;
-const GLdouble mvSTEP = 5.0;
+const GLdouble rotStep = 5.0;
+const GLdouble moveStep = 1.0;
 const GLdouble ALL_ROUND = 360;
-const GLdouble ZoomSTEP = 0.9;
+const GLdouble zoomStep = 5.0;
 const GLdouble zoomFactor = 1.03;
 
 // Current size of window (will change when you resize window)
@@ -182,42 +190,20 @@ GLdouble farPlane  = 120;
 // Viewing angle.
 GLdouble fovy = 60;
 
-/* Rotation */
-GLdouble yaw = 0;                                  // rotation angle about Y axis.
-GLdouble pitch = 0;                                   // rotation angle about X axis.
-GLdouble roll = 0;
-
 /* misc */
-static GLdouble halfway = - (farPlane + nearPlane) / 2;	   // half way between near and far planes
+//static GLdouble halfway = - (farPlane + nearPlane) / 2;	   // half way between near and far planes
 static GLint ambient_light = 0;
 static GLint textures_enabled = 1;
-static GLint color_material_enabled = 1;
+static GLint color_material_enabled = 0;
 static GLint pacman_outfit = 0;
 
 static GLint texturePellets = 1;
 static GLint texturePPellets = 1;
 
-/* Camera */
-/* Set initial values */
-const GLdouble initial_eye[3] = {10.0, 30.0, 35.0};
-const GLdouble initial_center[3] = {10.0, 2.0, 11.0};
+static vector<Tile *>walls;
+static vector<Tile *>pelletTiles;
 
-GLdouble fw_rw=0;
-GLdouble up_dn=0;
-GLdouble lt_rt=0;
-
-GLdouble eye_x=10.0;
-GLdouble eye_y=30.0;
-GLdouble eye_z=35.0;
-
-GLdouble center_x=10.0;
-GLdouble center_y=2.0;
-GLdouble center_z=11.0;
-
-GLdouble up_x=0.0;
-GLdouble up_y=1.0;
-GLdouble up_z=0.0;
-
+GLboolean paused = 0;
 GLboolean idleEnable = 0;	// flags that set continuous rotation on/off
 GLboolean projType = 1;      // flag for proj type; ortho = 0, perspective = 1
 GLboolean isWireFrame =0;    // flag for setting wire frame mode
@@ -225,6 +211,7 @@ GLboolean isWireFrame =0;    // flag for setting wire frame mode
 void resetViewParameters()
 {
 	// resets 3D synthetic camera parameters to default values
+    camera->reset();
 
 	viewWindowLeft =  -60;
 	viewWindowRight  = 60;
@@ -235,16 +222,9 @@ void resetViewParameters()
 	farPlane  = 120;
     
 	fovy = 60;
-	yaw = 0.0;
-	pitch = 0.0;
-	roll = 0.0;
     
 	projType = 1;
 	idleEnable = 0;
-    
-    fw_rw=0;
-    up_dn=0;
-    lt_rt=0;
 }
 
 
@@ -276,13 +256,13 @@ void zoom(unsigned char direction)
    // for zoom in reduces viewWindow size and for zoom out increases it.
 
 	if (direction == '+') {
-			viewWindowLeft += ZoomSTEP; viewWindowRight -= ZoomSTEP;
-			viewWindowBottom += ZoomSTEP; viewWindowTop -= ZoomSTEP;
+			viewWindowLeft += zoomStep; viewWindowRight -= zoomStep;
+			viewWindowBottom += zoomStep; viewWindowTop -= zoomStep;
 			fovy = fovy / zoomFactor;
 		}
 		else if (direction == '-') {
-			viewWindowLeft -= ZoomSTEP; viewWindowRight += ZoomSTEP;
-			viewWindowBottom -= ZoomSTEP; viewWindowTop += ZoomSTEP;
+			viewWindowLeft -= zoomStep; viewWindowRight += zoomStep;
+			viewWindowBottom -= zoomStep; viewWindowTop += zoomStep;
 			fovy = fovy * zoomFactor;
 		}
 
@@ -308,20 +288,6 @@ void drawAxes(){
     glPopMatrix();
 }
 
-void numbertest(){
-
-	glPushMatrix();
-	    glColor3f(1,1,1);
-	    glLineWidth(2.0);
-	    glTranslatef(1,1,0);
-			for(char n=0; n<10; n++){
-
-				glTranslatef(1.5,0,0);
-				number(n);
-			}
-    glPopMatrix();
-}
-
 // This function is called to display the scene.
 void display ()
 {
@@ -340,28 +306,13 @@ void display ()
     GLfloat spotlightDirection3[] = { 2.82f, -4.0f, -2.82f, 1.0f };
     GLfloat spotlightDirection4[] = { -2.82f, -4.0f, -2.82f, 1.0f };
     
-    GLfloat eye_position[3] = { eye_x+lt_rt, eye_y+up_dn, eye_z+fw_rw };
-    GLfloat center_position[3] = { center_x+lt_rt, center_y+up_dn, center_z+fw_rw };
-    
-    glClearColor(0,0,0,1);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
     // set modelling mode
 	glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     
-    gluLookAt(eye_position[0], eye_position[1], eye_position[2], 
-              center_position[0], center_position[1], center_position[2], 
-              0.0, 1.0, 0.0);
-    
-    glTranslatef(10.5, 0.0, 11.5);
-    glRotatef(pitch, up_y*(center_z - eye_z) - up_z*(center_y - eye_y), 
-              up_z*(center_x - eye_x) - up_x*(center_z - eye_z), 
-              up_x*(center_y - eye_y) - up_y*(center_x - eye_x));
-	glRotatef(yaw, up_x, up_y, up_z);
-	//glRotatef(roll, center_x - eye_x, center_y - eye_y, center_z - eye_z);
-    glRotatef(roll, 0.0, 0.0, 10.5);
-    glTranslatef(-10.5, 0.0, -11.5);
+    camera->look();
     
     lamp1->setLightPosition(spotlightPosition1, spotlightDirection1);
     lamp2->setLightPosition(spotlightPosition2, spotlightDirection2);
@@ -371,15 +322,13 @@ void display ()
 	// Draw model axes in centre of room.
     //drawAxes();
     
-    if(isWireFrame) glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
-    else glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
-
-    if(color_material_enabled) glEnable(GL_COLOR_MATERIAL);
-    else glDisable(GL_COLOR_MATERIAL);
-
+    if(isWireFrame) {
+        glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
+    } else {
+        glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
+    }
+    
     if (textures_enabled) glEnable(GL_TEXTURE_2D);
-    else glDisable(GL_TEXTURE_2D);
-
 
     pacman->draw(pacman_outfit);
     map1->draw(texturePellets, texturePPellets);
@@ -393,65 +342,141 @@ void display ()
     ghost3->draw();
     ghost4->draw();
 
+    if (textures_enabled) glDisable(GL_TEXTURE_2D);
+    
     //glPopMatrix();
-		glColor3f(1,1,1);
-		glTranslatef(6,4,0);
-		glScalef(0.01,0.01,0.01);
-		timer1->drawTimer();
-	//glPushMatrix();
+   		glColor3f(1,1,1);
+   		glTranslatef(6,4,0);
+   		glScalef(0.01,0.01,0.01);
+   		timer1->drawTimer();
+   	//glPushMatrix();
 
     // now swap buffer
-    glutSwapBuffers();
-   
-    //gluDeleteQuadric(quadric);
+    glutSwapBuffers();   
 }
-
-
 
 // This function is called when there is nothing else to do.
 void idle ()
 {
-
-   if (idleEnable)
-   {	
-       yaw += RotSTEP;
-       if (yaw > ALL_ROUND){
-           yaw -= ALL_ROUND;           
-       }
-       // Display normalized coordinates in title bar.
-       //const int BUFSIZE = 200;
-       //static char buffer[BUFSIZE];
-       //ostringstream s(buffer, BUFSIZE);
-       ostringstream s;
-       s    << resetiosflags(ios::floatfield) 
-            << setiosflags(ios::fixed) 
-            << setprecision(3) 
-            << "Mouse at (" 
-            << xMouse << ", " 
-            << yMouse 
-            << setprecision(0) 
-            << ").  Alpha=" 
-            << setw(3) 
-            << yaw 
-            << ".  Beta=" 
-            << setw(3) 
-            << pitch 
-            << setprecision(2)
-            << ". Distance=" 
-            << halfway 
-            << "." 
-            << ends;
-
-       string tmp = s.str();
-
-       char* thing;
-
-       thing = new char[tmp.length()+1];
-       strcpy(thing,tmp.c_str());
-       glutSetWindowTitle(thing);
-
-       glutPostRedisplay();
-   }
+    /* Do nothing when paused */
+    if (paused) {
+        return;
+    }
+    
+    /* Setup For Collision */
+    Vector pacmanPosition(pacman->x, pacman->y, pacman->z);
+    Vector ghostPosition(ghost1->x, ghost1->y, ghost1->z);
+    
+    GLint n, s, e, w;
+    
+    /***********************************
+     *  Collision With Walls           *
+     ***********************************/
+    vector<Tile *>::const_iterator t_it;
+    for (t_it = walls.begin(); t_it != walls.end(); ++t_it) 
+    {   
+        /**************************/   
+        /* PACMAN WALL COLLISIONS */
+        /**************************/
+        
+        /* Reset any collisions */
+        n = s = e = w = 0;
+        testWallCollision(pacmanPosition, *(*t_it), n, s, e, w);
+        pacman->collide(n, s, e, w);
+        
+        
+        /**************************/
+        /* GHOST1 WALL COLLISIONS */
+        /**************************/
+        ghostPosition = Vector(ghost1->x, ghost1->y, ghost1->z);
+        
+        /* Reset any collisions */
+        n = s = e = w = 0;
+        testWallCollision(ghostPosition, *(*t_it), n, s, e, w);
+        ghost1->collide(n, s, e, w);
+        
+        
+        /**************************/
+        /* GHOST2 WALL COLLISIONS */
+        /**************************/
+        ghostPosition = Vector(ghost2->x, ghost2->y, ghost2->z);
+        
+        /* Reset any collisions */
+        n = s = e = w = 0;
+        testWallCollision(ghostPosition, *(*t_it), n, s, e, w);
+        ghost2->collide(n, s, e, w);      
+        
+        
+        /**************************/
+        /* GHOST3 WALL COLLISIONS */
+        /**************************/
+        ghostPosition = Vector(ghost3->x, ghost3->y, ghost3->z);
+        
+        /* Reset any collisions */
+        n = s = e = w = 0;
+        testWallCollision(ghostPosition, *(*t_it), n, s, e, w);      
+        ghost3->collide(n, s, e, w);
+        
+        
+        /**************************/
+        /* GHOST4 WALL COLLISIONS */
+        /**************************/
+        ghostPosition = Vector(ghost4->x, ghost4->y, ghost4->z);
+        
+        /* Reset any collisions */
+        n = s = e = w = 0;
+        testWallCollision(ghostPosition, *(*t_it), n, s, e, w);
+        ghost4->collide(n, s, e, w);
+    }
+    
+    
+    /*******************************/
+    /*    END WALL COLLISIONS      */
+    /*******************************/
+#ifdef DEBUG
+    cout << "END WALL COLLISION" << endl;
+#endif
+    
+    vector<Tile *>::iterator p_it;
+    /********************************
+     *  Collision With Pellets      *
+     ********************************/
+    for(p_it = pelletTiles.begin(); p_it != pelletTiles.end(); ++p_it)
+    {
+        Vector tilePosition((*p_it)->x, 0, (*p_it)->z);
+        GLdouble distance = testDistance(tilePosition, pacmanPosition);
+        
+        /* Eat the pellet */
+        if (distance < 0.7) {
+            (*p_it)->pellet = false;
+            pelletTiles.erase(p_it);
+        }
+        
+        /* Avoid an error when you eat the last pellet */
+        if (p_it == pelletTiles.end()) 
+        {
+            break;
+        }
+    }
+    
+    
+    /**********************/
+    /*  MOVE CHARACTERS   */
+    /**********************/
+    pacman->move();
+    ghost1->move();
+    ghost2->move();
+    ghost3->move();
+    ghost4->move();
+    
+    
+    if (idleEnable)
+    {	
+        /* Slow Rotation */
+        camera->rotateY(rotStep/20);
+    }
+    glutPostRedisplay();
+    
 }
 
 //capture mouse movement
@@ -469,17 +494,11 @@ void mouseMovement (int mx, int my)
 // Parameters give new window size in pixels.
 void reshapeMainWindow (int newWidth, int newHeight)
 {
-    GLfloat eye_position[3] = { eye_x+lt_rt, eye_y+up_dn, eye_z+fw_rw };
-    GLfloat center_position[3] = { center_x+lt_rt, center_y+up_dn, center_z+fw_rw };
-
 	width = newWidth;
 	height = newHeight;
 	glViewport(0, 0, width, height);
     setView();
 	glMatrixMode (GL_MODELVIEW);
-    gluLookAt(eye_position[0], eye_position[1], eye_position[2], 
-              center_position[0], center_position[1], center_position[2], 
-              up_x, up_y, up_z);
 }
 
 // Display Help.
@@ -495,8 +514,8 @@ void help()
 		<< "S : Backward" << endl
 		<< "A : Strafe Left" << endl
 		<< "D : Strafe Right" << endl
-		<< ", : Lower Camera" << endl
-		<< ". : Raise Camera" << endl 
+		<< "+ : Zoom in Camera" << endl
+		<< "- : Zoom out Camera" << endl 
         << "Right Mouse Button: Menu" << endl
         << "F5: Light 1 on/off" << endl
         << "F6: Light 2 on/off" << endl
@@ -505,9 +524,10 @@ void help()
         << "F9: All Lights on/off" << endl
         << "F11: Ambient Light on/off" << endl
         << "1: Pacman cam" << endl
-        << "2-3-4-5: Ghost1-2-3-4 Cam" << endl
-        << "6-7-8-9: Light1-2-3-4 Cam" << endl
+        << "2, 3, 4, 5: Ghost1, 2, 3, 4 Cam" << endl
+        << "6, 7, 8, 9: Light1, 2, 3, 4 Cam" << endl
         << "0: Initial Cam" << endl
+        << "p: pause" << endl
         << endl;
 }
 
@@ -525,37 +545,46 @@ void graphicKeys (unsigned char key, int x, int y)
             exit(0);
             break;
             
-        case 'w':
-            fw_rw -= 0.2*mvSTEP;
-            break;
-        case 's':
-            fw_rw += 0.2*mvSTEP;
-            break;
-        case 'a':
-            lt_rt -= 0.2*mvSTEP;
-            break;
-        case 'd':
-            lt_rt += 0.2*mvSTEP;
-            break;
-		case ',':
-			up_dn -= 0.2*mvSTEP;
-            break;
-		case '.':
-			up_dn += 0.2*mvSTEP;
-            break;
-        case ']':
-            roll -= 10*RotSTEP;
-		    if (roll < -ALL_ROUND) {
-                roll += ALL_ROUND;
-            }
-            break;
-        case '[':
-            roll += 10*RotSTEP;
-            if (roll > -ALL_ROUND) {
-                roll += ALL_ROUND;
-            }
+        case 'p':
+            paused = 1 - paused;
             break;
             
+        case 'w':
+            camera->moveForward(moveStep);
+            break;
+        case 's':
+            camera->moveBackward(moveStep);
+            break;
+        case 'a':
+            camera->moveLeft(moveStep);
+            break;
+        case 'd':
+            camera->moveRight(moveStep);
+            break;
+		case '=':
+        case '+':
+			camera->zoomIn(zoomStep);
+            break;
+		case '-':
+			camera->zoomOut(zoomStep);
+            break;
+        case ']':
+            camera->roll(rotStep);
+            break;
+        case '[':
+            camera->roll(-rotStep);
+            break;
+            
+        case 't' :
+            if(timer1->timerIsOn)
+            timer1->stopTimer();
+            else timer1->startTimer();
+            break;
+
+        case 'x' :
+        	ProcessMenu(30);
+        	break;
+
         case '1':
             ProcessMenu(5);
             break;
@@ -587,10 +616,6 @@ void graphicKeys (unsigned char key, int x, int y)
             ProcessMenu(16);
             break;
 
-        case 't' :
-        	if(timer1->timerIsOn)
-        	timer1->stopTimer();
-        	else timer1->startTimer();
 
         default:
             cout << key << endl;
@@ -621,6 +646,15 @@ void ProcessMenu(GLint value)
             
             /* Pacman-cam */
         case 5:
+            camera->reset();
+            camera->setPosition(pacman->x, 
+                                pacman->y+1.0, 
+                                pacman->z);
+            
+            camera->setCenter(pacman->x, 
+                              pacman->y, 
+                              pacman->z+5.0);
+            /*
             eye_x = pacman->x;
             eye_y = pacman->y+1.0;
             eye_z = pacman->z;
@@ -636,181 +670,133 @@ void ProcessMenu(GLint value)
             yaw = 0;
             pitch  = 0;
             roll = 0;   
-            
+            */
             break;
             
             /* Ghost1-Cam */    
         case 6:
-            eye_x = ghost1->x;
-            eye_y = ghost1->y+1.0;
-            eye_z = ghost1->z;
+            camera->reset();
+            camera->setPosition(ghost1->x, 
+                                ghost1->y+1.0, 
+                                ghost1->z);
             
-            center_x = ghost1->x;
-            center_y = ghost1->y;
-            center_z = ghost1->z+5.0;
-            
-            fw_rw = 0;
-            up_dn = 0;
-            lt_rt = 0;
-            
-            yaw = 0;
-            pitch  = 0;
-            roll = 0;   
+            camera->setCenter(ghost1->x, 
+                              ghost1->y, 
+                              ghost1->z+5.0); 
             
             break;
             
             /* Ghost2-Cam */
         case 7:
-            eye_x = ghost2->x;
-            eye_y = ghost2->y+1.0;
-            eye_z = ghost2->z;
+            camera->reset();
+            camera->setPosition(ghost2->x, 
+                                ghost2->y+1.0, 
+                                ghost2->z);
             
-            center_x = ghost2->x;
-            center_y = ghost2->y;
-            center_z = ghost2->z+5.0;
-            
-            fw_rw = 0;
-            up_dn = 0;
-            lt_rt = 0;
-            
-            yaw = 0;
-            pitch  = 0;
-            roll = 0;   
+            camera->setCenter(ghost2->x, 
+                              ghost2->y, 
+                              ghost2->z+5.0);   
             
             break;
             
             /* Ghost3-Cam */    
         case 8:
-            eye_x = ghost3->x;
-            eye_y = ghost3->y+1.0;
-            eye_z = ghost3->z;
+            camera->reset();
+            camera->setPosition(ghost3->x, 
+                                ghost3->y+1.0, 
+                                ghost3->z);
             
-            center_x = ghost3->x;
-            center_y = ghost3->y;
-            center_z = ghost3->z+5.0;            
-            
-            fw_rw = 0;
-            up_dn = 0;
-            lt_rt = 0;
-            
-            yaw = 0;
-            pitch  = 0;
-            roll = 0;   
+            camera->setCenter(ghost3->x, 
+                              ghost3->y, 
+                              ghost3->z+5.0); 
             
             break;
             
             /* Ghost4-Cam */
         case 9:
-            eye_x = ghost4->x;
-            eye_y = ghost4->y+1.0;
-            eye_z = ghost4->z;
+            camera->reset();
+            camera->setPosition(ghost4->x, 
+                                ghost4->y+1.0, 
+                                ghost4->z);
             
-            center_x = ghost4->x;
-            center_y = ghost4->y;
-            center_z = ghost4->z+5.0;            
-            
-            fw_rw = 0;
-            up_dn = 0;
-            lt_rt = 0;
-            
-            yaw = 0;
-            pitch  = 0;
-            roll = 0;   
+            camera->setCenter(ghost4->x, 
+                              ghost4->y, 
+                              ghost4->z+5.0); 
             
             break;
             
             /* Light1-Cam */
         case 10:
-            eye_x = lamp1->x;
-            eye_y = lamp1->y;
-            eye_z = lamp1->z;
+            camera->reset();
+            camera->setPosition(lamp1->x, 
+                                lamp1->y+5.0, 
+                                lamp1->z);
             
-            //center_x = initial_center[0];
-            //center_y = initial_center[1];
-            //center_z = initial_center[2];
-            center_x = lamp1->x +2.82;
-            center_y = lamp1->y -4;
-            center_z = lamp1->z +2.82;
+            camera->setCenter(lamp1->x +5, 
+                              lamp1->y -4, 
+                              lamp1->z +5);
             
-            
-            fw_rw = 0;
-            up_dn = 0;
-            lt_rt = 0;
-            
-            yaw = 0;
-            pitch  = 0;
-            roll = 0;
-            
+            /******
+             *NOTE: Changed viewing direction for better vision
+             ******/
+            /*
+            camera->setCenter(lamp1->x +2.82, 
+                              lamp1->y -4, 
+                              lamp1->z +2.82);
+            */
             break;
             
             /* Light2-Cam */
         case 11:
-            eye_x = lamp2->x;
-            eye_y = lamp2->y;
-            eye_z = lamp2->z;
+            camera->reset();
+            camera->setPosition(lamp2->x, 
+                                lamp2->y+5.0, 
+                                lamp2->z);
             
-            //center_x = initial_center[0];
-            //center_y = initial_center[1];
-            //center_z = initial_center[2];
-            
-            center_x = lamp2->x -2.82;
-            center_y = lamp2->y -4;
-            center_z = lamp2->z +2.82;
-            
-            fw_rw = 0;
-            up_dn = 0;
-            lt_rt = 0;
-            
-            yaw = 0;
-            pitch  = 0;
-            roll = 0;   
-            
+            camera->setCenter(lamp2->x -5, 
+                              lamp2->y -4, 
+                              lamp2->z +5);
+            /*
+            camera->setCenter(lamp2->x -2.82, 
+                              lamp2->y -4, 
+                              lamp2->z +2.82);  
+            */
             break;
             
             /* Light3-Cam */
 		case 12:
-            eye_x = lamp3->x;
-            eye_y = lamp3->y;
-            eye_z = lamp3->z;
+            camera->reset();
+            camera->setPosition(lamp3->x, 
+                                lamp3->y+5.0, 
+                                lamp3->z);
             
-            //center_x = initial_center[0];
-            //center_y = initial_center[1];
-            //center_z = initial_center[2];
-            center_x = lamp3->x + 2.82;
-            center_y = lamp3->y - 4;
-            center_z = lamp3->z -2.82;
+            camera->setCenter(lamp3->x +5, 
+                              lamp3->y -4, 
+                              lamp3->z -5);
             
-            fw_rw = 0;
-            up_dn = 0;
-            lt_rt = 0;
-            
-            yaw = 0;
-            pitch  = 0;
-            roll = 0;                        
+            /*
+            camera->setCenter(lamp3->x +2.82, 
+                              lamp3->y -4, 
+                              lamp3->z -2.82);
+            */
             
             break;
             
             /* Light4-Cam */
 		case 13:
-            eye_x = lamp4->x;
-            eye_y = lamp4->y;
-            eye_z = lamp4->z;
+            camera->reset();
+            camera->setPosition(lamp4->x, 
+                                lamp4->y+5.0, 
+                                lamp4->z);
             
-            //center_x = initial_center[0];
-            //center_y = initial_center[1];
-            //center_z = initial_center[2];
-            center_x = lamp4->x -2.82;
-            center_y = lamp4->y -4;
-            center_z = lamp4->z -2.82;
-            
-            fw_rw = 0;
-            up_dn = 0;
-            lt_rt = 0;
-            
-            yaw = 0;
-            pitch  = 0;
-            roll = 0;                        
-            
+            camera->setCenter(lamp4->x -5, 
+                              lamp4->y -4, 
+                              lamp4->z -5);
+            /*
+            camera->setCenter(lamp4->x -2.82, 
+                              lamp4->y -4, 
+                              lamp4->z -2.82); 
+            */
             break;
             
             /* Enable Ambient Light */
@@ -825,31 +811,16 @@ void ProcessMenu(GLint value)
             
             /* Initial-Cam */
         case 16:
-            eye_x = initial_eye[0];
-            eye_y = initial_eye[1];
-            eye_z = initial_eye[2];
-            
-            center_x = initial_center[0];
-            center_y = initial_center[1];
-            center_z = initial_center[2];
-            
-            fw_rw = 0;
-            up_dn = 0;
-            lt_rt = 0;
-            
-            yaw = 0;
-            pitch  = 0;
-            roll = 0;            
-            
+            camera->reset();
             break;
             
             /* Enable/Disable Color Material */
         case 17:
+            color_material_enabled = 1 - color_material_enabled;
             if (color_material_enabled) {
-                color_material_enabled = false;
+                glEnable(GL_COLOR_MATERIAL);
             } else {
-                color_material_enabled = true;
-
+                glDisable(GL_COLOR_MATERIAL);
             }
             break;
             
@@ -1039,31 +1010,38 @@ void functionKeys (int key, int x, int y)
            ambient_light = 1 - ambient_light;
            break;
            
+/*
        case GLUT_KEY_UP:
-           pitch += 10*RotSTEP;
-           if (pitch > ALL_ROUND)
-               pitch -= ALL_ROUND;
+           camera->rotateZ(-rotStep);
            break;
            
        case GLUT_KEY_DOWN:
-           pitch -= 10*RotSTEP;
-           if (pitch < -ALL_ROUND)
-               pitch += ALL_ROUND;
+           camera->rotateZ(rotStep);
            break; 
 
 		case GLUT_KEY_RIGHT:
-            yaw -= 10*RotSTEP;
-		    if (yaw < -ALL_ROUND) {
-                yaw += ALL_ROUND;
-            }
-            break;
+           camera->rotateY(rotStep);
+           break;
            
         case GLUT_KEY_LEFT:
-            yaw += 10*RotSTEP;
-            if (yaw > -ALL_ROUND) {
-                yaw += ALL_ROUND;
-            }
-            break;  
+           camera->rotateY(-rotStep);
+           break;  
+ */
+       case GLUT_KEY_UP:
+           pacman->setDirection('n');
+           break;
+           
+       case GLUT_KEY_DOWN:
+           pacman->setDirection('s');
+           break; 
+           
+       case GLUT_KEY_RIGHT:
+           pacman->setDirection('e');          
+           break;
+           
+       case GLUT_KEY_LEFT:
+           pacman->setDirection('w');          
+           break;  
    }
 
     glutPostRedisplay();
@@ -1071,91 +1049,6 @@ void functionKeys (int key, int x, int y)
 
 
 
-void setupLighting()
-{
-    // Light values and coordinates
-    GLfloat lightModelIntensity[] = { 0.1f, 0.1f, 0.1f, 1.0f };
-    
-    /* Ambient Light Values */
-    
-    GLfloat lightAmbient[]  = { 0.7f, 0.7f, 0.7f, 1.0f };
-    GLfloat lightDiffuse[]  = { 0.7f, 0.7f, 0.7f, 1.0f };
-    GLfloat lightSpecular[] = { 0.7f, 0.7f, 0.7f, 1.0f };
-    GLfloat lightPosition[] = { 0.0f, 1.0f, 0.0f, 0.0f }; /* Point down Y-Axis */
-    
-    /* Spotlight Values */
-    GLfloat spotlightAmbient[]  = { 0.5f, 0.5f, 0.0f, 1.0f };
-    GLfloat spotlightDiffuse[]  = { 0.5f, 0.5f, 0.0f, 1.0f };
-    GLfloat spotlightSpecular[] = { 0.5f, 0.5f, 0.0f, 1.0f };
-    GLfloat spotlightPosition1[] = { 0.5f, 1.0f, 0.5f, 1.0f };
-    GLfloat spotlightPosition2[] = { 19.5f, 1.0f, 0.5f, 1.0f };
-    GLfloat spotlightPosition3[] = { 0.5f, 1.0f, 21.5f, 1.0f };
-    GLfloat spotlightPosition4[] = { 19.5f, 1.0f, 21.5f, 1.0f };
-    GLfloat spotlightDirection1[] = { 1.0f, 0.0f, 1.0f};
-    GLfloat spotlightDirection2[] = { -1.0f, 0.0f, 1.0f};
-    GLfloat spotlightDirection3[] = { 1.0f, 0.0f, -1.0f};
-    GLfloat spotlightDirection4[] = { -1.0f, 0.0f, -1.0f};
-
-    
-    lamp1 = new Lamp(GL_LIGHT1, spotlightDirection1);
-    lamp2 = new Lamp(GL_LIGHT2, spotlightDirection2);
-    lamp3 = new Lamp(GL_LIGHT3, spotlightDirection3);
-    lamp4 = new Lamp(GL_LIGHT4, spotlightDirection4);
-        
-    lamp1->setAmbDiffSpec(spotlightAmbient, spotlightDiffuse, spotlightSpecular);
-    lamp2->setAmbDiffSpec(spotlightAmbient, spotlightDiffuse, spotlightSpecular);
-    lamp3->setAmbDiffSpec(spotlightAmbient, spotlightDiffuse, spotlightSpecular);
-    lamp4->setAmbDiffSpec(spotlightAmbient, spotlightDiffuse, spotlightSpecular);
-
-    /* setup where the lamps are modeled */
-    lamp1->setModelPosition(spotlightPosition1);
-    lamp2->setModelPosition(spotlightPosition2);
-    lamp3->setModelPosition(spotlightPosition3);
-    lamp4->setModelPosition(spotlightPosition4);
-
-    glEnable(GL_DEPTH_TEST);	// Hidden surface removal
-    glFrontFace(GL_CCW);		// Counter clock-wise polygons face out
- 
-    // Enable lighting
-    glEnable(GL_LIGHTING);
-
-    /* Setup and enable light 0 */    
-    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lightModelIntensity);
-    glLightfv(GL_LIGHT0, GL_AMBIENT, lightAmbient);
-    glLightfv(GL_LIGHT0, GL_DIFFUSE, lightDiffuse);
-    glLightfv(GL_LIGHT0, GL_SPECULAR, lightSpecular);
-    glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
-    glEnable(GL_LIGHT0);
-    
-    // Set Material properties to follow glColor values
-    glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
-
-    // Black blue background
-    glClearColor(0.0f, 0.0f, 0.4f, 1.0f );
-    
-    // Enable Transparency
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    
-    //Rescale Normals if needed
-    glEnable(GL_NORMALIZE);
-}
-
-void cleanup()
-{
-    /* Clean up */
-    delete pacman;
-    delete ghost1;
-    delete ghost2;
-    delete ghost3;
-    delete ghost4;
-    delete map1;
-    delete lamp1;
-    delete lamp2;
-    delete lamp3;
-    delete lamp4;
-    
-}
 
 int main (int argc, char **argv)
 {
@@ -1165,10 +1058,44 @@ int main (int argc, char **argv)
 	glutInitWindowSize(width, height);
 	glutCreateWindow("Pacman3D Assignment3");
     
-	GLint nModeMenu; // menu identifier used when calling glutsetmenu
+    initMenu();
+    
+	// Register call backs for standard tasks such as:
+	// display, windowresize, keypress, functionkey press, mouse movement.
+	glutDisplayFunc(display);
+	glutReshapeFunc(reshapeMainWindow);
+	glutKeyboardFunc(graphicKeys);
+    glutSpecialFunc(functionKeys);
+    glutMotionFunc(mouseMovement);
+	glutIdleFunc(idle);
+    
+    // Display help.
+	help();
+    
+    init();
+    
+    // Enter GLUT loop.
+	glutMainLoop();
+    
+}
+
+
+void initMenu()
+{
+    GLint nModeMenu; // menu identifier used when calling glutsetmenu
 	nModeMenu = glutCreateMenu(ProcessMenu);
 	glutAddMenuEntry("Solid",1);
 	glutAddMenuEntry("Wire",2);
+	glutAddMenuEntry("-------------", 0);
+	    glutAddMenuEntry("Enable/Disable Textures", 29);
+	    glutAddMenuEntry("-------------", 0);
+	    glutAddMenuEntry("Pacman Outfit 1", 30);
+	    glutAddMenuEntry("Pacman Outfit 2", 31);
+	    glutAddMenuEntry("Pacman Outfit 3", 32);
+	    glutAddMenuEntry("-------------", 0);
+	    glutAddMenuEntry("Enable/Disable Pellet Texture", 33);
+	    glutAddMenuEntry("Enable/Disable Power Pellet Texture", 34);
+	    glutAddMenuEntry("Enable/Disable All Pellet Texture", 35);
     glutAddMenuEntry("-------------", 0);
     glutAddMenuEntry("Smooth Shading", 3);
     glutAddMenuEntry("Flat Shading", 4);
@@ -1199,42 +1126,23 @@ int main (int argc, char **argv)
     glutAddMenuEntry("Disable Lamp 4", 26);
     glutAddMenuEntry("Enable All Lamps", 27);
     glutAddMenuEntry("Disable All Lamps", 28);
-    glutAddMenuEntry("-------------", 0);
-    glutAddMenuEntry("Enable/Disable Textures", 29);
-    glutAddMenuEntry("-------------", 0);
-    glutAddMenuEntry("Pacman Outfit 1", 30);
-    glutAddMenuEntry("Pacman Outfit 2", 31);
-    glutAddMenuEntry("Pacman Outfit 3", 32);
-    glutAddMenuEntry("-------------", 0);
-    glutAddMenuEntry("Enable/Disable Pellet Texture", 33);
-    glutAddMenuEntry("Enable/Disable Power Pellet Texture", 34);
-    glutAddMenuEntry("Enable/Disable All Pellet Texture", 35);
-
+    
+    
 
 	glutAttachMenu(GLUT_RIGHT_BUTTON);
-    
-	// Register call backs for standard tasks such as:
-	// display, windowresize, keypress, functionkey press, mouse movement.
-	glutDisplayFunc(display);
-	glutReshapeFunc(reshapeMainWindow);
-	glutKeyboardFunc(graphicKeys);
-    glutSpecialFunc(functionKeys);
-    glutMotionFunc(mouseMovement);
-	glutIdleFunc(idle);
-    
-    // Display help.
-	help();
-    
+}
+
+
+void init()
+{
     //init scene
     glShadeModel(GL_SMOOTH);
     setupLighting();
     
-	/* init ghosts */
+	/* init characters */
     pacman = new Pacman();
     pacman->initPosition(1.0f, 0.2f, 3.0f);
     
-    timer1 = new Timer();
-
     ghost1 = new Ghost(1.0, 0.0, 0.0);
     ghost2 = new Ghost(0.0, 1.0, 0.0);
     ghost3 = new Ghost(1.0, 0.5, 0.7);
@@ -1244,18 +1152,121 @@ int main (int argc, char **argv)
     ghost2->initPosition(10.0f, 0.2f, 11.0f);
     ghost3->initPosition(11.0f, 0.2f, 11.0f);
     ghost4->initPosition(10.0f, 0.2f, 10.0f);
-        
+    
+    timer1 = new Timer();
+
     /* init map */
     srand(time(NULL)); //seed rand for pellet colours
-    map1 = new Map(map, 23, 21);        
+    map1 = new Map(map, 23, 21);
+    
+    /* Create a vector of walls for collision detection */
+    /* Create another vector of tiles with pellets for more detection */
+    vector<Tile *>::const_iterator t_it;    
+    for (t_it = map1->tiles.begin(); t_it != map1->tiles.end(); ++t_it) 
+    {
+        
+        if ((*t_it)->type == 'W') {
+            walls.push_back((*t_it));
+        }
+        
+        if ((*t_it)->type == 'Z') {
+            pelletTiles.push_back((*t_it));
+        }
+    }
+    
+    /* init camera */
+    camera = new Camera();
     
     glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
     glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
-
-    atexit(cleanup);
     
-    // Enter GLUT loop.
-	glutMainLoop();
     
+    atexit(cleanup);    
 }
 
+
+void setupLighting()
+{
+    // Light values and coordinates
+    GLfloat lightModelIntensity[] = { 0.1f, 0.1f, 0.1f, 1.0f };
+    
+    /* Ambient Light Values */
+    
+    GLfloat lightAmbient[]  = { 0.7f, 0.7f, 0.7f, 1.0f };
+    GLfloat lightDiffuse[]  = { 0.7f, 0.7f, 0.7f, 1.0f };
+    GLfloat lightSpecular[] = { 0.7f, 0.7f, 0.7f, 1.0f };
+    GLfloat lightPosition[] = { 0.0f, 1.0f, 0.0f, 0.0f }; /* Point down Y-Axis */
+    
+    /* Spotlight Values */
+    GLfloat spotlightAmbient[]  = { 0.5f, 0.5f, 0.0f, 1.0f };
+    GLfloat spotlightDiffuse[]  = { 0.5f, 0.5f, 0.0f, 1.0f };
+    GLfloat spotlightSpecular[] = { 0.5f, 0.5f, 0.0f, 1.0f };
+    GLfloat spotlightPosition1[] = { 0.5f, 1.0f, 0.5f, 1.0f };
+    GLfloat spotlightPosition2[] = { 19.5f, 1.0f, 0.5f, 1.0f };
+    GLfloat spotlightPosition3[] = { 0.5f, 1.0f, 21.5f, 1.0f };
+    GLfloat spotlightPosition4[] = { 19.5f, 1.0f, 21.5f, 1.0f };
+    GLfloat spotlightDirection1[] = { 1.0f, 0.0f, 1.0f};
+    GLfloat spotlightDirection2[] = { -1.0f, 0.0f, 1.0f};
+    GLfloat spotlightDirection3[] = { 1.0f, 0.0f, -1.0f};
+    GLfloat spotlightDirection4[] = { -1.0f, 0.0f, -1.0f};
+    
+    
+    lamp1 = new Lamp(GL_LIGHT1, spotlightDirection1);
+    lamp2 = new Lamp(GL_LIGHT2, spotlightDirection2);
+    lamp3 = new Lamp(GL_LIGHT3, spotlightDirection3);
+    lamp4 = new Lamp(GL_LIGHT4, spotlightDirection4);
+    
+    lamp1->setAmbDiffSpec(spotlightAmbient, spotlightDiffuse, spotlightSpecular);
+    lamp2->setAmbDiffSpec(spotlightAmbient, spotlightDiffuse, spotlightSpecular);
+    lamp3->setAmbDiffSpec(spotlightAmbient, spotlightDiffuse, spotlightSpecular);
+    lamp4->setAmbDiffSpec(spotlightAmbient, spotlightDiffuse, spotlightSpecular);
+    
+    /* setup where the lamps are modeled */
+    lamp1->setModelPosition(spotlightPosition1);
+    lamp2->setModelPosition(spotlightPosition2);
+    lamp3->setModelPosition(spotlightPosition3);
+    lamp4->setModelPosition(spotlightPosition4);
+    
+    glEnable(GL_DEPTH_TEST);	// Hidden surface removal
+    glFrontFace(GL_CCW);		// Counter clock-wise polygons face out
+    
+    // Enable lighting
+    glEnable(GL_LIGHTING);
+    
+    /* Setup and enable light 0 */    
+    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lightModelIntensity);
+    glLightfv(GL_LIGHT0, GL_AMBIENT, lightAmbient);
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, lightDiffuse);
+    glLightfv(GL_LIGHT0, GL_SPECULAR, lightSpecular);
+    glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
+    glEnable(GL_LIGHT0);
+    
+    // Set Material properties to follow glColor values
+    glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
+    
+    // Black blue background
+    glClearColor(0.0f, 0.0f, 0.4f, 1.0f );
+    
+    // Enable Transparency
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    
+    //Rescale Normals if needed
+    glEnable(GL_NORMALIZE);
+}
+
+
+void cleanup()
+{
+    /* Clean up */
+    delete pacman;
+    delete ghost1;
+    delete ghost2;
+    delete ghost3;
+    delete ghost4;
+    delete map1;
+    delete lamp1;
+    delete lamp2;
+    delete lamp3;
+    delete lamp4;
+}

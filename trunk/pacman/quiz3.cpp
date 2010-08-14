@@ -7,43 +7,56 @@
  *      Team #8
  *The following code is based off sampleglprogram.cpp and our project
 
-- (1) Set the background color of the world black.
+- (1) Set the background color of the world gray.
 
 - (3) Draw (x,y,z) axes as lines originating at (0,0,0) to their
-      positive direction, 3 units in length, x: red, y: green,
-       z: yellow.
+      positive direction, 2.5 units in length, x: green, y: red,
+      z: blue.
 
-- (4) Extract the model of the Ghost from your project. The
-      model should be texture-free.
+- (4) Extract the models of the Floor Tile and the Pellet from your
+      project. The models should be texture-free.
 
-- (1) Place the Ghost at the origin, 1 unit in size.
+- (1) Place the Floor Tile at the origin, 1x1x0.5 units in size.
+      Place the Pellets covering the Tile such that there are 8
+      of them there spred evenly on the sides as roughly ASCII
+      illustrated:
+      
+    ____
+   /ooo/|
+  /o o/ |
+ /ooo/ /
+/---/ /
+|   |/
+|___|
 
 - (2) Place a camera looking at the scene as in PA1.
 
-- (4) Model two pointy "legs" using quadric cones at the bottom of the
-      Ghost pointing downward the Y axis. Color them as you did
-      for Ghost. Use whatever necessary to achieve that.
-
-- (6) Model your student ID's first 2 digits as old Timex watch using
-      parallelopipeds (3D "cubes", scaled) standing besides Ghost
-      on the left, half unit tall, .25 unit deep, unit wide. You can
-      keep them as wireframe or fill in with any color you like
-      as long as it is visible.
-  ___
-/|___|
-/___/
+- (4) Model a quadric cone at the top of the Tile pointing upward
+      the Y axis. Its bottom diameter should be the same as that of
+      the pellets. Color it as you did for the Pellets. Use whatever
+      transformations necessary to achieve that. The length of the code
+      is 1 unit.
 
 - (1) Allow for smooth and flat shading with a key.
 
-- (8) Apply various transformations below to the Ghost with legs, BUT NOT
-      YOUR DIGITS NOR AXES. Pay attention to the order.
-    - key '1': Rotate Ghost 45 degrees about Z and translate it 1 unit over X
-    - key '2': Scale Ghost by -0.5x, 2y, and 3z
+- (6) Model your student ID's first and last digits as old Timex watch using
+      parallelopipeds (3D "cubes", scaled approprately) standing on both sides
+      of the tile along X, unit tall, .5 unit deep, unit wide. You can
+      keep them as wireframe or fill in with any color you like
+      as long as they are visible.
+   ___    ___
+ /|___| /|___|
+|/___/ |/___/
+
+- (8) Apply various transformations below to the Tile with the Pellets and the cone
+      (the model), BUT NOT TO YOUR DIGITS NOR AXES. Pay attention to the order.
+    - key '1': Rotate the model 60 degrees about Y and translate it 2 units over Z
+    - key '2': Scale the model by 3x, 0.5y, and -0.5z
     - key '3': Combine '1' and '2' with the scaling being last applied to the model.
     - key '4': Combine '1' and '2' with the scaling being first applied to the model.
-    - key '5': Rotate Ghost about the fixed point (4.0, 5.0, 6.0) 45 degrees with the 1.0, 2.0 and 3.0 components.
-    - key '6': Combine '4' and '5' with the '5' being last.
-    - key 'R': key to reset to the initial state
+    - key '5': Rotate the model about the fixed point (4.0, 5.0, 6.0) 45 degrees with the 1.0, 2.0 and 3.0 components.
+    - key '6': Combine '4' and '5' with the '5' being last applied to the model.
+    - key 'R': key to reset to the initial state before any transformation.
 
 */
 
@@ -56,7 +69,7 @@
 #include <vector>
 #include <ctime>
 
-#include "Ghost.h"
+#include "Tile.h"
 
 using namespace std;
 
@@ -69,7 +82,8 @@ void graphicKeys (unsigned char key, int x, int y);
 /**************************
  Scene Objects
  **************************/
-static Ghost *ghost1;
+static Tile *tile3;
+//static Tile *tile0;
 
 // Initial size of graphics window on your screen in pixels.
 #define WIDTH 800
@@ -98,7 +112,7 @@ GLdouble roll = 0;
 GLdouble halfway = - (farPlane + nearPlane) / 2;	   // half way between near and far planes
 bool useSmoothShading = 0;
 bool isWireFrame = 1;
-char t;                                                //choice of transform
+char t=0;                                                //choice of transform
 
 /* Camera */
 /* Set initial values */
@@ -183,15 +197,15 @@ void drawAxes(){
 	glPushMatrix();
 		glBegin(GL_LINES);
 		// X axis
-		glColor3f(1, 0, 0); //red
+		glColor3f(0, 1, 0); //greeen
 		glVertex3f(0, 0, 0);
 		glVertex3f(3, 0, 0);
 		// Y axis
-		glColor3f(0, 1, 0); //green
+		glColor3f(1, 0, 0); //red
 		glVertex3f(0, 0, 0);
 		glVertex3f(0, 3, 0);
 		// Z axis
-		glColor3f(1, 1, 0); //red + green = yellow
+		glColor3f(0, 0, 1); //blue
 		glVertex3f(0, 0, 0);
 		glVertex3f(0, 0, 3);
 		glEnd();
@@ -239,7 +253,7 @@ void draw9(){
 }
 //you should draw whatever at the origin then translate;
 
-void draw2(){
+void draw5(){
 
 	glColor3f(0.0,0.7,0.5);
 	//top long
@@ -252,7 +266,7 @@ void draw2(){
 
 	//left short
 		glPushMatrix();
-		glTranslatef(0.75+0.0625/2,0.125+0.0625/2,0);
+		glTranslatef(1.25-0.0625/2,0.125+0.0625/2,0);
 		glScalef(0.25,1,1);
 		glutSolidCube(0.25);
 		glPopMatrix();
@@ -269,7 +283,7 @@ void draw2(){
 
 	//right short
 		glPushMatrix();
-		glTranslatef(1.25-0.0625/2,0.375-0.0625/2,0);
+		glTranslatef(0.75+0.0625/2,0.375-0.0625/2,0);
 		glScalef(0.25,1,1);
 		glutSolidCube(0.25);
 		glPopMatrix();
@@ -284,6 +298,22 @@ void draw2(){
 
 }
 
+void drawModelthing(){
+
+	glPushMatrix();
+		glTranslatef(0,0.25,0);
+		glScalef(0.5,0.5,0.5);
+		glRotatef(-90,1,0,0);
+		glutSolidCone(0.5,1,20,20);
+	glPopMatrix();
+
+	glPushMatrix();
+		tile3->draw(0,0);
+	glPopMatrix();
+
+
+}
+
 void setupLighting(){
 
 	GLfloat lightModelIntensity[] = { 0.1f, 0.1f, 0.1f, 1.0f };
@@ -293,7 +323,7 @@ void setupLighting(){
 	    GLfloat lightAmbient[]  = { 0.7f, 0.7f, 0.7f, 1.0f };
 	    GLfloat lightDiffuse[]  = { 0.7f, 0.7f, 0.7f, 1.0f };
 	    GLfloat lightSpecular[] = { 0.7f, 0.7f, 0.7f, 1.0f };
-	    GLfloat lightPosition[] = { 0.0f, 1.0f, 0.0f, 0.0f }; /* Point down Y-Axis */
+	    GLfloat lightPosition[] = { 1.0f, 0.0f, 0.0f, 0.0f }; /* Point down Y-Axis */
 	/*
 	 *
 	 */
@@ -319,7 +349,7 @@ void display ()
 {
 	setupLighting();
 	//set background color
-    glClearColor(0.0,0.0,0.0,1.0);
+    glClearColor(0.5,0.5,0.5,1.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // set modelling mode
@@ -359,7 +389,7 @@ void display ()
 
    	//drawing routines
    	draw9();
-   	draw2();
+   	draw5();
    	drawAxes();
 
    	//draw ghost with different transforms based on choice..
@@ -371,8 +401,10 @@ void display ()
    			glPushMatrix();
    			glTranslatef(-1,0,0);
    			glRotatef(45,0,0,1);
-   			ghost1->draw();
-   			glPopMatrix();
+			
+   			drawModelthing();
+   			
+			glPopMatrix();
    			break;
 
 
@@ -381,8 +413,11 @@ void display ()
    			//Scale Ghost by -0.5x, 2y, and 3z
    			glPushMatrix();
    			glScalef(0.5,2,3);
-   			ghost1->draw();
-   			glPopMatrix();
+			
+   			drawModelthing();
+
+   			
+			glPopMatrix();
  		 	break;
 
    		case 3 :
@@ -392,8 +427,11 @@ void display ()
    			glScalef(0.5,2,3);
    			glTranslatef(-1,0,0);
    			glRotatef(45,0,0,1);
-   			ghost1->draw();
-   			glPopMatrix();
+			
+   			drawModelthing();
+
+   			
+			glPopMatrix();
    			break;
 
 
@@ -403,8 +441,11 @@ void display ()
    			glTranslatef(-1,0,0);
    			glRotatef(45,0,0,1);
    			glScalef(0.5,2,3);
-   			ghost1->draw();
-   			glPopMatrix();
+			
+   			drawModelthing();
+
+   			
+			glPopMatrix();
    			break;
 
    		case 5 :
@@ -414,8 +455,15 @@ void display ()
    			glTranslatef(4.0, 5.0, 6.0);
    			glRotatef(45,1,2,3);
    			glTranslatef(-4.0, -5.0, -6.0);
-   			ghost1->draw();
-   			glPopMatrix();
+
+   			glTranslatef(-1,0,0);
+   			glRotatef(45,0,0,1);
+   			glScalef(0.5,2,3);
+			
+   			drawModelthing();
+
+   			
+			glPopMatrix();
 
    			break;
 
@@ -425,15 +473,19 @@ void display ()
    			glPushMatrix();
    			glTranslatef(-4.0, -5.0, -6.0);
    			glRotatef(45,1,2,3);
-   			ghost1->draw();
-   			glTranslatef(4.0, 5.0, 6.0);
+			
+   			drawModelthing();
+
+   			
+			glTranslatef(4.0, 5.0, 6.0);
    			glPopMatrix();
 
    			break;
 
    		default:
-   			//draw ghost at 0,0,0
-   			ghost1->draw();
+   			
+   			drawModelthing();
+
    			break;
 
    		}
@@ -675,7 +727,7 @@ void functionKeys (int key, int x, int y)
 void cleanup()
 {
     /* Clean up */
-    delete ghost1;
+    delete tile3;
 
 }
 
@@ -704,12 +756,15 @@ int main (int argc, char **argv)
 
 	/* init objects */
 
-    ghost1 = new Ghost();
+    tile3 = new Tile('N',0,0);
+	//Tile type = without pellet
+	//Tile Position = origin
 
     atexit(cleanup);
 
     // Enter GLUT loop.
 	glutMainLoop();
+	return 0;
 
 }
 

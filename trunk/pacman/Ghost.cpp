@@ -13,11 +13,24 @@
 #include "Common.h"
 #include "textures.h"
 
+
+#ifdef __APPLE__ /* OS X */
+#define ghostTexture "ghostbody.raw"
+#elif defined(__linux__) /* LINUX */
+#define ghostTexture "data/Textures/ghostbody.raw"
+#else /* WINDOWS */
+#define ghostTexture "data/Textures/ghostbody.raw"
+#endif
+
 using namespace std;
 
 extern GLfloat ghost_body[];
 extern GLfloat ghost_pupil[];
 extern GLfloat ghost_white[];
+
+GLuint Ghost::current_id = 0;
+
+const static GLfloat SPEED = 0.05;
 
 Ghost::Ghost()
 {
@@ -30,6 +43,13 @@ Ghost::Ghost()
     cout << "Allocating Ghost" << endl;
 #endif
     initializeModel();
+    
+    this->xVelocity = 0;
+    this->zVelocity = 0;
+    
+    /* Set the Ghost Id for AI purposes */
+    this->myId = current_id;
+    ++current_id;
 }
 
 Ghost::Ghost(GLfloat red, GLfloat green, GLfloat blue)
@@ -43,6 +63,13 @@ Ghost::Ghost(GLfloat red, GLfloat green, GLfloat blue)
     cout << "Allocating Ghost" << endl;
 #endif
     initializeModel();
+    
+    this->xVelocity = 0;
+    this->zVelocity = -1;
+    
+    /* Set the Ghost Id for AI purposes */
+    this->myId = current_id;
+    ++current_id;
 }
 
 Ghost::~Ghost()
@@ -56,7 +83,7 @@ Ghost::~Ghost()
 
 void Ghost::initializeModel()
 {    
-    this->textureID = LoadTextureRAW("ghostbody.raw", 1, 256, 256);
+    this->textureID = LoadTextureRAW(ghostTexture, 1, 64, 64);
     
     this->listID = glGenLists(1);
     glNewList(listID, GL_COMPILE);
@@ -189,4 +216,110 @@ void Ghost::draw()
     glScalef(0.6, 0.6, 0.6);
     glCallList(this->listID);
     glPopMatrix();
+}
+
+void Ghost::move()
+{
+    this->x += this->xVelocity;
+    this->z += this->zVelocity;
+}
+
+void Ghost::setDirection(char direction)
+{
+    switch (direction) {
+        case 'n':
+            this->zVelocity = -SPEED;
+            this->xVelocity = 0;
+            break;
+            
+        case 'e':
+            this->xVelocity = SPEED;
+            this->zVelocity = 0;
+            break;
+            
+        case 's':
+            this->zVelocity = SPEED;
+            this->xVelocity = 0;
+            break;
+            
+        case 'w':
+            this->xVelocity = -SPEED;
+            this->zVelocity = 0;
+            break;
+            
+        default:
+            break;
+    }
+}
+
+void Ghost::collide(GLint n, GLint s, GLint e, GLint w)
+{
+    if (n && this->zVelocity < 0) 
+    {
+        this->zVelocity = 0;
+        chooseMove();
+    }
+    
+    if (s && this->zVelocity > 0)
+    {
+        this->zVelocity = 0;
+        chooseMove();
+    }
+    
+    if (e && this->xVelocity > 0)
+    {
+        this->xVelocity = 0;
+        chooseMove();
+    }
+    
+    if (w && this->xVelocity < 0) 
+    {
+        this->xVelocity = 0;
+        chooseMove();
+    }
+}
+
+
+void Ghost::chooseMove()
+{
+    /* Implement AI Logic */
+    if (this->myId == 0) 
+    {
+        //Logic for Ghost One
+    }
+    else if (this->myId == 1)
+    {
+        //Logic for Ghost Two
+    }
+    else if (this->myId == 2)
+    {
+        //Logic for Ghost Three
+    }
+    else if (this->myId == 3)
+    {
+        //Logic for Ghost Four
+    }
+    
+    /**************************/
+    /* RANDOM DIRECTION LOGIC */
+    /**************************/
+    GLint direction = rand() % 4;
+    switch (direction) {
+        case 0:
+            this->xVelocity = SPEED;
+            break;
+        case 1:
+            this->xVelocity = -SPEED;
+            break;
+        case 2:
+            this->zVelocity = SPEED;
+            break;
+        case 3:
+            this->zVelocity = -SPEED;
+            break;
+
+        default:
+            break;
+    }
+    cout << "Choosing: " << direction << endl;
 }

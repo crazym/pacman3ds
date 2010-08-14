@@ -32,6 +32,11 @@ public:
     ~Ghost();
     void draw();
     
+    void move();
+    void chooseMove();
+    void setDirection(char direction);
+    void collide(GLint n, GLint s, GLint e, GLint w);
+    
     void initializeModel();
     void initPosition(GLfloat x, GLfloat y, GLfloat z);
     
@@ -41,9 +46,15 @@ public:
     GLfloat x;
     GLfloat y;
     GLfloat z;
+    GLfloat xVelocity;
+    GLfloat zVelocity;
+    
+    GLuint myId;
+
     
 private:
     GLUquadricObj *cylinder;
+    static GLuint current_id;
 };
 
 #endif

@@ -14,6 +14,24 @@
 
 #include <iostream>
 #include <cmath>
+#include <cassert>
+
+#ifdef __APPLE__ /* OS X */
+#define brickTexture "teal_brick.raw"
+#define pelletTexture "stone.raw"
+#define floorTexture1 "floor.raw"
+#define floorTexture2 "floor_blood.raw"
+#elif defined(__linux__) /* LINUX */
+#define brickTexture "data/Textures/teal_brick.raw"
+#define pelletTexture "data/Textures/stone.raw"
+#define floorTexture1 "data/Textures/floor.raw"
+#define floorTexture2 "data/Textures/floor_blood.raw"
+#else /* WINDOWS */
+#define brickTexture "data/Textures/teal_brick.raw"
+#define pelletTexture "data/Textures/stone.raw"
+#define floorTexture1 "data/Textures/floor.raw"
+#define floorTexture2 "data/Textures/floor_blood.raw"
+#endif
 
 extern GLfloat high_shininess[];
 extern GLfloat no_shininess[];
@@ -23,15 +41,37 @@ extern GLfloat no_specular[];
 
 extern GLfloat group_number[];
 
-Tile::Tile(GLchar type, GLint x, GLint z)
+Tile::Tile(char type, GLint x, GLint z)
 {    
     this->type = type;
     this->x = x;
     this->z = z;
     
-    this->wallTextureID   = LoadTextureRAW("teal_brick.raw", 1, 256, 256);
-    this->pelletTextureID = LoadTextureRAW("stone.raw", 1, 256, 256);
-    this->floorTextureID  = LoadTextureRAW("floor.raw", 1, 256, 256);    
+    Vector eastWall(x+0.5, 0, z);
+    Vector southWall(x, 0, z+0.5);
+    Vector westWall(x-0.5, 0, z);
+    Vector northWall(x, 0, z-0.5);
+    
+    Vector eastNormal(1, 0, 0);
+    Vector southNormal(0, 0, 1);
+    Vector northNormal(0, 0, -1);
+    Vector westNormal(-1, 0, 0);
+    
+    
+    this->eastPlane = Plane(eastWall, eastNormal);
+    this->southPlane = Plane(southWall, southNormal);
+    this->westPlane = Plane(westWall, westNormal);
+    this->northPlane = Plane(northWall, northNormal);
+    
+    this->wallTextureID   = LoadTextureRAW(brickTexture, 1, 64, 64);
+    this->pelletTextureID = LoadTextureRAW(pelletTexture, 1, 64, 64);
+    
+    if (rand()%10 > 2) {
+        this->floorTextureID  = LoadTextureRAW(floorTexture1, 1, 64, 64);    
+    } else {
+        this->floorTextureID  = LoadTextureRAW(floorTexture2, 1, 64, 64);    
+
+    }
     
     switch (type) {
         case 'W':

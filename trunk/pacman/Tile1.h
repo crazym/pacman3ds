@@ -13,9 +13,7 @@
 #include <cstdlib>
 #include <GLUT/glut.h>
 #elif defined(__linux__) /* LINUX */
-#include <stdlib.h>
-#include <GL/gl.h>
-#include <GL/glu.h>
+#include <cstdlib>
 #include <GL/glut.h>
 #else /* WINDOWS */
 #include <stdlib.h>
@@ -23,13 +21,14 @@
 #include <GL/glut.h>
 #endif
 
-#include "Plane.h"
+#include "Pellet.h"
 
 class Tile{
 public:
-    Tile(char type, GLint x, GLint z);
+    Tile(char type, int x, int z);
+    Pellet* pellet1;
     
-    void draw(GLint texturePellets, GLint texturePPellets);
+    void draw(int texturePellets, int texturePPellets);
     
     char type;
     GLboolean pellet;
@@ -37,18 +36,11 @@ public:
     
     GLuint floorTextureID;
     GLuint wallTextureID;
-    GLuint pelletTextureID;
     
     GLint x;
     GLint z;
     
-    GLfloat pellet_color[4];
     GLfloat tile_color[4];
-    
-    Plane eastPlane;
-    Plane westPlane;
-    Plane southPlane;
-    Plane northPlane;
 };
 
 #endif

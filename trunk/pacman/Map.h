@@ -31,10 +31,10 @@ class Tile;
 
 class Map {
 public:
-    Map(GLchar* map, GLint rows, GLint columns);
+    Map(char* map, GLint rows, GLint columns);
     ~Map();
     
-    void initializeMap(GLchar* map, GLint rows, GLint columns);
+    void initializeMap(char* map, GLint rows, GLint columns);
     void draw(GLint texturePellets, GLint texturePPellets);
     
     vector<Tile*> tiles;
