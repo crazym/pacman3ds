@@ -52,9 +52,11 @@ extern GLfloat pacman_paper_ambient_diffuse[];
 static int pac_atop=0;
 static int open=0;
 
+const int SPEED = 0.05;
+const int FRENZY_SPEED = 0.1;
+
 Pacman::Pacman()
 {
-	SPEED = 0.05;
 #ifdef DEBUG
     cout << "Allocating Pacman" << endl;
 #endif        
@@ -67,6 +69,7 @@ Pacman::Pacman()
     this->textureID[2] = LoadTextureRAW(pacmanTexture3, 1, 64, 64);
 
     this->frenzy = 0;
+    this->speed = SPEED;
 }
 
 Pacman::~Pacman()
@@ -773,9 +776,15 @@ GLint Pacman::getRoundedZ()
 void Pacman::atePowerPellet()
 {
     this->outfit = 1;
+    this->frenzy = 1;
+    this->speed = FRENZY_SPEED;
+}
 
-
-
+void Pacman::finishPowerPellet()
+{
+    this->outfit = 0;
+    this->frenzy = 0;
+    this->speed = SPEED;
 }
 
 void Pacman::drawShadow()
@@ -791,3 +800,4 @@ void Pacman::drawShadow()
 	shadow();
 	glPopMatrix();
 }
+
