@@ -12,6 +12,8 @@
 
 #include "Common.h"
 #include "textures.h"
+#include "Pacman.h"
+#include "Material.h"
 
 
 #ifdef __APPLE__ /* OS X */
@@ -27,6 +29,7 @@ using namespace std;
 extern GLfloat ghost_body[];
 extern GLfloat ghost_pupil[];
 extern GLfloat ghost_white[];
+Pacman pacman();
 
 GLuint Ghost::current_id = 0;
 
@@ -81,6 +84,21 @@ Ghost::~Ghost()
     gluDeleteQuadric(cylinder);
 }
 
+void Ghost::get_pac(GLint x, GLint z)
+{
+	this->p_loc_x = x;
+	this->p_loc_z = z;
+	//cout<<"Pacman x: "<<p_loc_x<<endl;
+	//cout<<"Pacman z: "<<p_loc_z<<endl;
+}
+
+void Ghost::get_bli(GLint x,GLint z)
+{
+	this->b_loc_x = x;
+	this->b_loc_z = z;
+	//cout<<"Blinky x: "<<b_loc_x<<endl;
+	//cout<<"Blinky z: "<<b_loc_z<<endl;
+}
 void Ghost::initializeModel()
 {    
     this->textureID = LoadTextureRAW(ghostTexture, 1, 64, 64);
@@ -196,6 +214,20 @@ void Ghost::initializeModel()
             */
         glPopMatrix();
     glPopMatrix();
+
+	//Draw a shadow
+
+	//Setup
+    glPushMatrix();
+		glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, shadow_mat);
+		glColor4fv(shadow_mat);
+
+		glTranslatef(0.5,0.0,0.0);
+		glRotatef(90,1,0,0);
+		glScalef(1.0,1.0,1.0);
+		shadow();
+	glPopMatrix();
+
         
     glEndList();
     
@@ -257,53 +289,200 @@ void Ghost::collide(GLint n, GLint s, GLint e, GLint w)
     if (n && this->zVelocity < 0) 
     {
         this->zVelocity = 0;
-        chooseMove();
+        chooseMove('n');
     }
     
     if (s && this->zVelocity > 0)
     {
         this->zVelocity = 0;
-        chooseMove();
+        chooseMove('s');
     }
     
     if (e && this->xVelocity > 0)
     {
         this->xVelocity = 0;
-        chooseMove();
+        chooseMove('e');
     }
     
     if (w && this->xVelocity < 0) 
     {
         this->xVelocity = 0;
-        chooseMove();
+        chooseMove('w');
     }
+	//TELEPORT
+    if(this->x<-0.5)
+		this->x=19.5;
+	if(this->x>20.0)
+		this->x=0.0;
+	//enf of teleport
 }
 
 
-void Ghost::chooseMove()
+void Ghost::chooseMove(char side)
 {
+	int out=0;
+	GLint direction = 0;
     /* Implement AI Logic */
+
+	//Blinky
     if (this->myId == 0) 
     {
-        //Logic for Ghost One
+        //Logic for Ghost One 
+		//Getting out of box
+		if(out)
+		{
+			this->zVelocity = -SPEED;
+			out=1;
+		}
+		//Turns toward the intersection closest to pacman
+		//get pacman's coordinates
+			//done with get_pac
+		//get blinky's coordinates 
+		//compare
+		switch (side) {
+		case 'n': case 's':
+			if((this->b_loc_x)>(this->p_loc_x))
+				this->xVelocity = -SPEED;	
+			else if((this->b_loc_x)<(this->p_loc_x))
+				this->xVelocity = SPEED;
+			else if(this->b_loc_x==this->p_loc_x)
+			{
+				if((this->b_loc_z)>(this->p_loc_z))
+					this->zVelocity = -SPEED;
+				else if((this->b_loc_z)<(this->p_loc_z))
+					this->zVelocity = SPEED;
+			}
+			break;
+		/*
+		case 's':
+			if((this->b_loc_x)>(this->p_loc_x))
+				this->xVelocity = -SPEED;	
+			else if((this->b_loc_x)<(this->p_loc_x))
+				this->xVelocity = SPEED;
+			break;*/
+		
+		case 'e': case'w':
+			if((this->b_loc_z)>(this->p_loc_z))
+				this->zVelocity = -SPEED;
+			else if((this->b_loc_z)<(this->p_loc_z))
+				this->zVelocity = SPEED;	
+			else if(this->b_loc_z==this->p_loc_z)
+			{
+				if((this->b_loc_x)>(this->p_loc_x))
+					this->xVelocity = -SPEED;	
+				else if((this->b_loc_x)<(this->p_loc_x))
+					this->xVelocity = SPEED;
+			}
+				break;
+		/*
+		case 'w':
+			if((this->b_loc_z)>(this->p_loc_z))
+				this->zVelocity = -SPEED;
+			else if((this->b_loc_z)<(this->p_loc_z))
+				this->zVelocity = SPEED;
+			break;*/
+
+
+		default:
+			break;	
+		}
     }
+
+	//Inky
     else if (this->myId == 1)
     {
-        //Logic for Ghost Two
+        //Logic for Ghost Two 
+		//Getting out of box
+		if(out)
+		{
+			this->zVelocity = -SPEED;
+			out=1;
+		}
+		direction = rand() % 4;
+		switch (direction) {
+			case 0:
+				this->xVelocity = SPEED;
+				break;
+			case 1:
+				this->xVelocity = -SPEED;
+				break;
+			case 2:
+				this->zVelocity = SPEED;
+				break;
+			case 3:
+				this->zVelocity = -SPEED;
+				break;
+
+			default:
+				break;
+		}
     }
+
+	//Pinky
     else if (this->myId == 2)
     {
-        //Logic for Ghost Three
+        //Logic for Ghost Three 
+		//Getting out of box
+		if(out)
+		{
+			this->zVelocity = -SPEED;
+			out=1;
+		}
+		switch (side) {
+			case 'n':
+				this->xVelocity = -SPEED;
+				break;
+			case 's':
+				this->xVelocity = SPEED;
+				break;
+			case 'e':
+				this->zVelocity = -SPEED;
+				break;
+			case 'w':
+				this->zVelocity = SPEED;
+				break;
+
+			default:
+				break;
+		}
     }
+
+	//Clyde
     else if (this->myId == 3)
     {
-        //Logic for Ghost Four
+        //Logic for Ghost Four 
+		//Getting out of box
+		if(out)
+		{
+			this->zVelocity = -SPEED;
+			out=1;
+		}
+
+		//GLint direction = rand() % 4;
+		switch (side) {
+			case 'n':
+				this->xVelocity = SPEED;
+				break;
+			case 's':
+				this->xVelocity = -SPEED;
+				break;
+			case 'e':
+				this->zVelocity = SPEED;
+				break;
+			case 'w':
+				this->zVelocity = -SPEED;
+				break;
+
+			default:
+				break;
+		}
     }
-    
+
     /**************************/
     /* RANDOM DIRECTION LOGIC */
     /**************************/
-    GLint direction = rand() % 4;
+    
+	/*direction = rand() % 4;
     switch (direction) {
         case 0:
             this->xVelocity = SPEED;
@@ -320,6 +499,6 @@ void Ghost::chooseMove()
 
         default:
             break;
-    }
-    cout << "Choosing: " << direction << endl;
+    }*/
+    //cout << "Choosing: " << direction << endl;
 }

@@ -31,9 +31,12 @@ class Tile;
 //#define DEBUG
 
 void number();
+void shadow();
 Vector crossProduct(const Vector& a, const Vector& b);
 GLdouble dotProduct(const Vector& a, const Vector& b);
 GLint TestIntersionPlane(const Plane& plane, const Vector& position, const Vector& direction, GLdouble& lamda);
 GLdouble testDistance(const Vector& point1, const Vector& point2);
 void testWallCollision(const Vector& position, const Tile& wall, GLint& n, GLint& s, GLint& e, GLint& w);
+
+
 #endif

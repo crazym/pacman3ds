@@ -33,13 +33,16 @@ public:
     void draw();
     
     void move();
-    void chooseMove();
+    void chooseMove(char side);
     void setDirection(char direction);
     void collide(GLint n, GLint s, GLint e, GLint w);
     
     void initializeModel();
     void initPosition(GLfloat x, GLfloat y, GLfloat z);
     
+	void get_pac(GLint,GLint);
+	void get_bli(GLint,GLint);
+
     GLuint listID;
     GLuint textureID;
     GLfloat color[4];
@@ -50,7 +53,11 @@ public:
     GLfloat zVelocity;
     
     GLuint myId;
-
+	GLfloat p_loc_x;
+	GLfloat p_loc_z;
+	
+	GLfloat b_loc_x;
+	GLfloat b_loc_z;
     
 private:
     GLUquadricObj *cylinder;

@@ -202,11 +202,21 @@ static GLint texturePPellets = 1;
 
 static vector<Tile *>walls;
 static vector<Tile *>pelletTiles;
+static vector<Tile *>ppelletTiles;
 
 GLboolean paused = 0;
 GLboolean idleEnable = 0;	// flags that set continuous rotation on/off
 GLboolean projType = 1;      // flag for proj type; ortho = 0, perspective = 1
 GLboolean isWireFrame =0;    // flag for setting wire frame mode
+
+//MADPACMAN
+GLboolean frenzy = 0;
+GLfloat f_timer=0.0;
+
+//Saving previous state
+GLfloat Temp[6][4];
+
+
 
 void resetViewParameters()
 {
@@ -330,6 +340,14 @@ void display ()
     
     if (textures_enabled) glEnable(GL_TEXTURE_2D);
 
+    //draw timer
+    glPushMatrix();
+		glColor3f(1,1,1);
+		glTranslatef(6,4,0);
+		glScalef(0.01,0.01,0.01);
+		timer1->drawTimer();
+	glPopMatrix();
+
     pacman->draw(pacman_outfit);
     map1->draw(texturePellets, texturePPellets);
     
@@ -342,17 +360,65 @@ void display ()
     ghost3->draw();
     ghost4->draw();
 
+	
+
     if (textures_enabled) glDisable(GL_TEXTURE_2D);
     
-    //glPopMatrix();
-   		glColor3f(1,1,1);
-   		glTranslatef(6,4,0);
-   		glScalef(0.01,0.01,0.01);
-   		timer1->drawTimer();
-   	//glPushMatrix();
-
     // now swap buffer
     glutSwapBuffers();   
+}
+
+void Frenzy(bool frenzy)
+{
+	if(frenzy)
+	{
+		f_timer=0.0;
+		ProcessMenu(31);
+		pacman->SPEED = 0.07;
+		/* Ambient Light Values */
+
+		for (int i=0;i<4;i++)
+		{
+			lightAmbient[i]=flightAmbient[i];
+			lightDiffuse[i]=flightDiffuse[i];
+			lightSpecular[i]=flightSpecular[i];
+
+		}
+		
+		/* Spotlight Values */
+		
+		for (int s=0;s<4;s++)
+		{
+			spotlightAmbient[s]=fspotlightAmbient[s];
+			spotlightDiffuse[s]=fspotlightDiffuse[s];
+			spotlightSpecular[s]=fspotlightSpecular[s];
+
+		}
+
+		setupLighting();
+	}
+	if(!frenzy)
+	{
+		f_timer=0.0;
+		ProcessMenu(30);
+		/* Ambient Light Values */
+		for (int i=0;i<4;i++)
+		{
+			lightAmbient[i]  = Temp[0][i];
+			lightDiffuse[i]  = Temp[1][i];
+			lightSpecular[i] = Temp[2][i];
+		}
+		
+		/* Spotlight Values */
+		for (int s=0;s<4;s++)
+		{
+			spotlightAmbient[s]  = Temp[3][s];
+			spotlightDiffuse[s]  = Temp[4][s];
+			spotlightSpecular[s] = Temp[5][s];
+		}
+
+		setupLighting();
+	}
 }
 
 // This function is called when there is nothing else to do.
@@ -458,6 +524,33 @@ void idle ()
             break;
         }
     }
+
+	vector<Tile *>::iterator pp_it;
+    /********************************
+     *  Collision With PPellets      *
+     ********************************/
+    for(pp_it = ppelletTiles.begin(); pp_it != ppelletTiles.end(); ++pp_it)
+    {
+        Vector tilePosition((*pp_it)->x, 0, (*pp_it)->z);
+        GLdouble distance = testDistance(tilePosition, pacmanPosition);
+        
+        /* Eat the ppellet */
+        if (distance < 0.7) {
+            (*pp_it)->powerPellet = false;
+            ppelletTiles.erase(pp_it);
+
+			//JACKO
+			frenzy = 1;
+			Frenzy(frenzy);
+			//Frenzy(frenzy);
+        }
+        
+        /* Avoid an error when you eat the last pellet */
+        if (pp_it == ppelletTiles.end()) 
+        {
+            break;
+        }
+    }
     
     
     /**********************/
@@ -469,7 +562,50 @@ void idle ()
     ghost3->move();
     ghost4->move();
     
-    
+	//Determine Pacman's position
+	ghost1->get_pac(pacman->x,pacman->z);
+	ghost1->get_bli(ghost1->x,ghost1->z);
+	
+	//PACMAN'S FRENZY TIMER
+	
+	if (frenzy)
+	{
+		f_timer+=0.1;
+		int s_l=rand()%5;
+		switch (s_l)
+		{
+			case 0:
+				functionKeys (GLUT_KEY_F5,0,0);
+				break;
+			case 1:
+				functionKeys (GLUT_KEY_F6,0,0);
+				break;
+			case 2:
+				functionKeys (GLUT_KEY_F7,0,0);
+				break;
+			case 3:
+				functionKeys (GLUT_KEY_F8,0,0);
+				break;
+			case 4:
+				functionKeys (GLUT_KEY_F9,0,0);
+				break;
+
+		}
+
+		//DISABLE ALL SPOTLIGHTS
+		functionKeys (GLUT_KEY_F9,0,0);
+		functionKeys (GLUT_KEY_F9,0,0);
+
+	}
+	if (f_timer>30.0)
+	{
+		frenzy = 0;
+		Frenzy(frenzy);
+	}
+	cout<<"TIME: "<<f_timer<<endl;
+	//
+	//
+
     if (idleEnable)
     {	
         /* Slow Rotation */
@@ -575,16 +711,6 @@ void graphicKeys (unsigned char key, int x, int y)
             camera->roll(-rotStep);
             break;
             
-        case 't' :
-            if(timer1->timerIsOn)
-            timer1->stopTimer();
-            else timer1->startTimer();
-            break;
-
-        case 'x' :
-        	ProcessMenu(30);
-        	break;
-
         case '1':
             ProcessMenu(5);
             break;
@@ -616,6 +742,11 @@ void graphicKeys (unsigned char key, int x, int y)
             ProcessMenu(16);
             break;
 
+        case 't' :
+            if(timer1->timerIsOn)
+            timer1->stopTimer();
+            else timer1->startTimer();
+            break;
 
         default:
             cout << key << endl;
@@ -1056,7 +1187,7 @@ int main (int argc, char **argv)
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
 	glutInitWindowSize(width, height);
-	glutCreateWindow("Pacman3D Assignment3");
+	glutCreateWindow("Pacman3D beta");
     
     initMenu();
     
@@ -1086,16 +1217,6 @@ void initMenu()
 	nModeMenu = glutCreateMenu(ProcessMenu);
 	glutAddMenuEntry("Solid",1);
 	glutAddMenuEntry("Wire",2);
-	glutAddMenuEntry("-------------", 0);
-	    glutAddMenuEntry("Enable/Disable Textures", 29);
-	    glutAddMenuEntry("-------------", 0);
-	    glutAddMenuEntry("Pacman Outfit 1", 30);
-	    glutAddMenuEntry("Pacman Outfit 2", 31);
-	    glutAddMenuEntry("Pacman Outfit 3", 32);
-	    glutAddMenuEntry("-------------", 0);
-	    glutAddMenuEntry("Enable/Disable Pellet Texture", 33);
-	    glutAddMenuEntry("Enable/Disable Power Pellet Texture", 34);
-	    glutAddMenuEntry("Enable/Disable All Pellet Texture", 35);
     glutAddMenuEntry("-------------", 0);
     glutAddMenuEntry("Smooth Shading", 3);
     glutAddMenuEntry("Flat Shading", 4);
@@ -1126,19 +1247,50 @@ void initMenu()
     glutAddMenuEntry("Disable Lamp 4", 26);
     glutAddMenuEntry("Enable All Lamps", 27);
     glutAddMenuEntry("Disable All Lamps", 28);
+    glutAddMenuEntry("-------------", 0);
+    glutAddMenuEntry("Enable/Disable Textures", 29);
+    glutAddMenuEntry("-------------", 0);
+    glutAddMenuEntry("Pacman Outfit 1", 30);
+    glutAddMenuEntry("Pacman Outfit 2", 31);
+    glutAddMenuEntry("Pacman Outfit 3", 32);
+    glutAddMenuEntry("-------------", 0);
+    glutAddMenuEntry("Enable/Disable Pellet Texture", 33);
+    glutAddMenuEntry("Enable/Disable Power Pellet Texture", 34);
+    glutAddMenuEntry("Enable/Disable All Pellet Texture", 35);
     
     
-
 	glutAttachMenu(GLUT_RIGHT_BUTTON);
 }
 
 
 void init()
 {
+	for (int i=0;i<6;i++)
+	{
+		for(int j=0;j<4;j++)
+		{
+			if(i==0)
+				Temp[i][j]=lightAmbient[j];
+			if(i==1)
+				Temp[i][j]=lightDiffuse[j];
+			if(i==2)
+				Temp[i][j]=lightSpecular[j];
+			if(i==3)
+				Temp[i][j]=spotlightAmbient[i];
+			if(i==4)
+				Temp[i][j]=spotlightDiffuse[i];
+			if(i==5)
+				Temp[i][j]=spotlightSpecular[i];
+		}
+	}
+
     //init scene
     glShadeModel(GL_SMOOTH);
     setupLighting();
     
+    /* intitialize timers */
+    timer1 = new Timer();
+
 	/* init characters */
     pacman = new Pacman();
     pacman->initPosition(1.0f, 0.2f, 3.0f);
@@ -1148,13 +1300,11 @@ void init()
     ghost3 = new Ghost(1.0, 0.5, 0.7);
     ghost4 = new Ghost(1.0, 0.5, 0.0);
     
-    ghost1->initPosition(9.0f,  0.2f, 11.0f);
+    ghost1->initPosition(10.0f,  0.2f, 11.0f);
     ghost2->initPosition(10.0f, 0.2f, 11.0f);
-    ghost3->initPosition(11.0f, 0.2f, 11.0f);
-    ghost4->initPosition(10.0f, 0.2f, 10.0f);
+    ghost3->initPosition(10.0f, 0.2f, 11.0f);
+    ghost4->initPosition(10.0f, 0.2f, 11.0f);
     
-    timer1 = new Timer();
-
     /* init map */
     srand(time(NULL)); //seed rand for pellet colours
     map1 = new Map(map, 23, 21);
@@ -1172,6 +1322,11 @@ void init()
         if ((*t_it)->type == 'Z') {
             pelletTiles.push_back((*t_it));
         }
+		
+		//POWER
+		if ((*t_it)->type == 'X') {
+            ppelletTiles.push_back((*t_it));
+        }
     }
     
     /* init camera */
@@ -1187,17 +1342,19 @@ void init()
 
 void setupLighting()
 {
+	/*
     // Light values and coordinates
     GLfloat lightModelIntensity[] = { 0.1f, 0.1f, 0.1f, 1.0f };
-    
+    */
     /* Ambient Light Values */
-    
+    /*
     GLfloat lightAmbient[]  = { 0.7f, 0.7f, 0.7f, 1.0f };
     GLfloat lightDiffuse[]  = { 0.7f, 0.7f, 0.7f, 1.0f };
     GLfloat lightSpecular[] = { 0.7f, 0.7f, 0.7f, 1.0f };
-    GLfloat lightPosition[] = { 0.0f, 1.0f, 0.0f, 0.0f }; /* Point down Y-Axis */
-    
+    GLfloat lightPosition[] = { 0.0f, 1.0f, 0.0f, 0.0f }; // Point down Y-Axis 
+    */
     /* Spotlight Values */
+	/*
     GLfloat spotlightAmbient[]  = { 0.5f, 0.5f, 0.0f, 1.0f };
     GLfloat spotlightDiffuse[]  = { 0.5f, 0.5f, 0.0f, 1.0f };
     GLfloat spotlightSpecular[] = { 0.5f, 0.5f, 0.0f, 1.0f };
@@ -1209,7 +1366,7 @@ void setupLighting()
     GLfloat spotlightDirection2[] = { -1.0f, 0.0f, 1.0f};
     GLfloat spotlightDirection3[] = { 1.0f, 0.0f, -1.0f};
     GLfloat spotlightDirection4[] = { -1.0f, 0.0f, -1.0f};
-    
+    */
     
     lamp1 = new Lamp(GL_LIGHT1, spotlightDirection1);
     lamp2 = new Lamp(GL_LIGHT2, spotlightDirection2);
