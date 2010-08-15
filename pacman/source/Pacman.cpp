@@ -52,8 +52,8 @@ extern GLfloat pacman_paper_ambient_diffuse[];
 static int pac_atop=0;
 static int open=0;
 
-const int SPEED = 0.05;
-const int FRENZY_SPEED = 0.1;
+const GLfloat SPEED = 0.05;
+const GLfloat FRENZY_SPEED = 0.1;
 
 Pacman::Pacman()
 {
@@ -319,32 +319,24 @@ void Pacman::setDirection(char direction)
 {
     switch (direction) {
         case 'n':
-            this->zVelocity = -SPEED;
+            this->zVelocity = -this->speed;
             this->xVelocity = 0;
             break;
         
         case 'e':
-            this->xVelocity = SPEED;
+            this->xVelocity = this->speed;
             this->zVelocity = 0;
             break;
         
         case 's':
-            this->zVelocity = SPEED;
+            this->zVelocity = this->speed;
             this->xVelocity = 0;
             break;
         
         case 'w':
-            this->xVelocity = -SPEED;
+            this->xVelocity = -this->speed;
             this->zVelocity = 0;
             break;
-			
-		/*
-		 * //Right portal
-			case 'r':
-			this->x=0;
-			this->xVelocity = SPEED;
-			break;
-		*/
 
         default:
             break;
@@ -397,15 +389,6 @@ void Pacman::collide(GLint n, GLint s, GLint e, GLint w)
     {
         this->xVelocity = 0;
     }
-	/*
-		//TELEPORT
-    	if(this->x<-0.5)
-			this->x=19.0;
-		if(this->x>20.0)
-			this->x=0.0;
-		//end of teleport
-		 
-	 */
 }
 
 
