@@ -86,8 +86,10 @@
 #include <ctime>
 #endif
 
+/*
 #include <OpenAL/al.h>
 #include <OpenAL/alc.h>
+*/
 
 /*
 #include <al/al.h>
@@ -430,10 +432,11 @@ void enableFrenzyMode(bool frenzy)
 {
 	if(frenzy)
 	{
+        pacman->atePowerPellet();
+
 		//set pacmans outfit to batman
 		ProcessMenu(31);
-		//increase his speed
-		pacman->SPEED = 0.1;
+
 		/* Ambient Light Values */
 
 		for (int i=0;i<4;i++)
@@ -458,9 +461,10 @@ void enableFrenzyMode(bool frenzy)
 	}
 	if(!frenzy)
 	{
+        pacman->finishPowerPellet();
 		//set pacman's outfit.
 		ProcessMenu(30);
-		pacman->SPEED = 0.05;
+
 		/* restore Ambient Light Values */
 		for (int i=0;i<4;i++)
 		{
@@ -899,8 +903,6 @@ void idle ()
         if (distance < 0.7) {
             (*p_it)->powerPellet = false;
             powerPelletTiles.erase(p_it);
-            pacman->atePowerPellet();
-            pacman->frenzy = 1;
             timer2->startTimer();
             enableFrenzyMode(1);
 
@@ -921,11 +923,7 @@ void idle ()
     ghost2->move();
     ghost3->move();
     ghost4->move();
-    
-	//Determine Pacman's position
-	//ghost1->get_pac(pacman->x,pacman->z);
-	//ghost1->get_bli(ghost1->x,ghost1->z);
-	
+
 	//PACMAN'S FRENZY makes lights go crazy
 	if (pacman->frenzy)
 	{

@@ -38,13 +38,14 @@ public:
     void setDirection(char direction);
     void collide(GLint n, GLint s, GLint e, GLint w);
     void atePowerPellet();
+    void finishPowerPellet();
     void drawShadow();
 
     
     GLint getRoundedX();
     GLint getRoundedZ();
     
-    GLfloat SPEED;
+    GLfloat speed;
     GLfloat x, y, z;
     GLuint textureID[3];
     GLfloat xVelocity;
