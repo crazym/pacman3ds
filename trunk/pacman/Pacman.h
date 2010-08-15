@@ -42,6 +42,7 @@ public:
     GLuint textureID[3];
     GLfloat xVelocity;
     GLfloat zVelocity;
+	GLfloat SPEED;
 
 private:
     void pacman_1();
@@ -59,6 +60,7 @@ private:
     void drawBothRetinas();
     void drawBothPupils(GLint model = 0);
     void drawBothPalates();
+	void drawShadow();
 };
 
 #endif

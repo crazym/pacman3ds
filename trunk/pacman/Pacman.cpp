@@ -15,22 +15,23 @@
 #include "Pacman.h"
 #include "Common.h"
 #include "textures.h"
+#include "Material.h"
 
 #include <cmath>
 #include <iostream>
 
 #ifdef __APPLE__ /* OS X */
 #define pacmanTexture1 "pacman_skin.raw"
-#define pacmanTexture2 "joker1.raw"
-#define pacmanTexture3 "pacman-batman.raw"
+#define pacmanTexture2 "pumpkin.raw"
+#define pacmanTexture3 "paper.raw"
 #elif defined(__linux__) /* LINUX */
 #define pacmanTexture1 "data/Textures/pacman_skin.raw"
-#define pacmanTexture2 "data/Textures/joker1.raw"
-#define pacmanTexture3 "data/Textures/pacman-batman.raw"
+#define pacmanTexture2 "data/Textures/pumpkin.raw"
+#define pacmanTexture3 "data/Textures/paper.raw"
 #else /* WINDOWS */
 #define pacmanTexture1 "data/Textures/pacman_skin.raw"
-#define pacmanTexture2 "data/Textures/pacman-batman.raw"
-#define pacmanTexture3 "pacman-batman.raw"
+#define pacmanTexture2 "data/Textures/pumpkin.raw"
+#define pacmanTexture3 "data/Textures/paper.raw"
 #endif
 
 using namespace std;
@@ -47,13 +48,14 @@ extern GLfloat pacman_pupil_jacko[];
 
 extern GLfloat pacman_paper_ambient_diffuse[];
 
-const static GLfloat SPEED = 0.05;
+//const static GLfloat SPEED = 0.05;
 
 static int pac_atop=0;
 static int open=0;
 
 Pacman::Pacman()
 {
+	SPEED = 0.05;
 #ifdef DEBUG
     cout << "Allocating Pacman" << endl;
 #endif        
@@ -113,12 +115,19 @@ void Pacman::draw(GLint outfit)
         pacman_3();
     }
     
+	 if (texturesAreEnabled) {
+        glEnable(GL_TEXTURE_2D);
+    }
+	 
+	//for some reason! the shadow is PURPLE
+	drawShadow();
     //glCallList(this->listID+outfit);
     glPopMatrix();
     
-    if (texturesAreEnabled) {
+    /*if (texturesAreEnabled) {
         glEnable(GL_TEXTURE_2D);
-    }
+    }*/
+
 }
 
 
@@ -330,6 +339,12 @@ void Pacman::setDirection(char direction)
             this->xVelocity = -SPEED;
             this->zVelocity = 0;
             break;
+			
+		//Right portal
+		case 'r':
+			this->x=0;
+			this->xVelocity = SPEED;
+			break;
 
         default:
             break;
@@ -364,7 +379,15 @@ void Pacman::collide(GLint n, GLint s, GLint e, GLint w)
     {
         this->xVelocity = 0;
     }
+
+	//TELEPORT
+    if(this->x<-0.5)
+		this->x=19.0;
+	if(this->x>20.0)
+		this->x=0.0;
+	//enf of teleport
 }
+
 
 
 void Pacman::pacman_1()
@@ -391,7 +414,12 @@ void Pacman::pacman_1()
     glPushMatrix();
         glMaterialfv(GL_FRONT, GL_AMBIENT, pacman_body_ambient);
         glMaterialfv(GL_FRONT, GL_DIFFUSE, pacman_body_diffuse);
-        glColor4fv(pacman_body_diffuse);
+		glColor4fv(pacman_body_diffuse);
+		//
+		glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, high_shininess);
+		glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, mat_specular);
+		//
+        
         glTranslated(0.0, 0.0, 0.0);
         glRotatef(90, 0.0, 1, 0.0);
         
@@ -400,15 +428,19 @@ void Pacman::pacman_1()
             //increasing raises
             glRotatef(30-pac_atop, 1, 0, 0.0);
             //glTranslated(0.0, 2.0, 0.0);
-            top_pacman(2, 40, 40, 0);
+            top_pacman(2, 40, 40);
         glPopMatrix();
     
         glPushMatrix();
             glRotatef(90, 0.0, 1, 0.0);
             //decreasing lowers
             glRotatef(-30+pac_atop, 1, 0, 0.0);
-            bottom_pacman(2, 40, 40, 0);
+            bottom_pacman(2, 40, 40);
         glPopMatrix();
+		//
+		glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, no_shininess);
+        glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, no_specular);
+		//
     glPopMatrix();
     
 	glDisable(GL_TEXTURE_2D);
@@ -456,22 +488,22 @@ void Pacman::pacman_2()
 	}
 	//Top and bottom parts of Pacman--
     glPushMatrix();
-    glMaterialfv(GL_FRONT, GL_AMBIENT, pacman_paper_ambient_diffuse);
+    glMaterialfv(GL_FRONT, GL_AMBIENT, pacman_body_ambient);
     glMaterialfv(GL_FRONT, GL_DIFFUSE, pacman_body_diffuse);
-    glColor4fv(pacman_paper_ambient_diffuse);
+    glColor4fv(pacman_body_diffuse);
     glTranslated(0.0, 0.0, 0.0);
     glRotatef(90, 0.0, 1, 0.0);
     glPushMatrix();
 	glRotatef(90, 0.0, 1, 0.0);
 	//increasing raises
 	glRotatef(30-pac_atop, 1, 0, 0.0);
-	top_pacman(2, 40, 40, 2);
+	top_pacman(2, 40, 40, 1);
 	glPopMatrix();
 	glPushMatrix();
 	glRotatef(90, 0.0, 1, 0.0);
 	//decreasing lowers
 	glRotatef(-30+pac_atop, 1, 0, 0.0);
-    bottom_pacman(2, 40, 40, 2);
+    bottom_pacman(2, 40, 40, 1);
 	glPopMatrix();
     glPopMatrix();
     
@@ -528,13 +560,13 @@ void Pacman::pacman_3()
 	glRotatef(90, 0.0, 1, 0.0);
 	//increasing raises
 	glRotatef(30-pac_atop, 1, 0, 0.0);
-	top_pacman(2, 40, 40, 1);
+	top_pacman(2, 40, 40, 2);
 	glPopMatrix();
     glPushMatrix();
 	glRotatef(90, 0.0, 1, 0.0);
 	//decreasing lowers
 	glRotatef(-30+pac_atop, 1, 0, 0.0);
-	bottom_pacman(2, 40, 40, 1);
+	bottom_pacman(2, 40, 40, 2);
     glPopMatrix();
 	glPopMatrix();
     
@@ -697,4 +729,18 @@ void Pacman::drawNumberEight()
     glScalef(10.0, 10.0, 10.0);
     number();
     glPopMatrix();
+}
+
+void Pacman::drawShadow()
+{
+	//Setup
+    glPushMatrix();
+    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, shadow_mat);
+    glColor4fv(shadow_mat);
+
+	glTranslatef(0.0,-4.0,0.0);
+	glRotatef(90,1,0,0);
+	glScalef(3.0,3.0,3.0);
+	shadow();
+	glPopMatrix();
 }
