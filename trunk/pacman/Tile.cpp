@@ -11,6 +11,7 @@
 #include "Common.h"
 #include "Cube.h"
 #include "textures.h"
+#include "Material.h"
 
 #include <iostream>
 #include <cmath>

@@ -16,17 +16,18 @@
 #include "Common.h"
 #include "textures.h"
 #include "Material.h"
+#include "Common.h"
 
 #include <cmath>
 #include <iostream>
 
 #ifdef __APPLE__ /* OS X */
 #define pacmanTexture1 "pacman_skin.raw"
-#define pacmanTexture2 "pumpkin.raw"
+#define pacmanTexture2 "pacman-batman.raw"
 #define pacmanTexture3 "paper.raw"
 #elif defined(__linux__) /* LINUX */
 #define pacmanTexture1 "data/Textures/pacman_skin.raw"
-#define pacmanTexture2 "data/Textures/pumpkin.raw"
+#define pacmanTexture2 "data/Textures/pacman-batman.raw"
 #define pacmanTexture3 "data/Textures/paper.raw"
 #else /* WINDOWS */
 #define pacmanTexture1 "data/Textures/pacman_skin.raw"
@@ -48,8 +49,6 @@ extern GLfloat pacman_pupil_jacko[];
 
 extern GLfloat pacman_paper_ambient_diffuse[];
 
-//const static GLfloat SPEED = 0.05;
-
 static int pac_atop=0;
 static int open=0;
 
@@ -61,10 +60,13 @@ Pacman::Pacman()
 #endif        
     this->xVelocity = 0;
     this->zVelocity = 0;
+    this->outfit = 0;
     
     this->textureID[0] = LoadTextureRAW(pacmanTexture1, 1, 64, 64);
     this->textureID[1] = LoadTextureRAW(pacmanTexture2, 1, 64, 64);
     this->textureID[2] = LoadTextureRAW(pacmanTexture3, 1, 64, 64);
+
+    this->frenzy = 0;
 }
 
 Pacman::~Pacman()
@@ -81,7 +83,7 @@ void Pacman::initPosition(GLfloat x, GLfloat y, GLfloat z)
     this->z = z;
 }
 
-void Pacman::draw(GLint outfit)
+void Pacman::draw()
 {
     GLint texturesAreEnabled = 0;
     if (glIsEnabled(GL_TEXTURE_2D)) {
@@ -102,32 +104,25 @@ void Pacman::draw(GLint outfit)
         glRotatef(180, 0, 1, 0);
     }
 
-    if (outfit == 0) 
+    if (this->outfit == 0) 
     {
         pacman_1();
     }
-    else if (outfit == 1)
+    else if (this->outfit == 1)
     {
         pacman_2();
     }
-    else if (outfit == 2)
+    else if (this->outfit == 2)
     {
         pacman_3();
     }
     
-	 if (texturesAreEnabled) {
-        glEnable(GL_TEXTURE_2D);
-    }
-	 
-	//for some reason! the shadow is PURPLE
-	drawShadow();
     //glCallList(this->listID+outfit);
     glPopMatrix();
     
-    /*if (texturesAreEnabled) {
+    if (texturesAreEnabled) {
         glEnable(GL_TEXTURE_2D);
-    }*/
-
+    }
 }
 
 
@@ -340,11 +335,13 @@ void Pacman::setDirection(char direction)
             this->zVelocity = 0;
             break;
 			
-		//Right portal
-		case 'r':
+		/*
+		 * //Right portal
+			case 'r':
 			this->x=0;
 			this->xVelocity = SPEED;
 			break;
+		*/
 
         default:
             break;
@@ -360,6 +357,24 @@ void Pacman::move()
 
 void Pacman::collide(GLint n, GLint s, GLint e, GLint w)
 {
+    /*********************/
+    /* Detect End of Map */
+    /*********************/
+    if (this->x <= 0.5) 
+    {
+        this->x = 20;
+        this->setDirection('w');
+    }
+    
+    if (this->x >= 20.5) 
+    {
+        this->x = 1;
+        this->setDirection('e');
+    }
+    
+    /*********************/
+    /* Detect Collisions */
+    /*********************/
     if (n && this->zVelocity < 0) 
     {
         this->zVelocity = 0;
@@ -379,15 +394,16 @@ void Pacman::collide(GLint n, GLint s, GLint e, GLint w)
     {
         this->xVelocity = 0;
     }
-
-	//TELEPORT
-    if(this->x<-0.5)
-		this->x=19.0;
-	if(this->x>20.0)
-		this->x=0.0;
-	//enf of teleport
+	/*
+		//TELEPORT
+    	if(this->x<-0.5)
+			this->x=19.0;
+		if(this->x>20.0)
+			this->x=0.0;
+		//end of teleport
+		 
+	 */
 }
-
 
 
 void Pacman::pacman_1()
@@ -415,10 +431,11 @@ void Pacman::pacman_1()
         glMaterialfv(GL_FRONT, GL_AMBIENT, pacman_body_ambient);
         glMaterialfv(GL_FRONT, GL_DIFFUSE, pacman_body_diffuse);
 		glColor4fv(pacman_body_diffuse);
-		//
+		
+		/*
 		glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, high_shininess);
 		glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, mat_specular);
-		//
+		*/
         
         glTranslated(0.0, 0.0, 0.0);
         glRotatef(90, 0.0, 1, 0.0);
@@ -437,10 +454,10 @@ void Pacman::pacman_1()
             glRotatef(-30+pac_atop, 1, 0, 0.0);
             bottom_pacman(2, 40, 40);
         glPopMatrix();
-		//
+		/*
 		glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, no_shininess);
         glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, no_specular);
-		//
+		*/
     glPopMatrix();
     
 	glDisable(GL_TEXTURE_2D);
@@ -488,9 +505,9 @@ void Pacman::pacman_2()
 	}
 	//Top and bottom parts of Pacman--
     glPushMatrix();
-    glMaterialfv(GL_FRONT, GL_AMBIENT, pacman_body_ambient);
-    glMaterialfv(GL_FRONT, GL_DIFFUSE, pacman_body_diffuse);
-    glColor4fv(pacman_body_diffuse);
+    glMaterialfv(GL_FRONT, GL_AMBIENT, pacman_paper_ambient_diffuse);
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, pacman_paper_ambient_diffuse);
+    glColor4fv(pacman_paper_ambient_diffuse);
     glTranslated(0.0, 0.0, 0.0);
     glRotatef(90, 0.0, 1, 0.0);
     glPushMatrix();
@@ -729,6 +746,36 @@ void Pacman::drawNumberEight()
     glScalef(10.0, 10.0, 10.0);
     number();
     glPopMatrix();
+}
+
+GLint Pacman::getRoundedX()
+{
+    if (this->x - floor(this->x) < 0.5) 
+    {
+        return floor(this->x);
+    }
+    
+    /* else */
+    return ceil(this->x);
+}
+
+GLint Pacman::getRoundedZ()
+{
+    if (this->z - floor(this->z) < 0.5) 
+    {
+        return floor(this->z);
+    }
+    
+    /* else */
+    return ceil(this->z);
+}
+
+void Pacman::atePowerPellet()
+{
+    this->outfit = 1;
+
+
+
 }
 
 void Pacman::drawShadow()

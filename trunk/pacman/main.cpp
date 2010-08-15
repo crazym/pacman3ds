@@ -40,7 +40,7 @@
  *              Paper: http://www.cgtextures.com/
  */
 
-// This program uses sampleprogram.cpp as a template
+// This program uses sampleprogram.cpp as a initalLightingValueslate
 // This Program Draws a scene in a Pacman game.
 
 // Function Keys support:
@@ -86,6 +86,16 @@
 #include <ctime>
 #endif
 
+#include <OpenAL/al.h>
+#include <OpenAL/alc.h>
+
+/*
+#include <al/al.h>
+#include <al/alc.h>
+#include <al/alu.h>
+#include <al/alut.h>
+*/
+
 #include <cmath>
 #include <iostream>
 #include <sstream>
@@ -105,8 +115,10 @@
 
 using namespace std;
 
-void init();
+void initModels();
 void initMenu();
+void initCameras();
+void initAudio();
 void setupLighting();
 void cleanup();
 
@@ -114,6 +126,9 @@ void ProcessMenu(GLint value);
 void resetViewParameters();
 void functionKeys (int key, int x, int y);
 void graphicKeys (unsigned char key, int x, int y);
+void enterFullscreen();
+void exitFullscreen();
+void switchCamera(GLuint camera);
 
 /**************************
  Game Objects
@@ -123,13 +138,29 @@ static Ghost *ghost1;
 static Ghost *ghost2;
 static Ghost *ghost3;
 static Ghost *ghost4;
+
 static Map *map1;
+
 static Lamp *lamp1;
 static Lamp *lamp2;
 static Lamp *lamp3;
 static Lamp *lamp4;
-static Camera *camera;
+
 static Timer *timer1;
+static Timer *timer2;
+
+static Camera *currentCamera;
+static Camera mainCam;
+static Camera lamp1Cam(1);
+static Camera lamp2Cam(1);
+static Camera lamp3Cam(1);
+static Camera lamp4Cam(1);
+static Camera pacmanCam(1);
+static Camera ghost1Cam(1);
+static Camera ghost2Cam(1);
+static Camera ghost3Cam(1);
+static Camera ghost4Cam(1);
+
 
 static char map[483] = {										 
     //23 Rows
@@ -164,12 +195,19 @@ static char map[483] = {
 const GLint WIDTH  = 800; // in pixels
 const GLint HEIGHT = 600; //
 
+static GLuint fullscreen = 0;
+
 // increment for idle function rotation and zoom
 const GLdouble rotStep = 5.0;
 const GLdouble moveStep = 1.0;
 const GLdouble ALL_ROUND = 360;
 const GLdouble zoomStep = 5.0;
 const GLdouble zoomFactor = 1.03;
+
+/* For Collision Detection */
+/* How close pacman and ghost has to be to collide with a wall when turning */
+const GLfloat PACMAN_LEEWAY = 0.7;
+const GLfloat GHOST_LEEWAY = 0.8;
 
 // Current size of window (will change when you resize window)
 GLint width  = WIDTH;
@@ -190,38 +228,56 @@ GLdouble farPlane  = 120;
 // Viewing angle.
 GLdouble fovy = 60;
 
-/* misc */
-//static GLdouble halfway = - (farPlane + nearPlane) / 2;	   // half way between near and far planes
-static GLint ambient_light = 0;
-static GLint textures_enabled = 1;
-static GLint color_material_enabled = 0;
-static GLint pacman_outfit = 0;
-
 static GLint texturePellets = 1;
 static GLint texturePPellets = 1;
 
 static vector<Tile *>walls;
 static vector<Tile *>pelletTiles;
-static vector<Tile *>ppelletTiles;
+static vector<Tile *>powerPelletTiles;
 
-GLboolean paused = 0;
+GLboolean paused = 1;
 GLboolean idleEnable = 0;	// flags that set continuous rotation on/off
 GLboolean projType = 1;      // flag for proj type; ortho = 0, perspective = 1
 GLboolean isWireFrame =0;    // flag for setting wire frame mode
+GLboolean ambient_lighting_enabled = 1;
+GLboolean textures_enabled = 1;
+GLboolean color_material_enabled = 1;
 
-//MADPACMAN
-GLboolean frenzy = 0;
-GLfloat f_timer=0.0;
+ /*
+ * Store initial lighting context after setup so that it may be restored
+ * after lighting is modified by powerups and other eventualities.
+ */
+GLfloat initalLightingValues[6][4];
 
-//Saving previous state
-GLfloat Temp[6][4];
 
 
+/*
+void initialiseLights(){
+
+	//street lights
+		GLfloat spotlightPosition1[] = { 0.0f, 4.0f, 0.0f, 1.0f };
+	    GLfloat spotlightPosition2[] = { 20.0f, 4.0f, 0.0f, 1.0f };
+	    GLfloat spotlightPosition3[] = { 0.0f, 4.0f, 22.0f, 1.0f };
+	    GLfloat spotlightPosition4[] = { 20.0f, 4.0f, 22.0f, 1.0f };
+
+	     * The projection of the spotlight onto the x-z plane is 4.
+	     * In order to obtain a 45 degree projection between the x-plane and the
+	     * z-plane the value must be 2sqrt(2) = ~2.82.  The value was calculated using
+	     * the pythagorean theorem.
+
+
+	    GLfloat spotlightDirection1[] = { 2.82f, -4.0f, 2.82f, 1.0f };
+	    GLfloat spotlightDirection2[] = { -2.82f, -4.0f, 2.82f, 1.0f };
+	    GLfloat spotlightDirection3[] = { 2.82f, -4.0f, -2.82f, 1.0f };
+	    GLfloat spotlightDirection4[] = { -2.82f, -4.0f, -2.82f, 1.0f };
+
+}
+*/
 
 void resetViewParameters()
 {
 	// resets 3D synthetic camera parameters to default values
-    camera->reset();
+    currentCamera->reset();
 
 	viewWindowLeft =  -60;
 	viewWindowRight  = 60;
@@ -301,28 +357,14 @@ void drawAxes(){
 // This function is called to display the scene.
 void display ()
 {
-    GLfloat spotlightPosition1[] = { 0.0f, 4.0f, 0.0f, 1.0f };
-    GLfloat spotlightPosition2[] = { 20.0f, 4.0f, 0.0f, 1.0f };
-    GLfloat spotlightPosition3[] = { 0.0f, 4.0f, 22.0f, 1.0f };
-    GLfloat spotlightPosition4[] = { 20.0f, 4.0f, 22.0f, 1.0f };
-    
-    /* The projection of the spotlight onto the x-z plane is 4.
-     * In order to obtain a 45 degree projection between the x-plane and the
-     * z-plane the value must be 2sqrt(2) = ~2.82.  The value was calculated using
-     * the pythagorean theorem.*/
-    
-    GLfloat spotlightDirection1[] = { 2.82f, -4.0f, 2.82f, 1.0f };
-    GLfloat spotlightDirection2[] = { -2.82f, -4.0f, 2.82f, 1.0f };
-    GLfloat spotlightDirection3[] = { 2.82f, -4.0f, -2.82f, 1.0f };
-    GLfloat spotlightDirection4[] = { -2.82f, -4.0f, -2.82f, 1.0f };
-    
+
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
     // set modelling mode
 	glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     
-    camera->look();
+    currentCamera->look();
     
     lamp1->setLightPosition(spotlightPosition1, spotlightDirection1);
     lamp2->setLightPosition(spotlightPosition2, spotlightDirection2);
@@ -340,15 +382,33 @@ void display ()
     
     if (textures_enabled) glEnable(GL_TEXTURE_2D);
 
-    //draw timer
+    if (color_material_enabled)
+    	glEnable(GL_COLOR_MATERIAL);
+    	else
+    	glDisable(GL_COLOR_MATERIAL);
+
+
+
+
+
+    //draw game timer
     glPushMatrix();
 		glColor3f(1,1,1);
-		glTranslatef(6,4,0);
+		glTranslatef(3,4,0);
 		glScalef(0.01,0.01,0.01);
 		timer1->drawTimer();
 	glPopMatrix();
 
-    pacman->draw(pacman_outfit);
+    //draw powerup timer
+    glPushMatrix();
+		glColor3f(1,1,1);
+		glTranslatef(0,6,0);
+		glScalef(0.01,0.01,0.01);
+		timer2->drawTimer();
+	glPopMatrix();
+
+
+    pacman->draw();
     map1->draw(texturePellets, texturePPellets);
     
     lamp1->draw();
@@ -360,21 +420,20 @@ void display ()
     ghost3->draw();
     ghost4->draw();
 
-	
-
     if (textures_enabled) glDisable(GL_TEXTURE_2D);
     
     // now swap buffer
     glutSwapBuffers();   
 }
 
-void Frenzy(bool frenzy)
+void enableFrenzyMode(bool frenzy)
 {
 	if(frenzy)
 	{
-		f_timer=0.0;
+		//set pacmans outfit to batman
 		ProcessMenu(31);
-		pacman->SPEED = 0.07;
+		//increase his speed
+		pacman->SPEED = 0.1;
 		/* Ambient Light Values */
 
 		for (int i=0;i<4;i++)
@@ -399,22 +458,23 @@ void Frenzy(bool frenzy)
 	}
 	if(!frenzy)
 	{
-		f_timer=0.0;
+		//set pacman's outfit.
 		ProcessMenu(30);
-		/* Ambient Light Values */
+		pacman->SPEED = 0.05;
+		/* restore Ambient Light Values */
 		for (int i=0;i<4;i++)
 		{
-			lightAmbient[i]  = Temp[0][i];
-			lightDiffuse[i]  = Temp[1][i];
-			lightSpecular[i] = Temp[2][i];
+			lightAmbient[i]  = initalLightingValues[0][i];
+			lightDiffuse[i]  = initalLightingValues[1][i];
+			lightSpecular[i] = initalLightingValues[2][i];
 		}
 		
-		/* Spotlight Values */
+		/* restore Spotlight Values */
 		for (int s=0;s<4;s++)
 		{
-			spotlightAmbient[s]  = Temp[3][s];
-			spotlightDiffuse[s]  = Temp[4][s];
-			spotlightSpecular[s] = Temp[5][s];
+			spotlightAmbient[s]  = initalLightingValues[3][s];
+			spotlightDiffuse[s]  = initalLightingValues[4][s];
+			spotlightSpecular[s] = initalLightingValues[5][s];
 		}
 
 		setupLighting();
@@ -422,6 +482,7 @@ void Frenzy(bool frenzy)
 }
 
 // This function is called when there is nothing else to do.
+//collision detection, camera logic and ghost AI is implemented here.
 void idle ()
 {
     /* Do nothing when paused */
@@ -432,9 +493,150 @@ void idle ()
     /* Setup For Collision */
     Vector pacmanPosition(pacman->x, pacman->y, pacman->z);
     Vector ghostPosition(ghost1->x, ghost1->y, ghost1->z);
+
+    /* Ghost's position in the map array */
+    GLuint positionInMapArray;
+
+    /* Used to Determine how far the ghost is from the center of a tile.
+     This determines whether he should look for a new opening or not. */
+    GLfloat distanceFromCenterX;
+    GLfloat distanceFromCenterZ;
+
+    /* A flag used to skip unnecessary calculations and trim clock cycles and code */
+    GLuint ghostNeedsToMove = 0;
     
+    /* A flag if the ghost collides with a wall.  Used for AI logic. */
+    GLuint ghostCollided = 0;
+
+    /* Collisions to the north, south, east, west */
     GLint n, s, e, w;
     
+
+    /***********************/
+    /* Pacman Camera Logic */
+    /***********************/
+    if (pacmanCam.enabled)
+    {
+        currentCamera->setPosition(pacman->x, pacman->y+1.5, pacman->z);
+
+        if (pacman->xVelocity < 0)
+        {
+            currentCamera->setCenter(pacman->x-5, pacman->y, pacman->z);
+        }
+        else if (pacman->xVelocity > 0)
+        {
+            currentCamera->setCenter(pacman->x+5, pacman->y, pacman->z);
+        }
+        else if (pacman->zVelocity < 0)
+        {
+            currentCamera->setCenter(pacman->x, pacman->y, pacman->z-5);
+        }
+        else if (pacman->zVelocity > 0)
+        {
+            currentCamera->setCenter(pacman->x, pacman->y, pacman->z+5);
+        }
+    }
+
+    /***********************/
+    /* Ghost1 Camera Logic */
+    /***********************/
+    if (ghost1Cam.enabled)
+    {
+        currentCamera->setPosition(ghost1->x, ghost1->y+1.5, ghost1->z);
+
+        if (ghost1->direction == 'n')
+        {
+            currentCamera->setCenter(ghost1->x, ghost1->y, ghost1->z - 5);
+        }
+        else if (ghost1->direction == 's')
+        {
+            currentCamera->setCenter(ghost1->x, ghost1->y, ghost1->z + 5);
+        }
+        else if (ghost1->direction == 'e')
+        {
+            currentCamera->setCenter(ghost1->x + 5, ghost1->y, ghost1->z);
+        }
+        else if (ghost1->direction == 'w')
+        {
+            currentCamera->setCenter(ghost1->x - 5, ghost1->y, ghost1->z);
+        }
+    }
+
+    /***********************/
+    /* Ghost2 Camera Logic */
+    /***********************/
+    if (ghost2Cam.enabled)
+    {
+        currentCamera->setPosition(ghost2->x, ghost2->y+1.5, ghost2->z);
+
+        if (ghost2->direction == 'n')
+        {
+            currentCamera->setCenter(ghost2->x, ghost2->y, ghost2->z - 5);
+        }
+        else if (ghost2->direction == 's')
+        {
+            currentCamera->setCenter(ghost2->x, ghost2->y, ghost2->z + 5);
+        }
+        else if (ghost2->direction == 'e')
+        {
+            currentCamera->setCenter(ghost2->x + 5, ghost2->y, ghost2->z);
+        }
+        else if (ghost2->direction == 'w')
+        {
+            currentCamera->setCenter(ghost2->x - 5, ghost2->y, ghost2->z);
+        }
+    }
+
+    /***********************/
+    /* Ghost3 Camera Logic */
+    /***********************/
+    if (ghost3Cam.enabled)
+    {
+        currentCamera->setPosition(ghost3->x, ghost3->y+1.5, ghost3->z);
+
+        if (ghost3->direction == 'n')
+        {
+            currentCamera->setCenter(ghost3->x, ghost3->y, ghost3->z - 5);
+        }
+        else if (ghost3->direction == 's')
+        {
+            currentCamera->setCenter(ghost3->x, ghost3->y, ghost3->z + 5);
+        }
+        else if (ghost3->direction == 'e')
+        {
+            currentCamera->setCenter(ghost3->x + 5, ghost3->y, ghost3->z);
+        }
+        else if (ghost3->direction == 'w')
+        {
+            currentCamera->setCenter(ghost3->x - 5, ghost3->y, ghost3->z);
+        }
+    }
+
+    /***********************/
+    /* Ghost4 Camera Logic */
+    /***********************/
+    if (ghost4Cam.enabled)
+    {
+        currentCamera->setPosition(ghost4->x, ghost4->y+1.5, ghost4->z);
+
+        if (ghost4->direction == 'n')
+        {
+            currentCamera->setCenter(ghost4->x, ghost4->y, ghost4->z - 5);
+        }
+        else if (ghost4->direction == 's')
+        {
+            currentCamera->setCenter(ghost4->x, ghost4->y, ghost4->z + 5);
+        }
+        else if (ghost4->direction == 'e')
+        {
+            currentCamera->setCenter(ghost4->x + 5, ghost4->y, ghost4->z);
+        }
+        else if (ghost4->direction == 'w')
+        {
+            currentCamera->setCenter(ghost4->x - 5, ghost4->y, ghost4->z);
+        }
+    }
+
     /***********************************
      *  Collision With Walls           *
      ***********************************/
@@ -447,7 +649,7 @@ void idle ()
         
         /* Reset any collisions */
         n = s = e = w = 0;
-        testWallCollision(pacmanPosition, *(*t_it), n, s, e, w);
+        testWallCollision(pacmanPosition, *(*t_it), n, s, e, w, PACMAN_LEEWAY);
         pacman->collide(n, s, e, w);
         
         
@@ -455,44 +657,204 @@ void idle ()
         /* GHOST1 WALL COLLISIONS */
         /**************************/
         ghostPosition = Vector(ghost1->x, ghost1->y, ghost1->z);
+        ghostNeedsToMove = 0;
+        ghostCollided = 0;
         
         /* Reset any collisions */
         n = s = e = w = 0;
-        testWallCollision(ghostPosition, *(*t_it), n, s, e, w);
-        ghost1->collide(n, s, e, w);
+        testWallCollision(ghostPosition, *(*t_it), n, s, e, w, GHOST_LEEWAY);
+        if (ghost1->collide(n, s, e, w))
+        {
+            ghostNeedsToMove = 1;
+            ghostCollided = 1;
+        }
+
+        /****************************************/
+        /* GHOST 1 REACHES THE CENTER OF A TILE */
+        /****************************************/
+        /* Determine how far the ghost is from the center of a tile.  This determines whether he
+         should look for a new opening or not. */
+        distanceFromCenterX = ghost1->x - floor(ghost1->x);
+        distanceFromCenterZ = ghost1->z - floor(ghost1->z);
+
+        /* Skip this if the ghost needs to move anyway */
+        if (distanceFromCenterX < 0.05 && distanceFromCenterZ < 0.05 && !ghostNeedsToMove)
+        {
+            /* Character is at the center of a tile. */
+            ghostNeedsToMove = 1;
+        }
+
+
+        /************************/
+        /* GHOST 1 MAKES A MOVE */
+        /************************/
+        if (ghostNeedsToMove) {
+            /* Get the ghosts position in the map array */
+            positionInMapArray = getPositionInMapArray(map1->columns, ghost1->getRoundedX(), ghost1->getRoundedZ());
+
+            /* Get the surrounding tiles and make a move */
+            GLint northTile, southTile, eastTile, westTile;
+            northTile = southTile = eastTile =  westTile = 0;
+
+            getSurroundingTiles(*map1, positionInMapArray, northTile, southTile, eastTile, westTile);
+
+            ghost1->chooseMove(northTile, southTile, eastTile, westTile, ghostCollided, pacman->getRoundedX(), pacman->getRoundedZ());
+        }
         
         
         /**************************/
         /* GHOST2 WALL COLLISIONS */
         /**************************/
         ghostPosition = Vector(ghost2->x, ghost2->y, ghost2->z);
+        ghostNeedsToMove = 0;
+        ghostCollided = 0;
         
         /* Reset any collisions */
         n = s = e = w = 0;
-        testWallCollision(ghostPosition, *(*t_it), n, s, e, w);
-        ghost2->collide(n, s, e, w);      
+        testWallCollision(ghostPosition, *(*t_it), n, s, e, w, GHOST_LEEWAY);
+
+        /* If the ghost collided */
+        if (ghost2->collide(n, s, e, w))
+        {
+            ghostNeedsToMove = 1;
+            ghostCollided = 1;
+        }
+
+
+        /****************************************/
+        /* GHOST 2 REACHES THE CENTER OF A TILE */
+        /****************************************/
+        /* Determine how far the ghost is from the center of a tile.  This determines whether he
+         should look for a new opening or not. */
+        distanceFromCenterX = ghost2->x - floor(ghost2->x);
+        distanceFromCenterZ = ghost2->z - floor(ghost2->z);
+
+        /* Skip this if the ghost needs to move anyway */
+        if (distanceFromCenterX < 0.05 && distanceFromCenterZ < 0.05 && !ghostNeedsToMove)
+        {
+            /* Character is at the center of a tile. */
+            ghostNeedsToMove = 1;
+        }
+
+        /************************/
+        /* GHOST 2 MAKES A MOVE */
+        /************************/
+        if (ghostNeedsToMove) {
+            /* Get the ghosts position in the map array */
+            positionInMapArray = getPositionInMapArray(map1->columns, ghost2->getRoundedX(), ghost2->getRoundedZ());
+
+            /* Get the surrounding tiles and make a move */
+            GLint northTile, southTile, eastTile, westTile;
+            northTile = southTile = eastTile =  westTile = 0;
+
+            getSurroundingTiles(*map1, positionInMapArray, northTile, southTile, eastTile, westTile);
+
+            ghost2->chooseMove(northTile, southTile, eastTile, westTile, ghostCollided);
+        }
         
         
         /**************************/
         /* GHOST3 WALL COLLISIONS */
         /**************************/
         ghostPosition = Vector(ghost3->x, ghost3->y, ghost3->z);
+        ghostNeedsToMove = 0;
+        ghostCollided = 0;
         
         /* Reset any collisions */
         n = s = e = w = 0;
-        testWallCollision(ghostPosition, *(*t_it), n, s, e, w);      
-        ghost3->collide(n, s, e, w);
+        testWallCollision(ghostPosition, *(*t_it), n, s, e, w, GHOST_LEEWAY);
+        if(ghost3->collide(n, s, e, w))
+        {
+            ghostNeedsToMove = 1;
+            ghostCollided = 1;
+        }
+
+
+        /****************************************/
+        /* GHOST 3 REACHES THE CENTER OF A TILE */
+        /****************************************/
+        /* Determine how far the ghost is from the center of a tile.  This determines whether he
+         should look for a new opening or not. */
+        distanceFromCenterX = ghost3->x - floor(ghost3->x);
+        distanceFromCenterZ = ghost3->z - floor(ghost3->z);
+
+        /* Skip this if the ghost needs to move anyway */
+        if (distanceFromCenterX < 0.05 && distanceFromCenterZ < 0.05 && !ghostNeedsToMove)
+        {
+            /* Character is at the center of a tile. */
+            ghostNeedsToMove = 1;
+        }
+
+        /************************/
+        /* GHOST 3 MAKES A MOVE */
+        /************************/
+        if (ghostNeedsToMove) {
+            /* Get the ghosts position in the map array */
+            positionInMapArray = getPositionInMapArray(map1->columns, ghost3->getRoundedX(), ghost3->getRoundedZ());
+
+            /* Get the surrounding tiles and make a move */
+            GLint northTile, southTile, eastTile, westTile;
+            northTile = southTile = eastTile =  westTile = 0;
+
+            getSurroundingTiles(*map1, positionInMapArray, northTile, southTile, eastTile, westTile);
+
+            ghost3->chooseMove(northTile, southTile, eastTile, westTile, ghostCollided);
+        }
         
         
         /**************************/
         /* GHOST4 WALL COLLISIONS */
         /**************************/
         ghostPosition = Vector(ghost4->x, ghost4->y, ghost4->z);
+        ghostNeedsToMove = 0;
+        ghostCollided = 0;
         
         /* Reset any collisions */
         n = s = e = w = 0;
-        testWallCollision(ghostPosition, *(*t_it), n, s, e, w);
-        ghost4->collide(n, s, e, w);
+        testWallCollision(ghostPosition, *(*t_it), n, s, e, w, GHOST_LEEWAY);
+        if(ghost4->collide(n, s, e, w))
+        {
+            ghostNeedsToMove = 1;
+            ghostCollided = 1;
+        }
+
+
+        /****************************************/
+        /* GHOST 4 REACHES THE CENTER OF A TILE */
+        /****************************************/
+        /* Determine how far the ghost is from the center of a tile.  This determines whether he
+         should look for a new opening or not. */
+        distanceFromCenterX = ghost4->x - floor(ghost4->x);
+        distanceFromCenterZ = ghost4->z - floor(ghost4->z);
+
+        /* Skip this if the ghost needs to move anyway */
+        if (distanceFromCenterX < 0.05 && distanceFromCenterZ < 0.05 && !ghostNeedsToMove)
+        {
+            /* Character is at the center of a tile. */
+            ghostNeedsToMove = 1;
+        }
+
+        /************************/
+        /* GHOST 4 MAKES A MOVE */
+        /************************/
+        if (ghostNeedsToMove) {
+            /* Get the ghosts position in the map array */
+            positionInMapArray = getPositionInMapArray(map1->columns, ghost4->getRoundedX(), ghost4->getRoundedZ());
+            if (positionInMapArray == 198) {
+                cout << ghost4->x << endl;
+                cout << ghost4->z << endl;
+                cout << ghost4->getRoundedX() << endl;
+                cout << ghost4->getRoundedZ() << endl;
+            }
+            /* Get the surrounding tiles and make a move */
+            GLint northTile, southTile, eastTile, westTile;
+            northTile = southTile = eastTile =  westTile = 0;
+
+            getSurroundingTiles(*map1, positionInMapArray, northTile, southTile, eastTile, westTile);
+
+            ghost4->chooseMove(northTile, southTile, eastTile, westTile, ghostCollided);
+        }
+
     }
     
     
@@ -525,33 +887,31 @@ void idle ()
         }
     }
 
-	vector<Tile *>::iterator pp_it;
     /********************************
-     *  Collision With PPellets      *
+     * Collision With Power Pellets *
      ********************************/
-    for(pp_it = ppelletTiles.begin(); pp_it != ppelletTiles.end(); ++pp_it)
+    for(p_it = powerPelletTiles.begin(); p_it != powerPelletTiles.end(); ++p_it)
     {
-        Vector tilePosition((*pp_it)->x, 0, (*pp_it)->z);
+        Vector tilePosition((*p_it)->x, 0, (*p_it)->z);
         GLdouble distance = testDistance(tilePosition, pacmanPosition);
         
-        /* Eat the ppellet */
+        /* Eat the power pellet */
         if (distance < 0.7) {
-            (*pp_it)->powerPellet = false;
-            ppelletTiles.erase(pp_it);
+            (*p_it)->powerPellet = false;
+            powerPelletTiles.erase(p_it);
+            pacman->atePowerPellet();
+            pacman->frenzy = 1;
+            timer2->startTimer();
+            enableFrenzyMode(1);
 
-			//JACKO
-			frenzy = 1;
-			Frenzy(frenzy);
-			//Frenzy(frenzy);
         }
         
         /* Avoid an error when you eat the last pellet */
-        if (pp_it == ppelletTiles.end()) 
+        if (p_it == powerPelletTiles.end())
         {
             break;
         }
     }
-    
     
     /**********************/
     /*  MOVE CHARACTERS   */
@@ -563,14 +923,12 @@ void idle ()
     ghost4->move();
     
 	//Determine Pacman's position
-	ghost1->get_pac(pacman->x,pacman->z);
-	ghost1->get_bli(ghost1->x,ghost1->z);
+	//ghost1->get_pac(pacman->x,pacman->z);
+	//ghost1->get_bli(ghost1->x,ghost1->z);
 	
-	//PACMAN'S FRENZY TIMER
-	
-	if (frenzy)
+	//PACMAN'S FRENZY makes lights go crazy
+	if (pacman->frenzy)
 	{
-		f_timer+=0.1;
 		int s_l=rand()%5;
 		switch (s_l)
 		{
@@ -592,24 +950,27 @@ void idle ()
 
 		}
 
+
 		//DISABLE ALL SPOTLIGHTS
 		functionKeys (GLUT_KEY_F9,0,0);
 		functionKeys (GLUT_KEY_F9,0,0);
 
 	}
-	if (f_timer>30.0)
+
+	if (timer2->getTimeElapsed()>30.0)
 	{
-		frenzy = 0;
-		Frenzy(frenzy);
+		pacman->frenzy = 0;
+		enableFrenzyMode(0);
+		timer2->stopTimer();
 	}
-	cout<<"TIME: "<<f_timer<<endl;
+
 	//
 	//
 
     if (idleEnable)
     {	
         /* Slow Rotation */
-        camera->rotateY(rotStep/20);
+        currentCamera->rotateY(rotStep/20);
     }
     glutPostRedisplay();
     
@@ -618,12 +979,14 @@ void idle ()
 //capture mouse movement
 void mouseMovement (int mx, int my)
 {
-   // Normalize mouse coordinates.
-   xMouse = double(mx) / double(width);
-   yMouse = 1 - double(my) / double(height);
+    // Normalize mouse coordinates.
+    xMouse = double(mx) / double(width);
+    yMouse = 1 - double(my) / double(height);
 
-   // Redisplay image.
-   glutPostRedisplay();
+
+
+    // Redisplay image.
+    glutPostRedisplay();
 }
 
 // Respond to window resizing, preserving proportions.
@@ -686,30 +1049,45 @@ void graphicKeys (unsigned char key, int x, int y)
             break;
             
         case 'w':
-            camera->moveForward(moveStep);
+            currentCamera->moveForward(moveStep);
             break;
         case 's':
-            camera->moveBackward(moveStep);
+            currentCamera->moveBackward(moveStep);
             break;
         case 'a':
-            camera->moveLeft(moveStep);
+            currentCamera->moveLeft(moveStep);
             break;
         case 'd':
-            camera->moveRight(moveStep);
+            currentCamera->moveRight(moveStep);
             break;
 		case '=':
         case '+':
-			camera->zoomIn(zoomStep);
+			currentCamera->zoomIn(zoomStep);
             break;
 		case '-':
-			camera->zoomOut(zoomStep);
+			currentCamera->zoomOut(zoomStep);
             break;
         case ']':
-            camera->roll(rotStep);
+            currentCamera->roll(rotStep);
             break;
         case '[':
-            camera->roll(-rotStep);
+            currentCamera->roll(-rotStep);
             break;
+        case 'f':
+            fullscreen = 1 - fullscreen;
+
+            if (fullscreen) {
+                enterFullscreen();
+            } else {
+                exitFullscreen();
+            }
+
+            break;
+
+        case 'r':
+            resetViewParameters();
+            break;
+
             
         case '1':
             ProcessMenu(5);
@@ -743,9 +1121,16 @@ void graphicKeys (unsigned char key, int x, int y)
             break;
 
         case 't' :
-            if(timer1->timerIsOn)
-            timer1->stopTimer();
-            else timer1->startTimer();
+            if(timer1->timerIsOn){
+
+				paused = 1;
+            	timer1->stopTimer();
+            }
+            else{
+
+            	paused = 0;
+            	timer1->startTimer();
+            }
             break;
 
         default:
@@ -777,184 +1162,74 @@ void ProcessMenu(GLint value)
             
             /* Pacman-cam */
         case 5:
-            camera->reset();
-            camera->setPosition(pacman->x, 
-                                pacman->y+1.0, 
-                                pacman->z);
-            
-            camera->setCenter(pacman->x, 
-                              pacman->y, 
-                              pacman->z+5.0);
-            /*
-            eye_x = pacman->x;
-            eye_y = pacman->y+1.0;
-            eye_z = pacman->z;
-            
-            center_x = pacman->x;
-            center_y = pacman->y;
-            center_z = pacman->z+5.0;
-            
-            fw_rw = 0;
-            up_dn = 0;
-            lt_rt = 0;
-            
-            yaw = 0;
-            pitch  = 0;
-            roll = 0;   
-            */
+            switchCamera(0);
             break;
             
             /* Ghost1-Cam */    
         case 6:
-            camera->reset();
-            camera->setPosition(ghost1->x, 
-                                ghost1->y+1.0, 
-                                ghost1->z);
-            
-            camera->setCenter(ghost1->x, 
-                              ghost1->y, 
-                              ghost1->z+5.0); 
-            
+            switchCamera(1);
             break;
             
             /* Ghost2-Cam */
         case 7:
-            camera->reset();
-            camera->setPosition(ghost2->x, 
-                                ghost2->y+1.0, 
-                                ghost2->z);
-            
-            camera->setCenter(ghost2->x, 
-                              ghost2->y, 
-                              ghost2->z+5.0);   
-            
+            switchCamera(2);
             break;
             
             /* Ghost3-Cam */    
         case 8:
-            camera->reset();
-            camera->setPosition(ghost3->x, 
-                                ghost3->y+1.0, 
-                                ghost3->z);
-            
-            camera->setCenter(ghost3->x, 
-                              ghost3->y, 
-                              ghost3->z+5.0); 
-            
+            switchCamera(3);
             break;
             
             /* Ghost4-Cam */
         case 9:
-            camera->reset();
-            camera->setPosition(ghost4->x, 
-                                ghost4->y+1.0, 
-                                ghost4->z);
-            
-            camera->setCenter(ghost4->x, 
-                              ghost4->y, 
-                              ghost4->z+5.0); 
-            
+            switchCamera(4);
             break;
             
             /* Light1-Cam */
         case 10:
-            camera->reset();
-            camera->setPosition(lamp1->x, 
-                                lamp1->y+5.0, 
-                                lamp1->z);
-            
-            camera->setCenter(lamp1->x +5, 
-                              lamp1->y -4, 
-                              lamp1->z +5);
-            
-            /******
-             *NOTE: Changed viewing direction for better vision
-             ******/
-            /*
-            camera->setCenter(lamp1->x +2.82, 
-                              lamp1->y -4, 
-                              lamp1->z +2.82);
-            */
+            switchCamera(5);
             break;
             
             /* Light2-Cam */
         case 11:
-            camera->reset();
-            camera->setPosition(lamp2->x, 
-                                lamp2->y+5.0, 
-                                lamp2->z);
-            
-            camera->setCenter(lamp2->x -5, 
-                              lamp2->y -4, 
-                              lamp2->z +5);
-            /*
-            camera->setCenter(lamp2->x -2.82, 
-                              lamp2->y -4, 
-                              lamp2->z +2.82);  
-            */
+            switchCamera(6);
             break;
             
             /* Light3-Cam */
 		case 12:
-            camera->reset();
-            camera->setPosition(lamp3->x, 
-                                lamp3->y+5.0, 
-                                lamp3->z);
-            
-            camera->setCenter(lamp3->x +5, 
-                              lamp3->y -4, 
-                              lamp3->z -5);
-            
-            /*
-            camera->setCenter(lamp3->x +2.82, 
-                              lamp3->y -4, 
-                              lamp3->z -2.82);
-            */
-            
+            switchCamera(7);
             break;
             
             /* Light4-Cam */
 		case 13:
-            camera->reset();
-            camera->setPosition(lamp4->x, 
-                                lamp4->y+5.0, 
-                                lamp4->z);
-            
-            camera->setCenter(lamp4->x -5, 
-                              lamp4->y -4, 
-                              lamp4->z -5);
-            /*
-            camera->setCenter(lamp4->x -2.82, 
-                              lamp4->y -4, 
-                              lamp4->z -2.82); 
-            */
+            switchCamera(8);
             break;
             
             /* Enable Ambient Light */
         case 14:
             glEnable(GL_LIGHT0);
+            ambient_lighting_enabled = 1;
             break;
             
             /* Disable Ambient Light */
         case 15:
             glDisable(GL_LIGHT0);
+            ambient_lighting_enabled = 0;
             break;
             
             /* Initial-Cam */
         case 16:
-            camera->reset();
+            switchCamera(9);
             break;
             
             /* Enable/Disable Color Material */
         case 17:
-            color_material_enabled = 1 - color_material_enabled;
-            if (color_material_enabled) {
-                glEnable(GL_COLOR_MATERIAL);
-            } else {
-                glDisable(GL_COLOR_MATERIAL);
-            }
+            if(color_material_enabled)
+            color_material_enabled = 0;
+            else
+            color_material_enabled = 1;
             break;
-            
+
             /* Enable Light 1 */
         case 19:
             lamp1->turnOn();
@@ -1018,17 +1293,17 @@ void ProcessMenu(GLint value)
         
             /* Pacman Outfit 1 */
         case 30:
-            pacman_outfit = 0;
+            pacman->outfit = 0;
             break;
             
             /* Pacman Outfit 2 */
         case 31:
-            pacman_outfit = 1;
+            pacman->outfit = 1;
             break;
             
             /* Pacman Outfit 3 */
         case 32:
-            pacman_outfit = 2;
+            pacman->outfit = 2;
             break;
 
             /* Enable/Disable Pellet Texture */
@@ -1137,27 +1412,28 @@ void functionKeys (int key, int x, int y)
            break;
            
        case GLUT_KEY_F11:
-           ProcessMenu(15-ambient_light);
-           ambient_light = 1 - ambient_light;
+    	   if(ambient_lighting_enabled)
+           ProcessMenu(15);
+    	   else ProcessMenu(14);
            break;
            
 /*
        case GLUT_KEY_UP:
-           camera->rotateZ(-rotStep);
+           currentCamera->rotateZ(-rotStep);
            break;
            
        case GLUT_KEY_DOWN:
-           camera->rotateZ(rotStep);
+           currentCamera->rotateZ(rotStep);
            break; 
 
 		case GLUT_KEY_RIGHT:
-           camera->rotateY(rotStep);
+           currentCamera->rotateY(rotStep);
            break;
            
         case GLUT_KEY_LEFT:
-           camera->rotateY(-rotStep);
+           currentCamera->rotateY(-rotStep);
            break;  
- */
+*/
        case GLUT_KEY_UP:
            pacman->setDirection('n');
            break;
@@ -1173,6 +1449,7 @@ void functionKeys (int key, int x, int y)
        case GLUT_KEY_LEFT:
            pacman->setDirection('w');          
            break;  
+
    }
 
     glutPostRedisplay();
@@ -1181,13 +1458,14 @@ void functionKeys (int key, int x, int y)
 
 
 
-int main (int argc, char **argv)
+int main (int argc, char *argv[])
 {
     // GLUT initialization. Enable double buffer mode
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
 	glutInitWindowSize(width, height);
 	glutCreateWindow("Pacman3D beta");
+    //glutPositionWindow(0, 0);
     
     initMenu();
     
@@ -1202,12 +1480,13 @@ int main (int argc, char **argv)
     
     // Display help.
 	help();
-    
-    init();
+
+    initModels();
     
     // Enter GLUT loop.
 	glutMainLoop();
-    
+
+    return 0;
 }
 
 
@@ -1263,33 +1542,42 @@ void initMenu()
 }
 
 
-void init()
+void initModels()
 {
+	//save lighting context in an array
 	for (int i=0;i<6;i++)
 	{
+		//array to store lighting
 		for(int j=0;j<4;j++)
 		{
 			if(i==0)
-				Temp[i][j]=lightAmbient[j];
+				initalLightingValues[i][j]=lightAmbient[j];
 			if(i==1)
-				Temp[i][j]=lightDiffuse[j];
+				initalLightingValues[i][j]=lightDiffuse[j];
 			if(i==2)
-				Temp[i][j]=lightSpecular[j];
+				initalLightingValues[i][j]=lightSpecular[j];
 			if(i==3)
-				Temp[i][j]=spotlightAmbient[i];
+				initalLightingValues[i][j]=spotlightAmbient[i];
 			if(i==4)
-				Temp[i][j]=spotlightDiffuse[i];
+				initalLightingValues[i][j]=spotlightDiffuse[i];
 			if(i==5)
-				Temp[i][j]=spotlightSpecular[i];
+				initalLightingValues[i][j]=spotlightSpecular[i];
 		}
 	}
 
     //init scene
     glShadeModel(GL_SMOOTH);
+
+    lamp1 = new Lamp(GL_LIGHT1, spotlightDirection1);
+    lamp2 = new Lamp(GL_LIGHT2, spotlightDirection2);
+    lamp3 = new Lamp(GL_LIGHT3, spotlightDirection3);
+    lamp4 = new Lamp(GL_LIGHT4, spotlightDirection4);
+
     setupLighting();
     
     /* intitialize timers */
-    timer1 = new Timer();
+    timer1 = new Timer((string)"PRESS 't' TO START");
+    timer2 = new Timer((string)"eat power pellets to power up");
 
 	/* init characters */
     pacman = new Pacman();
@@ -1300,10 +1588,10 @@ void init()
     ghost3 = new Ghost(1.0, 0.5, 0.7);
     ghost4 = new Ghost(1.0, 0.5, 0.0);
     
-    ghost1->initPosition(10.0f,  0.2f, 11.0f);
+    ghost1->initPosition(9.0f,  0.2f, 11.0f);
     ghost2->initPosition(10.0f, 0.2f, 11.0f);
-    ghost3->initPosition(10.0f, 0.2f, 11.0f);
-    ghost4->initPosition(10.0f, 0.2f, 11.0f);
+    ghost3->initPosition(11.0f, 0.2f, 11.0f);
+    ghost4->initPosition(10.0f, 0.2f, 10.0f);
     
     /* init map */
     srand(time(NULL)); //seed rand for pellet colours
@@ -1322,20 +1610,21 @@ void init()
         if ((*t_it)->type == 'Z') {
             pelletTiles.push_back((*t_it));
         }
-		
-		//POWER
-		if ((*t_it)->type == 'X') {
-            ppelletTiles.push_back((*t_it));
+
+        if ((*t_it)->type == 'X') {
+            powerPelletTiles.push_back((*t_it));
         }
     }
     
-    /* init camera */
-    camera = new Camera();
+    /* init cameras */
+    initCameras();
     
     glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
     glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
     
+    /* Init audio */
     
+
     atexit(cleanup);    
 }
 
@@ -1345,16 +1634,18 @@ void setupLighting()
 	/*
     // Light values and coordinates
     GLfloat lightModelIntensity[] = { 0.1f, 0.1f, 0.1f, 1.0f };
-    */
-    /* Ambient Light Values */
-    /*
+
+    //Ambient Light Values
+
+
     GLfloat lightAmbient[]  = { 0.7f, 0.7f, 0.7f, 1.0f };
     GLfloat lightDiffuse[]  = { 0.7f, 0.7f, 0.7f, 1.0f };
     GLfloat lightSpecular[] = { 0.7f, 0.7f, 0.7f, 1.0f };
-    GLfloat lightPosition[] = { 0.0f, 1.0f, 0.0f, 0.0f }; // Point down Y-Axis 
-    */
+    GLfloat lightPosition[] = { 0.0f, 1.0f, 0.0f, 0.0f }; // Point down Y-Axis
+	*/
+
     /* Spotlight Values */
-	/*
+    /*
     GLfloat spotlightAmbient[]  = { 0.5f, 0.5f, 0.0f, 1.0f };
     GLfloat spotlightDiffuse[]  = { 0.5f, 0.5f, 0.0f, 1.0f };
     GLfloat spotlightSpecular[] = { 0.5f, 0.5f, 0.0f, 1.0f };
@@ -1366,13 +1657,9 @@ void setupLighting()
     GLfloat spotlightDirection2[] = { -1.0f, 0.0f, 1.0f};
     GLfloat spotlightDirection3[] = { 1.0f, 0.0f, -1.0f};
     GLfloat spotlightDirection4[] = { -1.0f, 0.0f, -1.0f};
+
     */
-    
-    lamp1 = new Lamp(GL_LIGHT1, spotlightDirection1);
-    lamp2 = new Lamp(GL_LIGHT2, spotlightDirection2);
-    lamp3 = new Lamp(GL_LIGHT3, spotlightDirection3);
-    lamp4 = new Lamp(GL_LIGHT4, spotlightDirection4);
-    
+
     lamp1->setAmbDiffSpec(spotlightAmbient, spotlightDiffuse, spotlightSpecular);
     lamp2->setAmbDiffSpec(spotlightAmbient, spotlightDiffuse, spotlightSpecular);
     lamp3->setAmbDiffSpec(spotlightAmbient, spotlightDiffuse, spotlightSpecular);
@@ -1396,7 +1683,7 @@ void setupLighting()
     glLightfv(GL_LIGHT0, GL_DIFFUSE, lightDiffuse);
     glLightfv(GL_LIGHT0, GL_SPECULAR, lightSpecular);
     glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
-    glEnable(GL_LIGHT0);
+    if(ambient_lighting_enabled) glEnable(GL_LIGHT0);
     
     // Set Material properties to follow glColor values
     glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
@@ -1426,4 +1713,105 @@ void cleanup()
     delete lamp2;
     delete lamp3;
     delete lamp4;
+}
+
+
+void enterFullscreen()
+{
+    glutFullScreen();
+}
+
+
+void exitFullscreen()
+{
+    glutReshapeWindow(WIDTH, HEIGHT);
+    glutPositionWindow(0, 0);
+}
+
+
+void initCameras()
+{
+    currentCamera = &mainCam;
+
+    /****************************************
+     *NOTE: Changed viewing direction for better vision (from 2 * sqrt(2)) on lamps
+     ****************************************/
+
+    lamp1Cam.setPosition(lamp1->x, lamp1->y + 5, lamp1->z);
+    lamp1Cam.setCenter(lamp1->x + 5, lamp1->y, lamp1->z + 5);
+
+    lamp2Cam.setPosition(lamp2->x, lamp2->y + 5, lamp2->z);
+    lamp2Cam.setCenter(lamp2->x - 5, lamp2->y - 4, lamp2->z + 5);
+
+    lamp3Cam.setPosition(lamp3->x, lamp3->y + 5, lamp3->z);
+    lamp3Cam.setCenter(lamp3->x + 5, lamp3->y - 4, lamp3->z - 5);
+
+    lamp4Cam.setPosition(lamp4->x, lamp4->y + 5, lamp4->z);
+    lamp4Cam.setCenter(lamp4->x - 5, lamp4->y - 4, lamp4->z - 5);
+}
+
+
+void switchCamera(GLuint camera)
+{
+    pacmanCam.enabled = 0;
+    ghost1Cam.enabled = 0;
+    ghost2Cam.enabled = 0;
+    ghost3Cam.enabled = 0;
+    ghost4Cam.enabled = 0;
+
+    switch (camera) {
+        case 0:
+            pacmanCam.enabled = 1;
+            currentCamera = &pacmanCam;
+            break;
+
+        case 1:
+            ghost1Cam.enabled = 1;
+            currentCamera = &ghost1Cam;
+            break;
+
+        case 2:
+            ghost2Cam.enabled = 1;
+            currentCamera = &ghost2Cam;
+            break;
+
+        case 3:
+            ghost3Cam.enabled = 1;
+            currentCamera = &ghost3Cam;
+            break;
+
+        case 4:
+            ghost4Cam.enabled = 1;
+            currentCamera = &ghost4Cam;
+            break;
+
+        case 5:
+            currentCamera = &lamp1Cam;
+            break;
+
+        case 6:
+            currentCamera = &lamp2Cam;
+            break;
+
+        case 7:
+            currentCamera = &lamp3Cam;
+            break;
+
+        case 8:
+            currentCamera = &lamp4Cam;
+            break;
+
+        default:
+            currentCamera = &mainCam;
+            break;
+    }
+}
+
+void initLights(){
+
+}
+
+void initAudio()
+{
+
 }

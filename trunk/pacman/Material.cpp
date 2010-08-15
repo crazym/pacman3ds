@@ -71,7 +71,7 @@ GLfloat spotlightDirection4[] = { -1.0f, 0.0f, -1.0f};
 
 /* Frenzy Light Ambient*/
 
-GLfloat flightAmbient[]  = { 1.0f, 0.5f, 0.2f, 1.0f };
+GLfloat flightAmbient[]  = { 1.0f, 0.3f, 0.2f, 1.0f };
 GLfloat flightDiffuse[]  = { 1.0f, 0.5f, 0.2f, 1.0f };
 GLfloat flightSpecular[] = { 1.0f, 0.5f, 0.2f, 1.0f };
 

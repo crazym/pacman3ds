@@ -30,7 +30,7 @@
 class Camera
 {
 public:
-    Camera();
+    Camera(GLuint fixed = 0);
     
     void reset();
     void look();
@@ -55,7 +55,7 @@ public:
     
     void zoomIn(GLfloat amount);
     void zoomOut(GLfloat amount);
-    
+        
     Vector getTarget();
     Vector getRight();
     GLfloat getDistance();
@@ -70,6 +70,9 @@ public:
     GLfloat yRotation;
     GLfloat xRotation;
     GLfloat zRotation;
+    
+    GLuint enabled;
+    GLuint fixed;
 };
 
 #endif

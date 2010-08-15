@@ -41,5 +41,8 @@ public:
     GLint size;
     GLint rows;
     GLint columns;
+    
+    char *mapArray;
+    
 };
 #endif
