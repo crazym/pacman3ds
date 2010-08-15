@@ -13,21 +13,29 @@
 using namespace std;
 
 class Timer{
-public:
 
-	Timer();
-	//~Timer();
+
+public:
+	Timer(string);
+	~Timer();
 
 	void drawTimer();
 	void startTimer();
 	void stopTimer();
+	int getTimeElapsed();
+	int getTimeLeft();
+	void startCountDown(int);
 	string timer_string;
 	bool timerIsOn;
 
 private:
-	string runTimer(time_t);
+	string runTimeElapsed(time_t);
+	string runTimeLeft(time_t);
+	string runCountDown();
 	time_t currentTime;
 	time_t startTime;
+	time_t countDownTo;
+	string initTimerString;
 };
 
 #endif /* TIMER_H_ */

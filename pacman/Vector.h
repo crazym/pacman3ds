@@ -16,7 +16,9 @@
 #include <cstdlib>
 #include <GLUT/glut.h>
 #elif defined(__linux__) /* LINUX */
-#include <cstdlib>
+#include <stdlib.h>
+#include <GL/gl.h>
+#include <GL/glu.h>
 #include <GL/glut.h>
 #else /* WINDOWS */
 #include <stdlib.h>
@@ -34,7 +36,7 @@ private:
 public:
 	explicit Vector();
 	explicit Vector(GLdouble pX, GLdouble pY, GLdouble pZ);
-	~Vector(){};
+	~Vector() {};
 	void setX(GLdouble pX)						{ x = pX; };
 	void setY(GLdouble pY)						{ y = pY; };
 	void setZ(GLdouble pZ)						{ z = pZ; };

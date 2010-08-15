@@ -28,15 +28,19 @@
 
 class Vector;
 class Tile;
+class Map;
 //#define DEBUG
 
+
 void number();
-void shadow();
+
 Vector crossProduct(const Vector& a, const Vector& b);
 GLdouble dotProduct(const Vector& a, const Vector& b);
-GLint TestIntersionPlane(const Plane& plane, const Vector& position, const Vector& direction, GLdouble& lamda);
+GLint TestIntersionPlane(const Plane& plane, const Vector& position, const Vector& direction, GLdouble& lamda, const GLdouble leeway);
 GLdouble testDistance(const Vector& point1, const Vector& point2);
-void testWallCollision(const Vector& position, const Tile& wall, GLint& n, GLint& s, GLint& e, GLint& w);
-
+void testWallCollision(const Vector& position, const Tile& wall, GLint& n, GLint& s, GLint& e, GLint& w, const GLdouble leeway);
+GLint getPositionInMapArray(GLint cols, GLint x, GLint z);
+void getSurroundingTiles(const Map& theMap, GLint position, GLint& northTile, GLint& southTile, GLint& eastTile, GLint& westTile);
+void shadow();
 
 #endif

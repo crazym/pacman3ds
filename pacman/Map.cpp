@@ -26,28 +26,38 @@ void Map::initializeMap(char* map, GLint rows, GLint columns)
     this->columns = columns;
     this->size = rows * columns;
     
+    mapArray = (char*)malloc(size * sizeof(char));
+    
     GLint col_it = 0;
     GLint row_it = 0;    
     
     for (GLint i = 0; i < size; ++i) {
         
         switch (map[i]) {
+            
+            /* Wall */
             case 'W':
+                this->mapArray[i] = 'W';
                 tiles.push_back(new Tile('W', col_it, row_it));
                 break;
-            
+                
+            /* Blank */
             case 'Y':
+                this->mapArray[i] = 'Y';
                 tiles.push_back(new Tile('Y', col_it, row_it));
                 break;
             
+            /* Tile With Pellet */
             case 'Z':
+                this->mapArray[i] = 'Z';
                 tiles.push_back(new Tile('Z', col_it, row_it));
                 break;
             
+            /* Tile With Power Pellet */
             case 'X':
+                this->mapArray[i] = 'X';
                 tiles.push_back(new Tile('X', col_it, row_it));
                 break;
-
 
             default:
                 break;
@@ -63,6 +73,8 @@ void Map::initializeMap(char* map, GLint rows, GLint columns)
 
 Map::~Map()
 {
+    delete[] mapArray;
+    
     vector<Tile*>::iterator t_it;
     for(t_it = this->tiles.begin(); t_it != this->tiles.end(); ++t_it)
     {

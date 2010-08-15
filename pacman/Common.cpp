@@ -11,6 +11,7 @@
 #include "Common.h"
 #include "Vector.h"
 #include "Tile.h"
+#include "Map.h"
 
 #include <cmath>
 #include <iostream>
@@ -18,8 +19,8 @@
 #define EPSILON 1.0e-8
 #define ZERO EPSILON
 
-/* How close pacman has to be to collide with a wall when turning */
-const GLfloat PACMAN_LEEWAY = 0.7;
+const GLfloat DETECTION_RADIUS = 0.5;
+
 
 void number()
 {
@@ -80,12 +81,12 @@ GLdouble dotProduct(const Vector& a, const Vector& b)
 }
 
 /**  Reference: http://nehe.gamedev.net/data/lessons/lesson.asp?lesson=30 **/
-GLint TestIntersionPlane(const Plane& plane, const Vector& position, const Vector& direction, GLdouble& lamda)
+GLint TestIntersionPlane(const Plane& plane, const Vector& position, const Vector& direction, GLdouble& lamda, const GLdouble leeway)
 {
-    /* If pacman isn't on (more or less) the same x or z position, return right away */
+    /* If character isn't on (more or less) the same x or z position, return right away */
     //if (!(plane.position.getX() == position.getX() || plane.position.getZ() == position.getZ())) {
-    if ( (fabs(plane.position.getX() - position.getX()) > PACMAN_LEEWAY) ||
-         (fabs(plane.position.getZ() - position.getZ()) > PACMAN_LEEWAY))
+    if ( (fabs(plane.position.getX() - position.getX()) > leeway) ||
+         (fabs(plane.position.getZ() - position.getZ()) > leeway))
     {
         return 0;
     }
@@ -119,14 +120,14 @@ GLdouble testDistance(const Vector& point1, const Vector& point2)
     return sqrt((xd * xd) + (zd * zd));
 }
 
-void testWallCollision(const Vector& position, const Tile& wall, GLint& n, GLint& s, GLint& e, GLint& w)
+void testWallCollision(const Vector& position, const Tile& wall, GLint& n, GLint& s, GLint& e, GLint& w, const GLdouble leeway)
 {
     GLdouble lambda = 0;
     Vector direction = Vector(-1, 0, 0);
     
-    if(TestIntersionPlane(wall.eastPlane, position, direction, lambda))
+    if(TestIntersionPlane(wall.eastPlane, position, direction, lambda, leeway))
     {
-        if (lambda > 0 && lambda <= 0.5) 
+        if (lambda > 0 && lambda <= DETECTION_RADIUS) 
         {
             w = 1;
 #ifdef DEBUG
@@ -138,9 +139,9 @@ void testWallCollision(const Vector& position, const Tile& wall, GLint& n, GLint
     lambda = 0;
     direction = Vector(0, 0, -1);
     
-    if (TestIntersionPlane(wall.southPlane, position, direction, lambda))
+    if (TestIntersionPlane(wall.southPlane, position, direction, lambda, leeway))
     {
-        if (lambda > 0 && lambda <= 0.5)
+        if (lambda > 0 && lambda <= DETECTION_RADIUS)
         {
             n = 1;
 #ifdef DEBUG
@@ -152,9 +153,9 @@ void testWallCollision(const Vector& position, const Tile& wall, GLint& n, GLint
     lambda = 0;
     direction = Vector(1, 0, 0);
     
-    if(TestIntersionPlane(wall.westPlane, position, direction, lambda))
+    if(TestIntersionPlane(wall.westPlane, position, direction, lambda, leeway))
     {
-        if (lambda > 0 && lambda <= 0.5) 
+        if (lambda > 0 && lambda <= DETECTION_RADIUS) 
         {
             e = 1;
 #ifdef DEBUG
@@ -166,9 +167,9 @@ void testWallCollision(const Vector& position, const Tile& wall, GLint& n, GLint
     lambda = 0;
     direction = Vector(0, 0, 1);
     
-    if(TestIntersionPlane(wall.northPlane, position, direction, lambda))
+    if(TestIntersionPlane(wall.northPlane, position, direction, lambda, leeway))
     {
-        if (lambda > 0 && lambda <= 0.5) 
+        if (lambda > 0 && lambda <= DETECTION_RADIUS) 
         {
             s = 1;
 #ifdef DEBUG
@@ -176,4 +177,36 @@ void testWallCollision(const Vector& position, const Tile& wall, GLint& n, GLint
 #endif
         }
     }    
+}
+
+
+GLint getPositionInMapArray(GLint cols, GLint x, GLint z)
+{
+    return (cols*z + x); 
+}
+
+/* If a tile comes back as 1, it's a wall */
+void getSurroundingTiles(const Map& theMap, GLint position, GLint& northTile, GLint& southTile, GLint& eastTile, GLint& westTile)
+{
+    northTile = southTile = eastTile = westTile = 1;
+    
+    if (theMap.mapArray[position - theMap.columns] != 'W') 
+    {
+        northTile = 0;
+    }
+    
+    if (theMap.mapArray[position - 1] != 'W') 
+    {
+        westTile = 0;
+    }
+    
+    if (theMap.mapArray[position + 1] != 'W') 
+    {
+        eastTile = 0;
+    }
+    
+    if (theMap.mapArray[position + theMap.columns] != 'W') 
+    {
+        southTile = 0;
+    }
 }

@@ -12,9 +12,6 @@
 
 #include "Common.h"
 #include "textures.h"
-#include "Pacman.h"
-#include "Material.h"
-
 
 #ifdef __APPLE__ /* OS X */
 #define ghostTexture "ghostbody.raw"
@@ -29,7 +26,6 @@ using namespace std;
 extern GLfloat ghost_body[];
 extern GLfloat ghost_pupil[];
 extern GLfloat ghost_white[];
-Pacman pacman();
 
 GLuint Ghost::current_id = 0;
 
@@ -47,8 +43,7 @@ Ghost::Ghost()
 #endif
     initializeModel();
     
-    this->xVelocity = 0;
-    this->zVelocity = 0;
+    this->setDirection('n');
     
     /* Set the Ghost Id for AI purposes */
     this->myId = current_id;
@@ -67,8 +62,7 @@ Ghost::Ghost(GLfloat red, GLfloat green, GLfloat blue)
 #endif
     initializeModel();
     
-    this->xVelocity = 0;
-    this->zVelocity = -1;
+    this->setDirection('n');
     
     /* Set the Ghost Id for AI purposes */
     this->myId = current_id;
@@ -84,21 +78,6 @@ Ghost::~Ghost()
     gluDeleteQuadric(cylinder);
 }
 
-void Ghost::get_pac(GLint x, GLint z)
-{
-	this->p_loc_x = x;
-	this->p_loc_z = z;
-	//cout<<"Pacman x: "<<p_loc_x<<endl;
-	//cout<<"Pacman z: "<<p_loc_z<<endl;
-}
-
-void Ghost::get_bli(GLint x,GLint z)
-{
-	this->b_loc_x = x;
-	this->b_loc_z = z;
-	//cout<<"Blinky x: "<<b_loc_x<<endl;
-	//cout<<"Blinky z: "<<b_loc_z<<endl;
-}
 void Ghost::initializeModel()
 {    
     this->textureID = LoadTextureRAW(ghostTexture, 1, 64, 64);
@@ -214,20 +193,6 @@ void Ghost::initializeModel()
             */
         glPopMatrix();
     glPopMatrix();
-
-	//Draw a shadow
-
-	//Setup
-    glPushMatrix();
-		glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, shadow_mat);
-		glColor4fv(shadow_mat);
-
-		glTranslatef(0.5,0.0,0.0);
-		glRotatef(90,1,0,0);
-		glScalef(1.0,1.0,1.0);
-		shadow();
-	glPopMatrix();
-
         
     glEndList();
     
@@ -262,21 +227,74 @@ void Ghost::setDirection(char direction)
         case 'n':
             this->zVelocity = -SPEED;
             this->xVelocity = 0;
+            
+            /* Centers the Ghost */
+            if (this->x - floor(this->x) < 0.90) 
+            {
+                this->x = floor(this->x);
+            } 
+            else 
+            {
+                this->x = ceil(this->x);
+            }
+            
+            this->direction = 'n';
+
             break;
             
         case 'e':
             this->xVelocity = SPEED;
             this->zVelocity = 0;
+            
+            
+            /* Centers The Ghost */
+            if (this->z - floor(this->z) < 0.90) 
+            {
+                this->z = floor(this->z);
+            } 
+            else 
+            {
+                this->z = ceil(this->z);
+            }
+            
+            this->direction = 'e';
+
             break;
             
         case 's':
             this->zVelocity = SPEED;
             this->xVelocity = 0;
+
+            /* Centers The Ghost */
+            if (this->x - floor(this->x) < 0.90) 
+            {
+                this->x = floor(this->x);
+            } 
+            else 
+            {
+                this->x = ceil(this->x);
+            }
+
+            this->direction = 's';
+            
             break;
             
         case 'w':
             this->xVelocity = -SPEED;
             this->zVelocity = 0;
+
+            /* Centers The Ghost */
+            if (this->z - floor(this->z) < 0.90) 
+            {
+                this->z = floor(this->z);
+            } 
+            else 
+            {
+                this->z = ceil(this->z);
+            }
+            
+            this->direction = 'w';
+
             break;
             
         default:
@@ -284,221 +302,462 @@ void Ghost::setDirection(char direction)
     }
 }
 
-void Ghost::collide(GLint n, GLint s, GLint e, GLint w)
+GLboolean Ghost::collide(GLint n, GLint s, GLint e, GLint w)
 {
-    if (n && this->zVelocity < 0) 
+    /*********************/
+    /* Detect End of Map */
+    /*********************/
+    if (this->x <= 0.5) 
+    {
+        this->x = 20;
+        this->setDirection('w');
+    }
+    
+    if (this->x >= 21.5) 
+    {
+        this->x = 0;
+        this->setDirection('e');
+    }
+    
+    /*********************/
+    /* Detect Collisions */
+    /*********************/
+    if (n && this->direction == 'n') 
     {
         this->zVelocity = 0;
-        chooseMove('n');
-    }
+        this->z += SPEED;
+
+        return true;
+    } 
     
-    if (s && this->zVelocity > 0)
+    if (s && this->direction == 's')
     {
         this->zVelocity = 0;
-        chooseMove('s');
+        this->z -= SPEED;
+
+        return true;
     }
     
-    if (e && this->xVelocity > 0)
+    if (e && this->direction == 'e')
     {
         this->xVelocity = 0;
-        chooseMove('e');
+        this->x -= SPEED;
+
+        return true;
     }
     
-    if (w && this->xVelocity < 0) 
+    if (w && this->direction == 'w') 
     {
         this->xVelocity = 0;
-        chooseMove('w');
+        this->x += SPEED;
+        
+        return true;
     }
-	//TELEPORT
-    if(this->x<-0.5)
-		this->x=19.5;
-	if(this->x>20.0)
-		this->x=0.0;
-	//enf of teleport
+    
+    return false;
+    /********************/
+    /* Did Not Collide  */
+    /********************/
 }
 
 
-void Ghost::chooseMove(char side)
+void Ghost::chooseMove(GLint n, GLint s, GLint e, GLint w, GLboolean collided, GLint pacmanPositionX, GLint pacmanPositionZ)
 {
-	int out=0;
-	GLint direction = 0;
+    /* If n, s, e, w are 1 that means there is a wall in the respective direction */
+    
     /* Implement AI Logic */
-
-	//Blinky
     if (this->myId == 0) 
     {
-        //Logic for Ghost One 
-		//Getting out of box
-		if(out)
-		{
-			this->zVelocity = -SPEED;
-			out=1;
-		}
-		//Turns toward the intersection closest to pacman
-		//get pacman's coordinates
-			//done with get_pac
-		//get blinky's coordinates 
-		//compare
-		switch (side) {
-		case 'n': case 's':
-			if((this->b_loc_x)>(this->p_loc_x))
-				this->xVelocity = -SPEED;	
-			else if((this->b_loc_x)<(this->p_loc_x))
-				this->xVelocity = SPEED;
-			else if(this->b_loc_x==this->p_loc_x)
-			{
-				if((this->b_loc_z)>(this->p_loc_z))
-					this->zVelocity = -SPEED;
-				else if((this->b_loc_z)<(this->p_loc_z))
-					this->zVelocity = SPEED;
-			}
-			break;
-		/*
-		case 's':
-			if((this->b_loc_x)>(this->p_loc_x))
-				this->xVelocity = -SPEED;	
-			else if((this->b_loc_x)<(this->p_loc_x))
-				this->xVelocity = SPEED;
-			break;*/
-		
-		case 'e': case'w':
-			if((this->b_loc_z)>(this->p_loc_z))
-				this->zVelocity = -SPEED;
-			else if((this->b_loc_z)<(this->p_loc_z))
-				this->zVelocity = SPEED;	
-			else if(this->b_loc_z==this->p_loc_z)
-			{
-				if((this->b_loc_x)>(this->p_loc_x))
-					this->xVelocity = -SPEED;	
-				else if((this->b_loc_x)<(this->p_loc_x))
-					this->xVelocity = SPEED;
-			}
-				break;
-		/*
-		case 'w':
-			if((this->b_loc_z)>(this->p_loc_z))
-				this->zVelocity = -SPEED;
-			else if((this->b_loc_z)<(this->p_loc_z))
-				this->zVelocity = SPEED;
-			break;*/
+        //Logic for Ghost One
+        //Turns toward the intersection closest to pacman
+		//compare pacman and blinky's coordinates
 
-
-		default:
-			break;	
-		}
+        /*********************************/
+        /* Logic When Collided With Wall */
+        /*********************************/
+        if (collided) 
+        {
+            switch (this->direction) {
+                case 'n': 
+                case 's':
+                    if (this->x > pacmanPositionX && !w)
+                    {
+                        setDirection('w');
+                    }
+                    else if (this->x < pacmanPositionX && !e)
+                    {
+                        setDirection('e');
+                    }
+                    else if (this->z > pacmanPositionZ && !n)
+                    {
+                        setDirection('n');
+                    }
+                    else if (!s)
+                    {
+                        setDirection('s');
+                    }
+                    break;
+                    
+                case 'e': 
+                case 'w':
+                    if (this->z > pacmanPositionZ && !n) 
+                    {
+                        setDirection('n');
+                    }
+                    else if (this->z < pacmanPositionZ && !s)
+                    {
+                        setDirection('s');
+                    }
+                    else if (this->x > pacmanPositionX && !w)
+                    {
+                        setDirection('w');
+                    }
+                    else if (!e)
+                    {
+                        setDirection('e');
+                    }
+                    break;
+                    
+                default:
+                    break;
+            }
+        }
+        /********************************************/
+        /* Logic when reaching the center of a tile */
+        /********************************************/
+        else if(rand() % 100 == 1)
+        {
+            if (this->z > pacmanPositionZ) 
+            {
+                setDirection('n');
+            }
+            else if (this->z < pacmanPositionZ)
+            {
+                setDirection('s');
+            }
+        }
+        else if(rand() % 100 == 1)
+        {
+            if (this->x > pacmanPositionX) 
+            {
+                setDirection('w');
+            }
+            else if (this->x < pacmanPositionX)
+            {
+                setDirection('e');
+            }
+            
+        }
+                
     }
-
-	//Inky
     else if (this->myId == 1)
     {
-        //Logic for Ghost Two 
-		//Getting out of box
-		if(out)
-		{
-			this->zVelocity = -SPEED;
-			out=1;
-		}
-		direction = rand() % 4;
-		switch (direction) {
-			case 0:
-				this->xVelocity = SPEED;
-				break;
-			case 1:
-				this->xVelocity = -SPEED;
-				break;
-			case 2:
-				this->zVelocity = SPEED;
-				break;
-			case 3:
-				this->zVelocity = -SPEED;
-				break;
+        //Logic for Ghost Two
+        
+        /**************************/
+        /* RANDOM DIRECTION LOGIC */
+        /**************************/
+        
+        /*********************************/
+        /* Logic When Collided With Wall */
+        /*********************************/
+        if (collided) 
+        {
+            GLint direction = rand() % 4;
+            switch (direction) {
+                case 0:
+                    setDirection('n');
+                    break;
+                case 1:
+                    setDirection('s');
+                    break;
+                case 2:
+                    setDirection('e');
+                    break;
+                case 3:
+                    setDirection('w');
+                    break;
+                    
+                default:
+                    break;
+                    
+            }
+        }
+        /********************************************/
+        /* Logic when reaching the center of a tile */
+        /********************************************/
+        else if (rand() % 500 == 1)
+        {
+            /* Sometimes he feels like turning at an opening */
+            switch (this->direction) {
+                    
+                case 's':
+                case 'n':
+                    if (!w) 
+                    {
+                        setDirection('w');
+                    }
+                    else if (!e)
+                    {
+                        setDirection('e');
+                    }
+                    break;
+                   
+                case 'w':
+                case 'e':
+                    if (!n) 
+                    {
+                        setDirection('n');
+                    }
+                    else if (!s)
+                    {
+                        setDirection('s');
+                    }
+                    
+                    
+                default:
+                    break;
+            }
+        }
 
-			default:
-				break;
-		}
     }
-
-	//Pinky
     else if (this->myId == 2)
     {
-        //Logic for Ghost Three 
-		//Getting out of box
-		if(out)
-		{
-			this->zVelocity = -SPEED;
-			out=1;
-		}
-		switch (side) {
-			case 'n':
-				this->xVelocity = -SPEED;
-				break;
-			case 's':
-				this->xVelocity = SPEED;
-				break;
-			case 'e':
-				this->zVelocity = -SPEED;
-				break;
-			case 'w':
-				this->zVelocity = SPEED;
-				break;
+        //Logic for Ghost Three
+        
+        /***************************/
+        /* COUNTER-CLOCKWISE LOGIC */
+        /***************************/
+        
+        /*********************************/
+        /* Logic When Collided With Wall */
+        /*********************************/
+        if (collided) 
+        {
+            switch (this->direction) {
+                /* Moving North */
+                case 'n':
+                    /* West is a wall */
+                    if (w) 
+                    {
+                        setDirection('e');
+                    }
+                    else 
+                    {
+                        setDirection('w');
+                    }
+                    break;
+                /* Moving East */
+                case 'e':
+                    /* North is a wall */
+                    if (n) 
+                    {
+                        setDirection('s');
+                    }
+                    else 
+                    {
+                        setDirection('n');
+                    }
+                    break;
+                /* Moving South */
+                case 's':
+                    /* East is a wall */
+                    if (e) 
+                    {
+                        setDirection('w');
+                    }
+                    else 
+                    {
+                        setDirection('e');
+                    }
+                    break;
+                /* Moving West */
+                case 'w':
+                    /* South is a wall */
+                    if (s) 
+                    {
+                        setDirection('n');
+                    }
+                    else 
+                    {
+                        setDirection('s');
+                    }
+                    break;
 
-			default:
-				break;
-		}
+
+                default:
+                    break;
+            }
+        }
+        /********************************************/
+        /* Logic when reaching the center of a tile */
+        /********************************************/
+        else if (rand() % 500 == 1)
+        {
+            /* Sometimes he likes to turn counter-clockwise */
+            switch (this->direction) {
+                case 'n':
+                    if (!w) 
+                    {
+                        setDirection('w');
+                    }
+                    break;
+                    
+                case 'e':
+                    if (!n) 
+                    {
+                        setDirection('n');
+                    }
+                    break;
+                    
+                case 's':
+                    if (!e) {
+                        setDirection('e');
+                    }
+                    break;
+                    
+                case 'w':
+                    if (!s) {
+                        setDirection('s');
+                    }
+                    break;
+
+                default:
+                    break;
+            }
+        }
     }
-
-	//Clyde
     else if (this->myId == 3)
     {
-        //Logic for Ghost Four 
-		//Getting out of box
-		if(out)
-		{
-			this->zVelocity = -SPEED;
-			out=1;
-		}
+        //Logic for Ghost Four
+        
+        /*******************/
+        /* CLOCKWISE LOGIC */
+        /*******************/
+        
+        /*********************************/
+        /* Logic When Collided With Wall */
+        /*********************************/
+        if (collided) 
+        {
+            switch (this->direction) {
+                /* Moving North */
+                case 'n':
+                    /* East is a wall */
+                    if (e) 
+                    {
+                        setDirection('w');
+                    } 
+                    else
+                    {
+                        setDirection('e');   
+                    }
+                    break;
+                /* Moving East */
+                case 'e':
+                    /* South is a Wall */
+                    if (s) 
+                    {
+                        setDirection('n');
+                    }
+                    else 
+                    {
+                        setDirection('s');
+                    }
+                    break;
+                /* Moving South */
+                case 's':
+                    /* West is a Wall */
+                    if (w) 
+                    {
+                        setDirection('e');
+                    }
+                    else 
+                    {
+                        setDirection('w');
+                    }
+                    break;
+                /* Moving West */
+                case 'w':
+                    /* North is a Wall */
+                    if (n) 
+                    {
+                        setDirection('s');
+                    }
+                    else 
+                    {
+                        setDirection('n');
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+        /********************************************/
+        /* Logic when reaching the center of a tile */
+        /********************************************/
+        else if (rand() % 500 == 1)
+        {
+            /* Sometimes he feels like turning clockwise */
+            switch (this->direction) {
+                case 'n':
+                    if (!e) 
+                    {
+                        setDirection('e');
+                    }
+                    break;
+                    
+                case 'e':
+                    if (!s) 
+                    {
+                        setDirection('s');
+                    }
+                    break;
+                    
+                case 's':
+                    if (!w) 
+                    {
+                        setDirection('w');
+                    }
+                    break;
+                    
+                case 'w':
+                    if (!n) 
+                    {
+                        setDirection('n');
+                    }
+                    break;
 
-		//GLint direction = rand() % 4;
-		switch (side) {
-			case 'n':
-				this->xVelocity = SPEED;
-				break;
-			case 's':
-				this->xVelocity = -SPEED;
-				break;
-			case 'e':
-				this->zVelocity = SPEED;
-				break;
-			case 'w':
-				this->zVelocity = -SPEED;
-				break;
+                default:
+                    break;
+            }
+        }
 
-			default:
-				break;
-		}
     }
-
-    /**************************/
-    /* RANDOM DIRECTION LOGIC */
-    /**************************/
     
-	/*direction = rand() % 4;
-    switch (direction) {
-        case 0:
-            this->xVelocity = SPEED;
-            break;
-        case 1:
-            this->xVelocity = -SPEED;
-            break;
-        case 2:
-            this->zVelocity = SPEED;
-            break;
-        case 3:
-            this->zVelocity = -SPEED;
-            break;
 
-        default:
-            break;
-    }*/
     //cout << "Choosing: " << direction << endl;
+}
+
+
+GLint Ghost::getRoundedX()
+{
+    if (this->x - floor(this->x) < 0.5) 
+    {
+        return floor(this->x);
+    }
+    
+    /* else */
+    return ceil(this->x);
+}
+
+GLint Ghost::getRoundedZ()
+{
+    if (this->z - floor(this->z) < 0.5) 
+    {
+        return floor(this->z);
+    }
+    
+    /* else */
+    return ceil(this->z);
 }

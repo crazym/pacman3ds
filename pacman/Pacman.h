@@ -31,18 +31,26 @@ public:
     Pacman();
     ~Pacman();
     
-    void draw(GLint outfit = 0);
+    void draw();
     
     void initPosition(GLfloat x, GLfloat y, GLfloat z);
     void move();
     void setDirection(char direction);
     void collide(GLint n, GLint s, GLint e, GLint w);
+    void atePowerPellet();
+    void drawShadow();
+
     
+    GLint getRoundedX();
+    GLint getRoundedZ();
+    
+    GLfloat SPEED;
     GLfloat x, y, z;
     GLuint textureID[3];
     GLfloat xVelocity;
     GLfloat zVelocity;
-	GLfloat SPEED;
+    GLuint outfit;
+    GLboolean frenzy;
 
 private:
     void pacman_1();
@@ -60,7 +68,6 @@ private:
     void drawBothRetinas();
     void drawBothPupils(GLint model = 0);
     void drawBothPalates();
-	void drawShadow();
 };
 
 #endif

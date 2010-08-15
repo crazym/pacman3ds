@@ -22,8 +22,9 @@ const GLdouble initial_eye[3] = {10.0, 30.0, 35.0};
 const GLdouble initial_center[3] = {10.0, 2.0, 11.0};
 const GLdouble initial_up[3] = {0.0, 1.0, 0.0};
 
-Camera::Camera()
+Camera::Camera(GLuint fixed)
 {
+    this->fixed = fixed;
     reset();
 }
 
@@ -141,6 +142,10 @@ Vector Camera::getRight()
 
 void Camera::moveForward(GLfloat amount)
 {
+    if (this->fixed) {
+        return;
+    }
+    
     this->position.setZ(this->position.getZ() - amount);
     
     /* recalculate center */
@@ -150,6 +155,10 @@ void Camera::moveForward(GLfloat amount)
 
 void Camera::moveBackward(GLfloat amount)
 {
+    if (this->fixed) {
+        return;
+    }
+    
     this->position.setZ(this->position.getZ() + amount);
     
     /* recalculate center */
@@ -159,6 +168,10 @@ void Camera::moveBackward(GLfloat amount)
 
 void Camera::moveLeft(GLfloat amount)
 {
+    if (this->fixed) {
+        return;
+    }
+    
     this->position.setX(this->position.getX() - amount);
     
     /* recalculate center */
@@ -168,6 +181,10 @@ void Camera::moveLeft(GLfloat amount)
 
 void Camera::moveRight(GLfloat amount)
 {
+    if (this->fixed) {
+        return;
+    }
+    
     this->position.setX(this->position.getX() + amount);
     
     /* recalculate center */
@@ -177,6 +194,10 @@ void Camera::moveRight(GLfloat amount)
 
 void Camera::zoomIn(GLfloat amount)
 {
+    if (this->fixed) {
+        return;
+    }
+    
     Vector increment;
     increment = getTarget() * amount;
     increment.normalize();
@@ -193,6 +214,10 @@ void Camera::zoomIn(GLfloat amount)
 
 void Camera::zoomOut(GLfloat amount)
 {
+    if (this->fixed) {
+        return;
+    }
+    
     Vector increment;
     increment = getTarget() * amount;
     increment.normalize();
@@ -209,6 +234,10 @@ void Camera::zoomOut(GLfloat amount)
 
 void Camera::roll(GLfloat amount)
 {
+    if (this->fixed) {
+        return;
+    }
+    
     Vector newUp;
     
     GLfloat radius = 1;
@@ -229,6 +258,10 @@ void Camera::roll(GLfloat amount)
 
 void Camera::rotateY(GLfloat amount)
 {
+    if (this->fixed) {
+        return;
+    }
+    
     Vector newPosition;    
     
     /* Calculate the radius of the orbit */
@@ -262,6 +295,10 @@ void Camera::rotateY(GLfloat amount)
 
 void Camera::rotateZ(GLfloat amount)
 {
+    if (this->fixed) {
+        return;
+    }
+    
     Vector newPosition;    
     
     /* Calculate the radius of the orbit */

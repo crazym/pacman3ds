@@ -33,16 +33,16 @@ public:
     void draw();
     
     void move();
-    void chooseMove(char side);
+    void chooseMove(GLint n, GLint s, GLint e, GLint w, GLboolean collided, GLint pacmanPositionX = 0, GLint pacmanPositionZ = 0);
     void setDirection(char direction);
-    void collide(GLint n, GLint s, GLint e, GLint w);
+    GLboolean collide(GLint n, GLint s, GLint e, GLint w);
     
     void initializeModel();
     void initPosition(GLfloat x, GLfloat y, GLfloat z);
     
-	void get_pac(GLint,GLint);
-	void get_bli(GLint,GLint);
-
+    GLint getRoundedX();
+    GLint getRoundedZ();
+    
     GLuint listID;
     GLuint textureID;
     GLfloat color[4];
@@ -52,12 +52,9 @@ public:
     GLfloat xVelocity;
     GLfloat zVelocity;
     
+    char direction;
+    
     GLuint myId;
-	GLfloat p_loc_x;
-	GLfloat p_loc_z;
-	
-	GLfloat b_loc_x;
-	GLfloat b_loc_z;
     
 private:
     GLUquadricObj *cylinder;

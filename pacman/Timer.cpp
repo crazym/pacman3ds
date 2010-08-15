@@ -16,10 +16,11 @@
 
 using namespace std;
 
-Timer::Timer(){
+Timer::Timer(string init){
 
 	time(&currentTime);
 	timerIsOn = false;
+	initTimerString = init;
 
 }
 
@@ -28,6 +29,13 @@ void Timer::startTimer(){
 	timerIsOn = true;
 	startTime = time(NULL);
 	cout << "starting timer .." << endl;
+
+}
+
+void Timer::startCountDown(int countDown){
+
+	timerIsOn = true;
+	countDownTo = time(NULL) + countDown;
 
 }
 
@@ -41,6 +49,12 @@ void print_stroke_string(void* font, char* s){
    glutPostRedisplay();
 }
 
+string Timer::runCountDown(){
+
+	time_t count = countDownTo - time(NULL);
+	return ctime(&count);
+
+}
 void Timer::drawTimer(){
 
 		char* timerstring;
@@ -49,19 +63,19 @@ void Timer::drawTimer(){
 			//get current time
 			currentTime = time(NULL);
 			//get timer string
-			timer_string = Timer::runTimer(currentTime - startTime);
+			timer_string = Timer::runTimeElapsed(currentTime - startTime);
 
 			//copy timer_string into char array
 			timerstring = new char[timer_string.length()+1];
 			strcpy(timerstring,timer_string.c_str());
 
-	//draw timer string
-	print_stroke_string(GLUT_STROKE_ROMAN,timerstring);
+			//draw timer string
+			print_stroke_string(GLUT_STROKE_ROMAN,timerstring);
 
-	}
-	else{
+		}
+		else{
 
-		timer_string = "PRESS START";
+		timer_string = initTimerString;
 		timerstring = new char[timer_string.length()+1];
 		strcpy(timerstring,timer_string.c_str());
 
@@ -72,10 +86,12 @@ void Timer::drawTimer(){
 void Timer::stopTimer(){
 
 	timerIsOn = false;
+	drawTimer();
+
 
 }
 
-string Timer::runTimer(time_t seconds){
+string Timer::runTimeElapsed(time_t seconds){
 
 	int years;
 	int months;
@@ -123,5 +139,16 @@ string Timer::runTimer(time_t seconds){
 
 		//cout << timestamp.str();
 		return timestamp.str();
+
+}
+
+int Timer::getTimeElapsed(){
+
+	return time(NULL) - startTime;
+}
+
+int Timer::getTimeLeft(){
+
+	return countDownTo - time(NULL);
 
 }
