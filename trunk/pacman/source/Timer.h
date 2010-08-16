@@ -16,6 +16,7 @@ class Timer{
 
 
 public:
+
 	Timer(string);
 	~Timer();
 
@@ -27,15 +28,21 @@ public:
 	void startCountDown(int);
 	string timer_string;
 	bool timerIsOn;
+	bool timerIsPaused;
+	bool countDownIsOn;
+	void pause();
+	void resume();
 
 private:
-	string runTimeElapsed(time_t);
-	string runTimeLeft(time_t);
+
+	string runTime(time_t);
 	string runCountDown();
 	time_t currentTime;
 	time_t startTime;
 	time_t countDownTo;
+	time_t pauseTime;
 	string initTimerString;
+
 };
 
 #endif /* TIMER_H_ */

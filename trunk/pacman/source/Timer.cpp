@@ -16,71 +16,90 @@
 
 using namespace std;
 
+void print_stroke_string(void* font, char* s);
+void print_bitmap_string();
+void drawString(string);
+
 Timer::Timer(string init){
 
 	time(&currentTime);
 	timerIsOn = false;
+	countDownIsOn = false;
 	initTimerString = init;
+	timerIsPaused = 0;
 
 }
 
 void Timer::startTimer(){
 
 	timerIsOn = true;
+	timerIsPaused = false;
 	startTime = time(NULL);
+	pauseTime = 0;
 	cout << "starting timer .." << endl;
 
 }
 
 void Timer::startCountDown(int countDown){
 
-	timerIsOn = true;
+	cout << "starting countdown .." << endl;
+	countDownIsOn = true;
+	//if(getTimeLeft()) countDown += getTimeLeft();
+	
+	//reset previous countdowns
+	countDownTo = 0;
 	countDownTo = time(NULL) + countDown;
 
 }
 
-void print_stroke_string(void* font, char* s){
-   if (s && strlen(s)) {
-      while (*s) {
-         glutStrokeCharacter(font, *s);
-         s++;
-      }
-   }
-   glutPostRedisplay();
-}
+
 
 string Timer::runCountDown(){
 
 	time_t count = countDownTo - time(NULL);
-	return ctime(&count);
+	return runTime(count);
 
 }
+
+
 void Timer::drawTimer(){
 
-		char* timerstring;
-		if(timerIsOn){
+		if(countDownIsOn){
 
-			//get current time
-			currentTime = time(NULL);
-			//get timer string
-			timer_string = Timer::runTimeElapsed(currentTime - startTime);
+			if(!timerIsPaused){
+							
+				timer_string = runCountDown();
+				drawString(timer_string);
+			}
 
-			//copy timer_string into char array
-			timerstring = new char[timer_string.length()+1];
-			strcpy(timerstring,timer_string.c_str());
+			if(getTimeLeft() <= 0) countDownIsOn = false;
+			
+		
 
-			//draw timer string
-			print_stroke_string(GLUT_STROKE_ROMAN,timerstring);
+		}
+		else if(timerIsOn){
+
+			if(timerIsPaused){
+
+			//display paused
+				drawString("paused");
+			}
+			else{
+
+				//get current time
+				currentTime = time(NULL);
+
+				//get timer string
+				timer_string = Timer::runTime(currentTime - startTime);
+				drawString(timer_string);
+			}
 
 		}
 		else{
-
-		timer_string = initTimerString;
-		timerstring = new char[timer_string.length()+1];
-		strcpy(timerstring,timer_string.c_str());
-
-		print_stroke_string(GLUT_STROKE_ROMAN,timerstring);
-	}
+			
+			timer_string = initTimerString;
+			drawString(timer_string);
+		}
 }
 
 void Timer::stopTimer(){
@@ -91,7 +110,7 @@ void Timer::stopTimer(){
 
 }
 
-string Timer::runTimeElapsed(time_t seconds){
+string Timer::runTime(time_t seconds){
 
 	int years;
 	int months;
@@ -99,6 +118,7 @@ string Timer::runTimeElapsed(time_t seconds){
 	int hours;
 	int minutes;
 	int secs;
+	
 	ostringstream timestamp;
 
 		years = seconds/31556926;
@@ -151,4 +171,75 @@ int Timer::getTimeLeft(){
 
 	return countDownTo - time(NULL);
 
+}
+
+
+
+//wrapper for drwaing string
+//makes print_stroke_string easier to use
+void drawString(string timeString){
+
+		char * drawString;
+		drawString = new char[timeString.length()+1];
+		strcpy(drawString,timeString.c_str());
+
+		print_stroke_string(GLUT_STROKE_ROMAN,drawString);
+		//print_bitmap_string(GLUT_BITMAP_HELVETICA_18,drawString);
+
+}
+
+Timer::~Timer(){}
+
+void Timer::pause(){
+
+	if(!timerIsPaused){
+
+		timerIsPaused = 1;
+		//store time difference
+		currentTime = time(NULL);
+		
+	}
+}
+
+void Timer::resume(){
+
+	if(timerIsPaused) timerIsPaused = 0;
+
+	//calculate pause time
+	pauseTime = time(NULL) - currentTime;
+	
+	//update start time to compensate for pause time
+	startTime += pauseTime;
+
+	//update countDownTo to compensate for pause time
+	countDownTo += pauseTime;
+
+}
+
+
+//functions lifed off the redbook.
+void print_stroke_string(void* font, char* s){
+   if (s && strlen(s)) {
+      while (*s) {
+         glutStrokeCharacter(font, *s);
+         s++;
+      }
+   }
+   glutPostRedisplay();
+}
+
+void print_bitmap_string (void* font, char *string)
+{
+	int x = 5;
+	int y = 5;
+
+	int len, i;
+	glRasterPos2f(x, y);
+	len = (int) strlen(string);
+	for (i = 0; i < len; i++)
+	{
+	 glutBitmapCharacter(font, string[i]);
+	}
+
+	glutPostRedisplay();
 }

@@ -31,7 +31,7 @@
 #define pacmanTexture3 "data/Textures/paper.raw"
 #else /* WINDOWS */
 #define pacmanTexture1 "data/Textures/pacman_skin.raw"
-#define pacmanTexture2 "data/Textures/pumpkin.raw"
+#define pacmanTexture2 "data/Textures/pacman-batman.raw"
 #define pacmanTexture3 "data/Textures/paper.raw"
 #endif
 
@@ -52,8 +52,8 @@ extern GLfloat pacman_paper_ambient_diffuse[];
 static int pac_atop=0;
 static int open=0;
 
-const GLfloat SPEED = 0.05;
-const GLfloat FRENZY_SPEED = 0.1;
+const GLfloat SPEED = 0.025;
+const GLfloat FRENZY_SPEED = 0.05;
 
 Pacman::Pacman()
 {
