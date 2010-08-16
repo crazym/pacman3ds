@@ -114,6 +114,7 @@
 #include "Camera.h"
 #include "Vector.h"
 #include "Common.h"
+#include "Menu.h"
 
 using namespace std;
 
@@ -142,6 +143,7 @@ static Ghost *ghost3;
 static Ghost *ghost4;
 
 static Map *map1;
+static Menu *menu1;
 
 static Lamp *lamp1;
 static Lamp *lamp2;
@@ -244,6 +246,8 @@ GLboolean isWireFrame =0;    // flag for setting wire frame mode
 GLboolean ambient_lighting_enabled = 1;
 GLboolean textures_enabled = 1;
 GLboolean color_material_enabled = 1;
+GLboolean menuEnabled = 0;
+GLboolean timerDisplay = 1;
 
  /*
  * Store initial lighting context after setup so that it may be restored
@@ -390,25 +394,33 @@ void display ()
     	glDisable(GL_COLOR_MATERIAL);
 
 
+	if(menuEnabled){ 
+	
+		glPushMatrix();	
+			glColor3f(1,1,1);
+			glScalef(0.01,0.01,0.01);
+			menu1->printMenu('0');
+		glPopMatrix();
+	}
 
+	if(timerDisplay){ 
+		
+		//draw game timer
+		glPushMatrix();
+			glColor3f(1,1,1);
+			glTranslatef(1,4.5,0);
+			glScalef(0.01,0.01,0.01);
+			timer1->drawTimer();
+		glPopMatrix();
 
-
-    //draw game timer
-    glPushMatrix();
-		glColor3f(1,1,1);
-		glTranslatef(3,4,0);
-		glScalef(0.01,0.01,0.01);
-		timer1->drawTimer();
-	glPopMatrix();
-
-    //draw powerup timer
-    glPushMatrix();
-		glColor3f(1,1,1);
-		glTranslatef(0,6,0);
-		glScalef(0.01,0.01,0.01);
-		timer2->drawTimer();
-	glPopMatrix();
-
+		//draw powerup timer
+		glPushMatrix();
+			glColor3f(1,1,1);
+			glTranslatef(1,3,0);
+			glScalef(0.01,0.01,0.01);
+			timer2->drawTimer();
+		glPopMatrix();
+	}
 
     pacman->draw();
     map1->draw(texturePellets, texturePPellets);
@@ -432,9 +444,7 @@ void enableFrenzyMode(bool frenzy)
 {
 	if(frenzy)
 	{
-        pacman->atePowerPellet();
-
-		//set pacmans outfit to batman
+       	//set pacmans outfit to batman
 		ProcessMenu(31);
 
 		/* Ambient Light Values */
@@ -491,8 +501,18 @@ void idle ()
 {
     /* Do nothing when paused */
     if (paused) {
+
+		timer1->pause();
+		timer2->pause();
+
         return;
     }
+	else{
+
+			if(timer1->timerIsPaused) timer1->resume();
+			if(timer2->timerIsPaused) timer2->resume();
+
+		}
     
     /* Setup For Collision */
     Vector pacmanPosition(pacman->x, pacman->y, pacman->z);
@@ -903,7 +923,8 @@ void idle ()
         if (distance < 0.7) {
             (*p_it)->powerPellet = false;
             powerPelletTiles.erase(p_it);
-            timer2->startTimer();
+			pacman->atePowerPellet();
+            timer2->startCountDown(15);
             enableFrenzyMode(1);
 
         }
@@ -950,17 +971,20 @@ void idle ()
 
 
 		//DISABLE ALL SPOTLIGHTS
-		functionKeys (GLUT_KEY_F9,0,0);
-		functionKeys (GLUT_KEY_F9,0,0);
+		//functionKeys (GLUT_KEY_F9,0,0);
+		//functionKeys (GLUT_KEY_F9,0,0);
+
+		//cout << "Time: "<<timer2->getTimeLeft() << endl;
 
 	}
 
-	if (timer2->getTimeElapsed()>30.0)
-	{
-		pacman->frenzy = 0;
-		enableFrenzyMode(0);
-		timer2->stopTimer();
-	}
+	if (!timer2->getTimeLeft())
+		{
+			pacman->frenzy = 0;
+			enableFrenzyMode(0);
+	
+		}
+
 
 	//
 	//
@@ -1086,7 +1110,22 @@ void graphicKeys (unsigned char key, int x, int y)
             resetViewParameters();
             break;
 
-            
+		//toggles menu
+		case 'm':
+
+			if(menuEnabled){
+
+				menuEnabled = 0;
+				timerDisplay = 1;
+			}
+			else{
+
+				menuEnabled = 1;
+				timerDisplay = 0;
+				paused = 1;
+			}
+			break;
+				
         case '1':
             ProcessMenu(5);
             break;
@@ -1563,6 +1602,7 @@ void initModels()
 		}
 	}
 
+
     //init scene
     glShadeModel(GL_SMOOTH);
 
@@ -1576,6 +1616,8 @@ void initModels()
     /* intitialize timers */
     timer1 = new Timer((string)"PRESS 't' TO START");
     timer2 = new Timer((string)"eat power pellets to power up");
+
+	menu1 = new Menu();
 
 	/* init characters */
     pacman = new Pacman();
@@ -1707,6 +1749,9 @@ void cleanup()
     delete ghost3;
     delete ghost4;
     delete map1;
+	delete menu1;
+	delete timer1;
+	delete timer2;
     delete lamp1;
     delete lamp2;
     delete lamp3;
