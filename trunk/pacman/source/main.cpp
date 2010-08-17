@@ -98,6 +98,7 @@
 #include <al/alut.h>
 */
 
+#include "audio.h"
 #include <cmath>
 #include <iostream>
 #include <sstream>
@@ -902,6 +903,7 @@ void idle ()
         if (distance < 0.7) {
             (*p_it)->pellet = false;
             pelletTiles.erase(p_it);
+		play_pacman_eating_audio();
         }
         
         /* Avoid an error when you eat the last pellet */
@@ -948,6 +950,12 @@ void idle ()
 	//PACMAN'S FRENZY makes lights go crazy
 	if (pacman->frenzy)
 	{
+			if(pacman->frenzy)
+		{
+	
+			play_frenzy_audio();
+		
+		}
 		int s_l=rand()%5;
 		switch (s_l)
 		{
@@ -982,6 +990,7 @@ void idle ()
 		{
 			pacman->frenzy = 0;
 			enableFrenzyMode(0);
+			//stop_frenzy_audio();
 	
 		}
 
@@ -1062,6 +1071,9 @@ void graphicKeys (unsigned char key, int x, int y)
             help();
             break;
             
+		case 'v':
+            stop_intro_audio();
+            break;		
         case 27:
             exit(0);
             break;
@@ -1520,6 +1532,7 @@ int main (int argc, char *argv[])
 
     initModels();
     
+	play_intro_audio();
     // Enter GLUT loop.
 	glutMainLoop();
 
@@ -1756,6 +1769,7 @@ void cleanup()
     delete lamp2;
     delete lamp3;
     delete lamp4;
+	//stop_intro_audio();
 }
 
 
