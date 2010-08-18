@@ -106,18 +106,18 @@
 #include <iomanip>
 #include <vector>
 
-#include "../include/audio.h"
-#include "../include/Ghost.h"
-#include "../include/Pacman.h"
-#include "../include/Material.h"
-#include "../include/Timer.h"
-#include "../include/Map.h"
-#include "../include/Tile.h"
-#include "../include/Lamp.h"
-#include "../include/Camera.h"
-#include "../include/Vector.h"
-#include "../include/Common.h"
-#include "../include/Menu.h"
+#include "audio.h"
+#include "Ghost.h"
+#include "Pacman.h"
+#include "Material.h"
+#include "Timer.h"
+#include "Map.h"
+#include "Tile.h"
+#include "Lamp.h"
+#include "Camera.h"
+#include "Vector.h"
+#include "Common.h"
+#include "Menu.h"
 
 using namespace std;
 
@@ -127,9 +127,10 @@ void initCameras();
 void initAudio();
 void setupLighting();
 void cleanup();
+void reset(GLuint loadLevel);
+void loadMap(GLuint load);
 
 void ProcessMenu(GLint value);
-void resetViewParameters();
 void functionKeys (int key, int x, int y);
 void graphicKeys (unsigned char key, int x, int y);
 void enterFullscreen();
@@ -146,7 +147,9 @@ static Ghost *ghost2;
 static Ghost *ghost3;
 static Ghost *ghost4;
 
-static Map *map1;
+static Map *currentMap;
+static Map map2;
+static Map map1;
 static Menu *menu1;
 
 static Lamp *lamp1;
@@ -228,6 +231,7 @@ static vector<Tile *>walls;
 static vector<Tile *>pelletTiles;
 static vector<Tile *>powerPelletTiles;
 
+GLboolean inMenu = 0;
 GLboolean multiplayer = 0;
 GLboolean paused = 1;
 GLboolean respawn = 0;
@@ -237,7 +241,7 @@ GLboolean isWireFrame =0;    // flag for setting wire frame mode
 GLboolean ambient_lighting_enabled = 1;
 GLboolean textures_enabled = 1;
 GLboolean color_material_enabled = 1;
-GLboolean menuEnabled = 0;
+GLboolean menuEnabled = 1;
 GLboolean timerDisplay = 1;
 GLboolean lifeDisplay = 1;
 GLboolean gameover = 0;
@@ -262,7 +266,7 @@ void openMap()
 
 	if(level == 1)
 	{
-		 indata.open("data/Maps/Level1.txt"); // opens the file
+		indata.open("data/Maps/Level1.txt"); // opens the file
 	}
 	if(level == 2)
 	{
@@ -291,48 +295,6 @@ void openMap()
 
 }
 
-void resetViewParameters()
-{
-	// resets 3D synthetic camera parameters to default values
-    currentCamera->reset();
-
-	viewWindowLeft =  -60;
-	viewWindowRight  = 60;
-	viewWindowBottom =  -60;
-	viewWindowTop  = 60;
-    
-	nearPlane =  60;
-	farPlane  = 120;
-    
-	fovy = 60;
-    
-	projType = 1;
-	idleEnable = 0;
-}
-
-
-void setView()
-{
-	// Must set it up in Projection Matrix
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-    
-	if(projType) {
-        gluPerspective(fovy, (GLfloat) 1.0, nearPlane, farPlane);
-    }
-	else {
-        glOrtho
-		(
-         viewWindowLeft,
-         viewWindowRight,
-         viewWindowBottom,
-         viewWindowTop,
-         nearPlane,
-         farPlane
-         );
-    }
-		
-}
 
 void zoom(unsigned char direction)
 {
@@ -414,42 +376,54 @@ void display ()
 		glPopMatrix();
 	}
 
-	if(lives>-1){
-		if(timerDisplay){ 
-			
-			//draw game timer
-			glPushMatrix();
-				glColor3f(1,1,1);
-				glTranslatef(1,4.5,0);
-				glScalef(0.01,0.01,0.01);
-				timer1->drawTimer();
-			glPopMatrix();
+	/*if(!menuEnabled&&inMenu)
+	{
+		//glPushMatrix();	
+			glColor3f(1,1,1);
+			//glScalef(0.01,0.01,0.01);
+			menu1->printMenu('1');
+		//glPopMatrix();
+	}*/
 
-			//draw powerup timer
-			glPushMatrix();
+	if(!menuEnabled)
+	{
+		if(lives>-1){
+			if(timerDisplay){ 
+				
+				//draw game timer
+				glPushMatrix();
+					glColor3f(1,1,1);
+					glTranslatef(1,4.5,0);
+					glScalef(0.01,0.01,0.01);
+					timer1->drawTimer();
+				glPopMatrix();
+
+				//draw powerup timer
+				glPushMatrix();
+					glColor3f(1,1,1);
+					glTranslatef(1,3,0);
+					glScalef(0.01,0.01,0.01);
+					timer2->drawTimer();
+				glPopMatrix();
+			}
+			
+			if(lifeDisplay){
+				//Display LIFE
+				glPushMatrix();
 				glColor3f(1,1,1);
-				glTranslatef(1,3,0);
+				glTranslatef(1,7,0);
 				glScalef(0.01,0.01,0.01);
-				timer2->drawTimer();
-			glPopMatrix();
-		}
-		
-		if(lifeDisplay){
-			//Display LIFE
-			glPushMatrix();
-			glColor3f(1,1,1);
-			glTranslatef(1,7,0);
-			glScalef(0.01,0.01,0.01);
-			timer1->drawLife(lives);
-			glPopMatrix();
-		}
-		if(scoreDisplay){
-			glPushMatrix();
-			glColor3f(1,1,1);
-			glTranslatef(1,9,0);
-			glScalef(0.01,0.01,0.01);
-			timer1->drawScore(score);
-			glPopMatrix();
+				timer1->drawLife(lives);
+				glPopMatrix();
+			}
+			if(scoreDisplay){
+				glPushMatrix();
+				glColor3f(1,1,1);
+				glTranslatef(1,9,0);
+				glScalef(0.01,0.01,0.01);
+				timer1->drawScore(score);
+				glPopMatrix();
+			}
 		}
 	}
 
@@ -466,14 +440,13 @@ void display ()
 			glPopMatrix();
 		}
 			
-		//resetViewParameters();
 	}
 
 
     pacman->draw();
 	if(multiplayer)
 		pacman2->draw();
-    map1->draw(texturePellets, texturePPellets);
+    currentMap->draw(texturePellets, texturePPellets);
     
     lamp1->draw();
     lamp2->draw();
@@ -817,13 +790,13 @@ void idle ()
         /************************/
         if (ghostNeedsToMove) {
             /* Get the ghosts position in the map array */
-            positionInMapArray = getPositionInMapArray(map1->columns, ghost1->getRoundedX(), ghost1->getRoundedZ());
+            positionInMapArray = getPositionInMapArray(currentMap->columns, ghost1->getRoundedX(), ghost1->getRoundedZ());
 
             /* Get the surrounding tiles and make a move */
             GLint northTile, southTile, eastTile, westTile;
             northTile = southTile = eastTile =  westTile = 0;
 
-            getSurroundingTiles(*map1, positionInMapArray, northTile, southTile, eastTile, westTile);
+            getSurroundingTiles(*currentMap, positionInMapArray, northTile, southTile, eastTile, westTile);
 
             ghost1->chooseMove(northTile, southTile, eastTile, westTile, ghostCollided, pacman->getRoundedX(), pacman->getRoundedZ());
         }
@@ -868,13 +841,13 @@ void idle ()
         /************************/
         if (ghostNeedsToMove) {
             /* Get the ghosts position in the map array */
-            positionInMapArray = getPositionInMapArray(map1->columns, ghost2->getRoundedX(), ghost2->getRoundedZ());
+            positionInMapArray = getPositionInMapArray(currentMap->columns, ghost2->getRoundedX(), ghost2->getRoundedZ());
 
             /* Get the surrounding tiles and make a move */
             GLint northTile, southTile, eastTile, westTile;
             northTile = southTile = eastTile =  westTile = 0;
 
-            getSurroundingTiles(*map1, positionInMapArray, northTile, southTile, eastTile, westTile);
+            getSurroundingTiles(*currentMap, positionInMapArray, northTile, southTile, eastTile, westTile);
 
             ghost2->chooseMove(northTile, southTile, eastTile, westTile, ghostCollided);
         }
@@ -917,13 +890,13 @@ void idle ()
         /************************/
         if (ghostNeedsToMove) {
             /* Get the ghosts position in the map array */
-            positionInMapArray = getPositionInMapArray(map1->columns, ghost3->getRoundedX(), ghost3->getRoundedZ());
+            positionInMapArray = getPositionInMapArray(currentMap->columns, ghost3->getRoundedX(), ghost3->getRoundedZ());
 
             /* Get the surrounding tiles and make a move */
             GLint northTile, southTile, eastTile, westTile;
             northTile = southTile = eastTile =  westTile = 0;
 
-            getSurroundingTiles(*map1, positionInMapArray, northTile, southTile, eastTile, westTile);
+            getSurroundingTiles(*currentMap, positionInMapArray, northTile, southTile, eastTile, westTile);
 
             ghost3->chooseMove(northTile, southTile, eastTile, westTile, ghostCollided);
         }
@@ -966,7 +939,7 @@ void idle ()
         /************************/
         if (ghostNeedsToMove) {
             /* Get the ghosts position in the map array */
-            positionInMapArray = getPositionInMapArray(map1->columns, ghost4->getRoundedX(), ghost4->getRoundedZ());
+            positionInMapArray = getPositionInMapArray(currentMap->columns, ghost4->getRoundedX(), ghost4->getRoundedZ());
             if (positionInMapArray == 198) {
                 cout << ghost4->x << endl;
                 cout << ghost4->z << endl;
@@ -977,7 +950,7 @@ void idle ()
             GLint northTile, southTile, eastTile, westTile;
             northTile = southTile = eastTile =  westTile = 0;
 
-            getSurroundingTiles(*map1, positionInMapArray, northTile, southTile, eastTile, westTile);
+            getSurroundingTiles(*currentMap, positionInMapArray, northTile, southTile, eastTile, westTile);
 
             ghost4->chooseMove(northTile, southTile, eastTile, westTile, ghostCollided);
         }
@@ -1009,13 +982,12 @@ void idle ()
 
 			play_pacman_eating_audio();
 			
-			
-			
 			score += 10;
         }
         
         /* Avoid an error when you eat the last pellet */
         if (p_it == pelletTiles.end()) 
+		//if (p_it == pelletTiles.begin()) 
         {
             break;
         }
@@ -1046,6 +1018,12 @@ void idle ()
             break;
         }
     }
+	
+	if (pelletTiles.empty() && powerPelletTiles.empty())
+	{
+		reset(2);
+		return;
+	}
 
 	/*************************
 	 *GHOST/PACMAN Collisions*
@@ -1054,9 +1032,10 @@ void idle ()
 	{
 		if((ghost1->x>(pacman->x-1)) && (ghost1->y>(pacman->y-1)) && (ghost1->z>(pacman->z-1))){
 			if(pacman->frenzy){
-				ghost1->x = 9.0;
+				/*ghost1->x = 9.0;
 				ghost1->y = 0.2;
-				ghost1->z = 11.0;
+				ghost1->z = 11.0;*/
+				ghost1->initPosition(15.0f, 0.2f, 13.0f);
 				g_dead= 1;
 			}
 			if(!pacman->frenzy)
@@ -1068,9 +1047,10 @@ void idle ()
 	{
 		if((ghost2->x>(pacman->x-1)) && (ghost2->y>(pacman->y-1)) && (ghost2->z>(pacman->z-1))){
 			if(pacman->frenzy){
-				ghost2->x = 10.0;
+				/*ghost2->x = 10.0;
 				ghost2->y = 0.2;
-				ghost2->z = 11.0;
+				ghost2->z = 11.0;*/
+				ghost2->initPosition(14.0f, 0.2f, 13.0f);
 				g_dead= 1;
 			}
 			if(!pacman->frenzy)
@@ -1082,9 +1062,10 @@ void idle ()
 	{
 		if((ghost3->x>(pacman->x-1)) && (ghost3->y>(pacman->y-1)) && (ghost3->z>(pacman->z-1))){
 			if(pacman->frenzy){
-				ghost3->x = 11.0;
+				/*ghost3->x = 11.0;
 				ghost3->y = 0.2;
-				ghost3->z = 11.0;
+				ghost3->z = 11.0;*/
+				ghost3->initPosition(13.0f, 0.2f, 13.0f);
 				g_dead= 1;
 			}
 			if(!pacman->frenzy)
@@ -1096,9 +1077,10 @@ void idle ()
 	{
 		if((ghost4->x>(pacman->x-1)) && (ghost4->y>(pacman->y-1)) && (ghost4->z>(pacman->z-1))){
 			if(pacman->frenzy){
-				ghost4->x = 10.0;
+				/*ghost4->x = 10.0;
 				ghost4->y = 0.2;
-				ghost4->z = 10.0;
+				ghost4->z = 10.0;*/
+				ghost4->initPosition(12.0f, 0.2f, 13.0f);
 				g_dead= 1;
 			}
 			if(!pacman->frenzy)
@@ -1110,7 +1092,7 @@ void idle ()
 	{
 			lives--;
 			dead = 0;
-			
+			/*
 			pacman->x = 1.0;
 			pacman->y = 0.2;
 			pacman->z = 3.0;
@@ -1129,7 +1111,12 @@ void idle ()
 
 			ghost4->x = 10.0;
 			ghost4->y = 0.2;
-			ghost4->z = 10.0;
+			ghost4->z = 10.0;*/
+			pacman->initPosition(14.0f, 0.2f, 15.0f);
+			ghost1->initPosition(15.0f, 0.2f, 13.0f);
+			ghost2->initPosition(14.0f, 0.2f, 13.0f);
+			ghost3->initPosition(13.0f, 0.2f, 13.0f);
+			ghost4->initPosition(12.0f, 0.2f, 13.0f);
 
 			respawn = 1;
 			timer1->startTimer();
@@ -1159,7 +1146,7 @@ void idle ()
 	if (pacman->frenzy)
 	{
 	
-		int s_l=rand()%5;
+		int s_l=rand()%4;
 		switch (s_l)
 		{
 			case 0:
@@ -1174,12 +1161,8 @@ void idle ()
 			case 3:
 				functionKeys (GLUT_KEY_F8,0,0);
 				break;
-			case 4:
-				functionKeys (GLUT_KEY_F9,0,0);
-				break;
-
 		}
-		
+		//functionKeys (GLUT_KEY_F9,0,0);
 
 		//DISABLE ALL SPOTLIGHTS
 		//functionKeys (GLUT_KEY_F9,0,0);
@@ -1188,6 +1171,7 @@ void idle ()
 		//cout << "Time: "<<timer2->getTimeLeft() << endl;
 
 	}
+
 
 	if (!timer2->getTimeLeft())
 		{
@@ -1230,7 +1214,7 @@ void reshapeMainWindow (int newWidth, int newHeight)
 	width = newWidth;
 	height = newHeight;
 	glViewport(0, 0, width, height);
-    setView();
+    currentCamera->setViewport();
 	glMatrixMode (GL_MODELVIEW);
 }
 
@@ -1268,150 +1252,183 @@ void help()
 // Parameters give key code and mouse coordinates.
 void graphicKeys (unsigned char key, int x, int y)
 {
-	switch (key)
+	if (menuEnabled)
 	{
-		case 'h':
-            help();
-            break;
+		switch (key)
+		{
+			case '1':
+				menuEnabled=!menuEnabled;
+				inMenu = !inMenu;
+				break;
+			case '2':
+				break;
+			case '3':
+				break;
+			/*case '4':
+				menuEnabled=!menuEnabled;
+				inMenu = 1;
+				break;*/
+			case 27:
+				exit(0);
+				break;
+			default:
+				break;
+		}
+	}
+	else
+		{
+		switch (key)
+		{
+			case 'h':
+				help();
+				break;
             
 
-        case 27:
-            exit(0);
-            break;
+			case 27:
+				exit(0);
+				break;
             
-        case 'p':
-            paused = 1 - paused;
-            break;
+			case 'p':
+				paused = 1 - paused;
+				break;
 
-		case 'z':
-			offset = ++offset%3;
-			ProcessMenu(offset + 2);
-			break;
+			case 'z':
+				offset = ++offset%3;
+				ProcessMenu(offset + 2);
+				break;
             
-		case 'x':
-			offset = ++offset%3;
-			ProcessMenu(offset + 33);
-		break;
+			case 'x':
+				offset = ++offset%3;
+				ProcessMenu(offset + 33);
+				break;
 
-		case 'c':
-			ProcessMenu(29);
-		break;
+			case 'c':
+				ProcessMenu(29);
+				break;
 
-		case 'b':
-			offset = ++offset%3;
-			ProcessMenu(offset + 30);
-		break;
+			case 'b':
+				offset = ++offset%3;
+				ProcessMenu(offset + 30);
+				break;
 
-        case 'w':
-            currentCamera->moveForward(moveStep);
-            break;
-        case 's':
-            currentCamera->moveBackward(moveStep);
-            break;
-        case 'a':
-            currentCamera->moveLeft(moveStep);
-            break;
-        case 'd':
-            currentCamera->moveRight(moveStep);
-            break;
-		case '=':
-        case '+':
-			currentCamera->zoomIn(zoomStep);
-            break;
-		case '-':
-			currentCamera->zoomOut(zoomStep);
-            break;
-        case ']':
-            currentCamera->roll(rotStep);
-            break;
-        case '[':
-            currentCamera->roll(-rotStep);
-            break;
-        case 'f':
-            fullscreen = 1 - fullscreen;
+			case 'w':
+				currentCamera->moveForward(moveStep);
+				break;
+			case 's':
+				currentCamera->moveBackward(moveStep);
+				break;
+			case 'a':
+				currentCamera->moveLeft(moveStep);
+				break;
+			case 'd':
+				currentCamera->moveRight(moveStep);
+				break;
+			case '=':
+				currentCamera->zoomIn(zoomStep);
+				break;
+			case '-':
+				currentCamera->zoomOut(zoomStep);
+				break;
+			case '+':
+				currentCamera->zoomWithFovy(-zoomStep);
+				break;
+			case '_':
+				currentCamera->zoomWithFovy(zoomStep);
+				break;
+			case ']':
+				currentCamera->roll(rotStep);
+				break;
+			case '[':
+				currentCamera->roll(-rotStep);
+				break;
+			case 'f':
+				fullscreen = 1 - fullscreen;
 
-            if (fullscreen) {
-                enterFullscreen();
-            } else {
-                exitFullscreen();
-            }
+				if (fullscreen) {
+					enterFullscreen();
+				} else {
+					exitFullscreen();
+				}
 
-            break;
-        case 'r':
-            resetViewParameters();
-            break;
+				break;
+			case 'r':
+				currentCamera = &mainCam;
+				currentCamera->reset();
+				break;
 
-		//toggles menu
-		case 'm':
+			//toggles menu
+			case 'm':
 
-			/*if(menuEnabled){
+				/*if(menuEnabled){
 
-				menuEnabled = 0;
-				timerDisplay = 1;
-				g_o_display = 0;
-			}
-			else{*/
+					menuEnabled = 0;
+					timerDisplay = 1;
+					g_o_display = 0;
+				}
+				else{*/
 
-				menuEnabled = 1;
-				timerDisplay = 0;
-				lifeDisplay = 0;
-				scoreDisplay = 0;
-				paused = 1;
-				g_o_display = 0;
-			//}
-			break;
-				
-        case '1':
-            ProcessMenu(5);
-            break;
-        case '2':
-            ProcessMenu(6);
-            break;
-        case '3':
-            ProcessMenu(7);
-            break;
-        case '4':
-            ProcessMenu(8);
-            break;
-        case '5':
-            ProcessMenu(9);
-            break;
-        case '6':
-            ProcessMenu(10);
-            break;
-        case '7':
-            ProcessMenu(11);
-            break;
-        case '8':
-            ProcessMenu(12);
-            break;
-        case '9':
-            ProcessMenu(13);
-            break;
-        case '0':
-            ProcessMenu(16);
-            break;
+					menuEnabled = 1;
+					timerDisplay = 0;
+					lifeDisplay = 0;
+					scoreDisplay = 0;
+					paused = 1;
+					g_o_display = 0;
+				//}
+				break;
+					
+			case '1':
+				ProcessMenu(5);
+				break;
+			case '2':
+				ProcessMenu(6);
+				break;
+			case '3':
+				ProcessMenu(7);
+				break;
+			/*case '4':
+				ProcessMenu(8);
+				break;*/
+			case '5':
+				ProcessMenu(9);
+				break;
+			case '6':
+				ProcessMenu(10);
+				break;
+			case '7':
+				ProcessMenu(11);
+				break;
+			case '8':
+				ProcessMenu(12);
+				break;
+			case '9':
+				ProcessMenu(13);
+				break;
+			case '0':
+				ProcessMenu(16);
+				break;
 
-        case 't' :
-            /*if(timer1->timerIsOn){
+			case 'T' :
+			case 't' :
+				/*if(timer1->timerIsOn){
 
-				paused = 1;
-            	timer1->stopTimer();
-            }
-            else{*/
-				
-			if(t_flag==0)
-			{
-				paused = 0;
-				respawn = 0;
-				timer1->startTimer();
-			}
-			t_flag++;
-            //}
-            break;
+					paused = 1;
+            		timer1->stopTimer();
+				}
+				else{*/
+					
+				if(t_flag==0)
+				{
+					paused = 0;
+					respawn = 0;
+					timer1->startTimer();
+				}
+				t_flag++;
+				//}
+				break;
 
-        default:
-            cout << key << endl;
+			default:
+				cout << key << endl;
+		}
 	}
     glutPostRedisplay();
 }
@@ -1621,7 +1638,8 @@ void functionKeys (int key, int x, int y)
    switch (key)
    {
        case GLUT_KEY_F10:
-           resetViewParameters();
+		   currentCamera = &mainCam;
+		   currentCamera->reset();
            break;
            
        case GLUT_KEY_F1:
@@ -1760,13 +1778,6 @@ int main (int argc, char *argv[])
     // Display help.
 	help();
 
-
-
-	level=1; // Setting level 2
-
-
-
-
     initModels();
     
 	play_intro_audio();
@@ -1853,7 +1864,7 @@ void initModels()
 	}
 
 	//Initializing lives, timer
-	lives = 0;
+	lives = 3;
 
     //init scene
     glShadeModel(GL_SMOOTH);
@@ -1873,52 +1884,23 @@ void initModels()
 
 	/* init characters */
     pacman = new Pacman();
-    pacman->initPosition(1.0f, 0.2f, 3.0f);
+    pacman->initPosition(14.0f, 0.2f, 15.0f);
     
     ghost1 = new Ghost(1.0, 0.0, 0.0);
     ghost2 = new Ghost(0.0, 1.0, 0.0);
     ghost3 = new Ghost(1.0, 0.5, 0.7);
     ghost4 = new Ghost(1.0, 0.5, 0.0);
     
-    ghost1->initPosition(9.0f,  0.2f, 11.0f);
-    ghost2->initPosition(10.0f, 0.2f, 11.0f);
-    ghost3->initPosition(11.0f, 0.2f, 11.0f);
-    ghost4->initPosition(10.0f, 0.2f, 10.0f);
+    ghost1->initPosition(15.0f,  0.2f, 13.0f);
+    ghost2->initPosition(14.0f, 0.2f, 13.0f);
+    ghost3->initPosition(13.0f, 0.2f, 13.0f);
+    ghost4->initPosition(12.0f, 0.2f, 13.0f);
     
     /* init map */
     srand(time(NULL)); //seed rand for pellet colours
-   
-	if(level == 1)
-	{
+	
+	loadMap(level);
 
-		openMap(); // Reading map from file to map 
-		map1 = new Map(map, 23, 21);
-	}
-	if(level == 2)
-	{
-		openMap(); // Reading map from file to map 
-		map1 = new Map(map, 28, 28);
-	}
-    
-    /* Create a vector of walls for collision detection */
-    /* Create another vector of tiles with pellets for more detection */
-    vector<Tile *>::const_iterator t_it;    
-    for (t_it = map1->tiles.begin(); t_it != map1->tiles.end(); ++t_it) 
-    {
-        
-        if ((*t_it)->type == 'W') {
-            walls.push_back((*t_it));
-        }
-        
-        if ((*t_it)->type == 'Z') {
-            pelletTiles.push_back((*t_it));
-        }
-
-        if ((*t_it)->type == 'X') {
-            powerPelletTiles.push_back((*t_it));
-        }
-    }
-    
     /* init cameras */
     initCameras();
     
@@ -2011,7 +1993,6 @@ void cleanup()
     delete ghost2;
     delete ghost3;
     delete ghost4;
-    delete map1;
 	delete menu1;
 	delete timer1;
 	delete timer2;
@@ -2114,11 +2095,67 @@ void switchCamera(GLuint camera)
     }
 }
 
-void initLights(){
+void reset(GLuint loadLevel)
+{
+	currentCamera = &mainCam;
+	currentCamera->reset();
 
+	ghost1->initPosition(15.0f,  0.2f, 13.0f);
+    ghost2->initPosition(14.0f, 0.2f, 13.0f);
+    ghost3->initPosition(13.0f, 0.2f, 13.0f);
+    ghost4->initPosition(12.0f, 0.2f, 13.0f);
+
+	pacman->initPosition(14.0f, 0.2f, 15.0f);
+	enableFrenzyMode(0);
+
+	loadMap(loadLevel);
+
+	t_flag = 0;
+	paused = 1;
+	timer1->stopTimer();
 }
 
-void initAudio()
+void loadMap(GLuint load)
 {
+	level = load;
+
+	if(level == 1)
+	{
+
+		openMap(); // Reading map from file to map 
+		map1.initializeMap(map, 28, 28);
+		currentMap = &map1;
+	}
+	if(level == 2)
+	{
+		openMap(); // Reading map from file to map 
+		map2.initializeMap(map, 28, 28);
+		currentMap = &map2;
+	}
+
+
+
+	walls.clear();
+	pelletTiles.clear();
+	powerPelletTiles.clear();
+
+	/* Create a vector of walls for collision detection */
+    /* Create another vector of tiles with pellets for more detection */
+    vector<Tile *>::const_iterator t_it;    
+    for (t_it = currentMap->tiles.begin(); t_it != currentMap->tiles.end(); ++t_it) 
+    {      
+        if ((*t_it)->type == 'W') {
+            walls.push_back((*t_it));
+        }
+        
+        if ((*t_it)->type == 'Z') {
+            pelletTiles.push_back((*t_it));
+        }
+
+        if ((*t_it)->type == 'X') {
+            powerPelletTiles.push_back((*t_it));
+        }
+    }
+    
 
 }

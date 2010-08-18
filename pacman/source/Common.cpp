@@ -8,10 +8,10 @@
  *  Reference: http://nehe.gamedev.net/data/lessons/lesson.asp?lesson=30
  */
 
-#include "../include/Common.h"
-#include "../include/Vector.h"
-#include "../include/Tile.h"
-#include "../include/Map.h"
+#include "Common.h"
+#include "Vector.h"
+#include "Tile.h"
+#include "Map.h"
 
 #include <cmath>
 #include <iostream>
@@ -209,4 +209,44 @@ void getSurroundingTiles(const Map& theMap, GLint position, GLint& northTile, GL
     {
         southTile = 0;
     }
+}
+
+//functions lifed off the redbook.
+void print_stroke_string(void* font, char* s){
+   if (s && strlen(s)) {
+      while (*s) {
+         glutStrokeCharacter(font, *s);
+         s++;
+      }
+   }
+   glutPostRedisplay();
+}
+
+void print_bitmap_string (void* font, char *string)
+{
+	int x = 5;
+	int y = 5;
+
+	int len, i;
+	glRasterPos2f(x, y);
+	len = (int) strlen(string);
+	for (i = 0; i < len; i++)
+	{
+	 glutBitmapCharacter(font, string[i]);
+	}
+
+	glutPostRedisplay();
+}
+
+
+//wrapper for drwaing string
+//makes print_stroke_string easier to use
+void drawString(string timeString){
+
+		char * drawString;
+		drawString = new char[timeString.length()+1];
+		strcpy(drawString,timeString.c_str());
+
+		//print_stroke_string(GLUT_STROKE_ROMAN,drawString);
+		print_bitmap_string(GLUT_BITMAP_HELVETICA_18,drawString);
 }

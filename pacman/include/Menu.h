@@ -22,9 +22,9 @@ class Menu{
 
 	private:
 
-		void print_bitmap_string (void* font, char *string);
-		void print_stroke_string(void* font, char* s);
-		void drawString(string timeString);
+		//void print_bitmap_string (void* font, char *string);
+		//void print_stroke_string(void* font, char* s);
+		//void drawString(string timeString);
 		ostringstream MenuString;
 };
 #endif

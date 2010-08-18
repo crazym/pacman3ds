@@ -8,10 +8,10 @@
  *      http://www.opengl.org/documentation/red_book/
  */
 
-#include "../include/Ghost.h"
+#include "Ghost.h"
 
-#include "../include/Common.h"
-#include "../include/textures.h"
+#include "Common.h"
+#include "textures.h"
 
 #ifdef __APPLE__ /* OS X */
 #define ghostTexture "ghostbody.raw"
@@ -30,6 +30,7 @@ extern GLfloat ghost_white[];
 GLuint Ghost::current_id = 0;
 
 const static GLfloat SPEED = 0.05;
+const GLuint MAPBOUNDARY = 28;
 
 Ghost::Ghost()
 {
@@ -324,11 +325,11 @@ GLboolean Ghost::collide(GLint n, GLint s, GLint e, GLint w)
     /*********************/
     if (this->x <= 0.5) 
     {
-        this->x = 20;
+        this->x = MAPBOUNDARY - 1;
         this->setDirection('w');
     }
     
-    if (this->x >= 20.5) 
+    if (this->x >= MAPBOUNDARY - 0.5) 
     {
         this->x = 1;
         this->setDirection('e');
@@ -411,6 +412,18 @@ void Ghost::chooseMove(GLint n, GLint s, GLint e, GLint w, GLboolean collided, G
                     {
                         setDirection('s');
                     }
+					else if (!w)
+					{
+						setDirection('w');
+					}
+					else if (!e)
+					{
+						setDirection('e');
+					}
+					else if (!n)
+					{
+						setDirection('n');
+					}
                     break;
                     
                 case 'e': 
@@ -431,6 +444,18 @@ void Ghost::chooseMove(GLint n, GLint s, GLint e, GLint w, GLboolean collided, G
                     {
                         setDirection('e');
                     }
+					else if (!n)
+					{
+						setDirection('n');
+					}
+					else if (!s)
+					{
+						setDirection('s');
+					}
+					else if (!w)
+					{
+						setDirection('w');
+					}
                     break;
                     
                 default:

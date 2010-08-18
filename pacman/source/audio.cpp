@@ -12,9 +12,11 @@
 
 // start the sound engine with default parameters
 
-#include "../include/irrKlang.h"
+#include "irrKlang.h"
+
 
 using namespace irrklang;
+
 
 ISoundEngine* intro_audio = createIrrKlangDevice();
 ISoundEngine* game_ended_audio = createIrrKlangDevice();

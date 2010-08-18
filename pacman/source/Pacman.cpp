@@ -12,11 +12,11 @@
  */
 
 
-#include "../include/Pacman.h"
-#include "../include/Common.h"
-#include "../include/textures.h"
-#include "../include/Material.h"
-#include "../include/Common.h"
+#include "Pacman.h"
+#include "Common.h"
+#include "textures.h"
+#include "Material.h"
+#include "Common.h"
 
 #include <cmath>
 #include <iostream>
@@ -55,9 +55,10 @@ extern GLfloat pacman_paper_ambient_diffuse[];
 static int pac_atop=0;
 static int open=0;
 
-//const GLfloat SPEED = 0.025;
 const GLfloat SPEED = 0.05;
 const GLfloat FRENZY_SPEED = 0.07;
+
+const GLuint MAPBOUNDARY = 28;
 
 Pacman::Pacman()
 {
@@ -356,16 +357,17 @@ void Pacman::move()
 
 void Pacman::collide(GLint n, GLint s, GLint e, GLint w)
 {
+
     /*********************/
     /* Detect End of Map */
     /*********************/
     if (this->x <= 0.5) 
     {
-        this->x = 20;
+        this->x = MAPBOUNDARY - 1;
         this->setDirection('w');
     }
     
-    if (this->x >= 20.5) 
+    if (this->x >= MAPBOUNDARY - 0.5) 
     {
         this->x = 1;
         this->setDirection('e');

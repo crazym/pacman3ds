@@ -31,6 +31,7 @@ class Tile;
 
 class Map {
 public:
+	Map();
     Map(char* map, GLint rows, GLint columns);
     ~Map();
     

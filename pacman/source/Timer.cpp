@@ -5,7 +5,8 @@
  *      Author: sid
  */
 
-#include "../include/Timer.h"
+#include "Timer.h"
+#include "Common.h"
 #include <ctime>
 #include <iostream>
 #include <sstream>
@@ -16,8 +17,6 @@
 
 using namespace std;
 
-void print_stroke_string(void* font, char* s);
-void print_bitmap_string();
 void drawString(string);
 
 
@@ -221,21 +220,6 @@ int Timer::getTimeLeft(){
 
 }
 
-
-
-//wrapper for drwaing string
-//makes print_stroke_string easier to use
-void drawString(string timeString){
-
-		char * drawString;
-		drawString = new char[timeString.length()+1];
-		strcpy(drawString,timeString.c_str());
-
-		print_stroke_string(GLUT_STROKE_ROMAN,drawString);
-		//print_bitmap_string(GLUT_BITMAP_HELVETICA_18,drawString);
-
-}
-
 Timer::~Timer(){}
 
 void Timer::pause(){
@@ -265,29 +249,3 @@ void Timer::resume(){
 }
 
 
-//functions lifed off the redbook.
-void print_stroke_string(void* font, char* s){
-   if (s && strlen(s)) {
-      while (*s) {
-         glutStrokeCharacter(font, *s);
-         s++;
-      }
-   }
-   glutPostRedisplay();
-}
-
-void print_bitmap_string (void* font, char *string)
-{
-	int x = 5;
-	int y = 5;
-
-	int len, i;
-	glRasterPos2f(x, y);
-	len = (int) strlen(string);
-	for (i = 0; i < len; i++)
-	{
-	 glutBitmapCharacter(font, string[i]);
-	}
-
-	glutPostRedisplay();
-}

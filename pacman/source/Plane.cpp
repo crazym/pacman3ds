@@ -7,7 +7,7 @@
  *
  */
 
-#include "../include/Plane.h"
+#include "Plane.h"
 
 Plane::Plane(const Vector &position, const Vector &normal)
 {

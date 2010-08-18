@@ -54,7 +54,7 @@
 
 
 
-#include "../include/Cube.h"
+#include "Cube.h"
 
 static void
 drawBox(GLfloat size, GLenum type, GLuint textureID)
