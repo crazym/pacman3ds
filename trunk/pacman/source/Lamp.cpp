@@ -7,8 +7,8 @@
  *
  */
 
-#include "../include/Lamp.h"
-#include "../include/textures.h"
+#include "Lamp.h"
+#include "textures.h"
 #include <iostream>
 
 #ifdef __APPLE__ /* OS X */

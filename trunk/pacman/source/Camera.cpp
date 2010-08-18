@@ -9,17 +9,17 @@
  *  Reference: http://nehe.gamedev.net/data/articles/article.asp?article=08
  */
 
-#include "../include/Camera.h"
-#include "../include/Vector.h"
-#include "../include/Common.h"
+#include "Camera.h"
+#include "Vector.h"
+#include "Common.h"
 
 #include <cmath>
 #include <iostream>
 
 #define radians 0.0174532925
 
-const GLdouble initial_eye[3] = {10.0, 30.0, 35.0};
-const GLdouble initial_center[3] = {10.0, 2.0, 11.0};
+const GLdouble initial_eye[3] = {14.0, 30.0, 35.0};
+const GLdouble initial_center[3] = {14.0, 2.0, 11.0};
 const GLdouble initial_up[3] = {0.0, 1.0, 0.0};
 
 Camera::Camera(GLuint fixed)
@@ -43,8 +43,28 @@ void Camera::reset()
     this->center.setZ(initial_center[2]);
     
     this->yRotation = 85;
-    this->xRotation = -275;
     this->zRotation = 40;
+    
+    this->pitchAmount = 0;
+    this->yawAmount = 0;
+    this->rollAmount = 85;
+
+    this->fovy = 60;
+    this->nearPlane = 1.5;
+    this->farPlane = 120;
+    
+    setViewport();
+}
+
+
+void Camera::setViewport()
+{
+    // Must set it up in Projection Matrix
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+    
+    gluPerspective(this->fovy, (GLfloat) 1.0, this->nearPlane, this->farPlane);
+    glMatrixMode(GL_MODELVIEW);
 }
 
 
@@ -211,6 +231,12 @@ void Camera::zoomIn(GLfloat amount)
     setCenter(newCenter);
 }
 
+void Camera::zoomWithFovy(GLfloat amount)
+{
+    this->fovy += amount;
+    setViewport();
+}
+
 
 void Camera::zoomOut(GLfloat amount)
 {
@@ -231,7 +257,9 @@ void Camera::zoomOut(GLfloat amount)
     setCenter(newCenter);
 }
 
-
+/**************************/
+/* Camera Rolls Around Z  */
+/**************************/
 void Camera::roll(GLfloat amount)
 {
     if (this->fixed) {
@@ -242,20 +270,90 @@ void Camera::roll(GLfloat amount)
     
     GLfloat radius = 1;
     
-    this->xRotation += amount;
-    if (this->xRotation > 359) {
-        this->xRotation = 0;
+    this->rollAmount += amount;
+    if (this->rollAmount > 359) {
+        this->rollAmount = 0;
     }
     
-    newUp.setX( this->up.getX()+ radius * cos(this->xRotation*radians) );
-    newUp.setY( this->up.getY()+ radius * sin(this->xRotation*radians) );
+    /* calculate the vector using circle equation: 
+     x = a + r cos t
+     y = b + r sin t
+     
+     where: x,y are the new position; a,b is the center of the circle; t is the
+     angle formed from the origin to x,y and the x-axis.
+     */
+    newUp.setX( this->up.getX() + radius * cos(this->rollAmount*radians) );
+    newUp.setY( this->up.getY() + radius * sin(this->rollAmount*radians) );
     newUp.setZ( 0 );
     
     newUp.normalize();
     setUp(newUp);
 }
 
+void Camera::pitch(GLfloat amount)
+{
+    if (this->fixed) {
+        return;
+    }
+    
+    Vector newUp;
+    Vector newCenter;
+    
+    GLfloat radius = 1;
+    
+    this->pitchAmount += amount;
+    if (this->pitchAmount > 359 || this->pitchAmount < -359) 
+    {
+        this->pitchAmount = 0;
+    }
+    
+    newUp.setX( this->up.getX() );
+    newUp.setY( /*this->up.getY()* +*/ radius * cos(this->pitchAmount*radians) );
+    newUp.setZ( /*this->up.getZ() - */ radius * sin(this->pitchAmount*radians) );
+    
+    newUp.normalize();
+    
+    newCenter.setX( this->center.getX() );
+    newCenter.setY( this->center.getY() - getDistance() * cos(this->pitchAmount*radians) );
+    newCenter.setZ( this->center.getZ() - getDistance() * sin(this->pitchAmount*radians) );
+    
+    setUp(newUp);
+    setCenter(newCenter);
+    
+    cout << newUp << endl;
+    
+    cout << newCenter << endl;
+    
+    cout << pitchAmount << endl;
+}
 
+void Camera::yaw(GLfloat amount)
+{
+    if (this->fixed) {
+        return;
+    }
+    
+    Vector newCenter;
+    
+    GLfloat radius = getDistance();
+    
+    this->yawAmount += amount;
+    if (this->yawAmount > 359) 
+    {
+        this->yawAmount = 0;
+    }
+    
+    newCenter.setX( this->position.getX() + radius * cos(this->yawAmount*radians) );
+    newCenter.setY( this->center.getY() );
+    newCenter.setZ( this->position.getZ() + radius * sin(this->yawAmount*radians) );
+    
+    setCenter(newCenter);
+}
+
+
+/*********************************/
+/*  Camera Orbits around Y Axis  */
+/*********************************/
 void Camera::rotateY(GLfloat amount)
 {
     if (this->fixed) {
@@ -293,6 +391,10 @@ void Camera::rotateY(GLfloat amount)
     setPosition(newPosition);
 }
 
+
+/**********************************/
+/* Camera Orbits around Z Axis    */
+/**********************************/
 void Camera::rotateZ(GLfloat amount)
 {
     if (this->fixed) {

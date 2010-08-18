@@ -14,11 +14,12 @@ main menu
 #include <string.h>
 #include <cstring>
 
-#include "../include/Menu.h"
+#include "Menu.h"
+#include "Common.h"
 
 using namespace std;
 
-void Menu::print_bitmap_string (void* font, char *string)
+/*void print_bitmap_string (void* font, char *string)
 {
 	int x = 5;
 	int y = 3;
@@ -37,7 +38,7 @@ void Menu::print_bitmap_string (void* font, char *string)
 	}
 
 	glutPostRedisplay();
-}
+}*/
 
 
 
@@ -58,18 +59,22 @@ void Menu::print_stroke_string(void* font, char* s){
 */
 
 
+
+
 //wrapper for drwaing string
 //makes print_stroke_string easier to use
-void Menu::drawString(string timestring){
+/*void Menu::drawString(string timeString){
 
 		char * drawstring;
 		drawstring = new char[timestring.length()+1];
-		strcpy(drawstring,timestring.c_str());
+		strcpy(drawString,timeString.c_str());
 
-		//print_stroke_string(GLUT_STROKE_ROMAN,drawstring);
-		print_bitmap_string(GLUT_BITMAP_HELVETICA_18,drawstring);
+		print_stroke_string(GLUT_STROKE_ROMAN,drawstring);
+		//print_bitmap_string(GLUT_BITMAP_HELVETICA_18,drawstring);
 
-}
+}*/
+
+
 
 void Menu::printMenu(char level){
 
@@ -107,15 +112,6 @@ void Menu::printMenu(char level){
 	switch(level){
 
 
-		case '1' :
-
-
-			for(; i < 24; i++){
-					
-				glTranslatef(0,-1,0);
-				drawString(hmenuString[i]);
-		
-			}
 		
 		/*
 
@@ -150,7 +146,6 @@ void Menu::printMenu(char level){
 
 		*/
 
-		break;
 
 
 		//level zero
@@ -161,14 +156,14 @@ void Menu::printMenu(char level){
 					glTranslatef(0,2,0);
 					drawString("1.single player");
 				 
-					glTranslatef(0,-3,0);
+					/*glTranslatef(0,-3,0);
 					drawString("2.automated scene");
 				
 					glTranslatef(0,-3,0);
-					drawString("3.multiplayer");
+					drawString("3.multiplayer");*/
 
-					glTranslatef(0,-3,0);
-					drawString("4.help");
+					/*glTranslatef(0,-3,0);
+					drawString("4.help");*/
 
 					glTranslatef(0,-3,0);
 					drawString("Esc: quit");
@@ -177,11 +172,23 @@ void Menu::printMenu(char level){
 
 		break;
 
+		
+		case '1' :
 
+
+			for(; i < 24; i++){
+				glPushMatrix();
+				glTranslatef(0,10-2*i,0);
+				drawString(hmenuString[i]);
+				glPopMatrix();
+			}
+			
+		break;
 
 		default:
 
 			cout << "wrong choice" << endl;
+			break;
 
 
 	}

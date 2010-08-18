@@ -42,5 +42,7 @@ void testWallCollision(const Vector& position, const Tile& wall, GLint& n, GLint
 GLint getPositionInMapArray(GLint cols, GLint x, GLint z);
 void getSurroundingTiles(const Map& theMap, GLint position, GLint& northTile, GLint& southTile, GLint& eastTile, GLint& westTile);
 void shadow();
-
+void print_stroke_string(void* font, char* s);
+void print_bitmap_string (void* font, char *string);
+void drawString(string timeString);
 #endif

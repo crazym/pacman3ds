@@ -8,7 +8,7 @@
  *  Modified by bronson
  */
 
-#include "../include/Vector.h"
+#include "Vector.h"
 Vector::Vector():
 x(0), y(0), z(0)
 {

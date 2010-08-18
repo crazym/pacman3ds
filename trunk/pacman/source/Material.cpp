@@ -6,7 +6,7 @@
  *  Copyright 2010 Concordia University. All rights reserved.
  *
  */
-#include "../include/Material.h"
+#include "Material.h"
 
 GLfloat no_mat[]            = { 0.0, 0.0, 0.0, 1.0 };
 GLfloat mat_ambient[]       = { 0.5, 0.5, 0.5, 1.0 };
@@ -67,9 +67,9 @@ GLfloat spotlightPosition3[] = { 0.5f, 4.0f, 21.5f, 1.0f };
 GLfloat spotlightPosition4[] = { 19.5f, 4.0f, 21.5f, 1.0f };
 
 GLfloat streetlightPosition1[] = { 0.5f, 1.0f, 0.5f, 1.0f };
-GLfloat streetlightPosition2[] = { 19.5f, 1.0f, 0.5f, 1.0f };
-GLfloat streetlightPosition3[] = { 0.5f, 1.0f, 21.5f, 1.0f };
-GLfloat streetlightPosition4[] = { 19.5f, 1.0f, 21.5f, 1.0f };
+GLfloat streetlightPosition2[] = { 26.5f, 1.0f, 0.5f, 1.0f };
+GLfloat streetlightPosition3[] = { 0.5f, 1.0f, 26.5f, 1.0f };
+GLfloat streetlightPosition4[] = { 26.5f, 1.0f, 26.5f, 1.0f };
 /*GLfloat spotlightDirection1[] = { 1.0f, 0.0f, 1.0f};
 GLfloat spotlightDirection2[] = { -1.0f, 0.0f, 1.0f};
 GLfloat spotlightDirection3[] = { 1.0f, 0.0f, -1.0f};

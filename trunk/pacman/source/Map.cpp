@@ -7,13 +7,17 @@
  *
  */
 
-#include "../include/Map.h"
-#include "../include/Tile.h"
+#include "Map.h"
+#include "Tile.h"
 
 #include <iostream>
 #include <vector>
 
 using namespace std;
+
+Map::Map()
+{
+}
 
 Map::Map(char* map, GLint rows, GLint columns)
 {
