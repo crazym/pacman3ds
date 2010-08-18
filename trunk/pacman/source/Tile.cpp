@@ -145,8 +145,10 @@ GLfloat Tile::Color(int key){
 		return 0.3;
 	case 1:
 		return 0.8;
+    default:
+        return 1.0;
 	}
-
+    return 1.0;
 }
 
 void Tile::draw(GLint texturePellets, GLint texturePPellets)

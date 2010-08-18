@@ -13,7 +13,21 @@
 
 #include "stdio.h"
 #include "string.h"
+
+#ifdef __APPLE__ /* OS X */
+#include <cstdlib>
+#include <GLUT/glut.h>
+#elif defined(__linux__) /* LINUX */
+#include <stdlib.h>
+#include <GL/gl.h>
+#include <GL/glu.h>
 #include <GL/glut.h>
+#else /* WINDOWS */
+#include <stdlib.h>
+#include <windows.h>
+#include <GL/glut.h>
+#include <ctime>
+#endif
 
 using namespace std;
 

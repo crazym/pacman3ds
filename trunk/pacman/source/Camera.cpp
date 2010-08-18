@@ -53,7 +53,7 @@ void Camera::reset()
     this->nearPlane = 1.5;
     this->farPlane = 120;
     
-    setViewport();
+    //setViewport();
 }
 
 

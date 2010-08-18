@@ -14,6 +14,26 @@
 
 #include "irrKlang.h"
 
+#ifdef __APPLE__ /* OS X */
+#define startLevelSound "starting_level.ogg"
+#define pacmanEatingSound "pacman_eating.ogg"
+#define pacmanDyingSound "pacman_dying.ogg"
+#define gameOverSound "game_end.ogg"
+#define frenzySound "death_metal_song.ogg"
+#elif defined(__linux__) /* LINUX */
+#define startLevelSound "data/sound/starting_level.ogg"
+#define pacmanEatingSound "data/sound/pacman_eating.ogg"
+#define pacmanDyingSound "data/sound/pacman_dying.ogg"
+#define gameOverSound "data/sound/game_end.ogg"
+#define frenzySound "data/sound/death_metal_song.ogg"
+#else /* WINDOWS */
+#define startLevelSound "data/sound/starting_level.ogg"
+#define pacmanEatingSound "data/sound/pacman_eating.ogg"
+#define pacmanDyingSound "data/sound/pacman_dying.ogg"
+#define gameOverSound "data/sound/game_end.ogg"
+#define frenzySound "data/sound/death_metal_song.ogg"
+#endif
+
 
 using namespace irrklang;
 
@@ -32,7 +52,7 @@ void play_intro_audio(){
 		return; // error starting up the engine
 	}
 
-	intro_audio->play2D("data/sound/starting_level.ogg", false);
+	intro_audio->play2D(startLevelSound, false);
 
 	return;
 }
@@ -45,7 +65,7 @@ void play_pacman_eating_audio(){
 		return; // error starting up the engine
 	}
 
-	pacman_eating_audio->play2D("data/sound/pacman_eating.ogg", false);
+	pacman_eating_audio->play2D(pacmanEatingSound, false);
 
 	return;
 }
@@ -57,7 +77,7 @@ void play_pacman_dying_audio(){
 		return; // error starting up the engine
 	}
 
-	pacman_dying_audio->play2D("data/sound/pacman_dying.ogg", false);
+	pacman_dying_audio->play2D(pacmanDyingSound, false);
 
 	return;
 }
@@ -69,7 +89,7 @@ void play_game_ended_audio(){
 		return; // error starting up the engine
 	}
 
-	game_ended_audio->play2D("data/sound/game_end.ogg", false);
+	game_ended_audio->play2D(gameOverSound, false);
 
 	return;
 }
@@ -82,7 +102,7 @@ void play_frenzy_audio(){
 		return; // error starting up the engine
 	}
 
-	frenzy_audio->play2D("data/sound/death_metal_song.ogg", false);
+	frenzy_audio->play2D(frenzySound, false);
 
 	return;
 }

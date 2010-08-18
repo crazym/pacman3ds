@@ -86,18 +86,6 @@
 #include <ctime>
 #endif
 
-/*
-#include <OpenAL/al.h>
-#include <OpenAL/alc.h>
-*/
-
-/*
-#include <al/al.h>
-#include <al/alc.h>
-#include <al/alu.h>
-#include <al/alut.h>
-*/
-
 #include <fstream>
 #include <cstdlib>
 #include <cmath>
@@ -119,12 +107,23 @@
 #include "Common.h"
 #include "Menu.h"
 
+
+#ifdef __APPLE__ /* OS X */
+#define map1Path "Level1.txt"
+#define map2Path "Level2.txt"
+#elif defined(__linux__) /* LINUX */
+#define map1Path "data/Maps/Level1.txt"
+#define map2Path "data/Maps/Level2.txt"
+#else /* WINDOWS */
+#define map1Path "data/Maps/Level1.txt"
+#define map2Path "data/Maps/Level2.txt"
+#endif
+
 using namespace std;
 
 void initModels();
 void initMenu();
 void initCameras();
-void initAudio();
 void setupLighting();
 void cleanup();
 void reset(GLuint loadLevel);
@@ -174,7 +173,7 @@ static Camera ghost4Cam(1);
 
 
 static char map[784];
-int level = 1; // Can either be level 1, level 2 or level 3									 
+int level = 2; // Can either be level 1, level 2							 
   
 
 // Initial size of graphics window on your screen.
@@ -266,11 +265,11 @@ void openMap()
 
 	if(level == 1)
 	{
-		indata.open("data/Maps/Level1.txt"); // opens the file
+		indata.open(map1Path); // opens the file
 	}
 	if(level == 2)
 	{
-		 indata.open("data/Maps/Level2.txt"); // opens the file
+		 indata.open(map2Path); // opens the file
 	}
  
 	if(!indata) { // file couldn't be opened
@@ -1780,7 +1779,6 @@ int main (int argc, char *argv[])
 
     initModels();
     
-	play_intro_audio();
     // Enter GLUT loop.
 	glutMainLoop();
 
