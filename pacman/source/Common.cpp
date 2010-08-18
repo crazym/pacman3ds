@@ -8,10 +8,10 @@
  *  Reference: http://nehe.gamedev.net/data/lessons/lesson.asp?lesson=30
  */
 
-#include "Common.h"
-#include "Vector.h"
-#include "Tile.h"
-#include "Map.h"
+#include "../include/Common.h"
+#include "../include/Vector.h"
+#include "../include/Tile.h"
+#include "../include/Map.h"
 
 #include <cmath>
 #include <iostream>

@@ -5,7 +5,7 @@
  *      Author: sid
  */
 
-#include "Timer.h"
+#include "../include/Timer.h"
 #include <ctime>
 #include <iostream>
 #include <sstream>
@@ -20,6 +20,7 @@ void print_stroke_string(void* font, char* s);
 void print_bitmap_string();
 void drawString(string);
 
+
 Timer::Timer(string init){
 
 	time(&currentTime);
@@ -27,6 +28,7 @@ Timer::Timer(string init){
 	countDownIsOn = false;
 	initTimerString = init;
 	timerIsPaused = 0;
+	//l_string = ;
 
 }
 
@@ -82,7 +84,8 @@ void Timer::drawTimer(){
 			if(timerIsPaused){
 
 			//display paused
-				drawString("paused");
+				//drawString("paused");
+				drawString(timer_string);
 			}
 			else{
 
@@ -101,6 +104,51 @@ void Timer::drawTimer(){
 			drawString(timer_string);
 		}
 }
+
+void Timer::drawLife(int life)
+{
+	string l_string;
+	stringstream out;
+	out << "Life: " << life;
+	l_string = out.str();
+	
+	drawString(l_string);
+	//life=3;
+}
+
+void Timer::drawScore(long int score)
+{
+	string s;
+	stringstream out;
+	out << "Score: " << score;
+	s = out.str();
+	
+	drawString(s);
+}
+
+void Timer::drawGameOver(int i){
+	string s;
+	string s1;
+	string s2;
+	stringstream out;
+
+	if(i==0){
+		out << "GAME OVER";
+		s = out.str();
+		drawString(s);
+	}
+	if(i==1){
+		out << "PRESS 'm' key for Main Menu";
+		s1 = out.str();
+		drawString(s1);
+	}
+	if(i==2){
+		out << "PRESS 'Esc' key to quit";
+		s2 = out.str();
+		drawString(s2);
+	}
+}
+
 
 void Timer::stopTimer(){
 

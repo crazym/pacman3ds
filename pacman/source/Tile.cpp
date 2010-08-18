@@ -7,11 +7,11 @@
  *
  */
 
-#include "Tile.h"
-#include "Common.h"
-#include "Cube.h"
-#include "textures.h"
-#include "Material.h"
+#include "../include/Tile.h"
+#include "../include/Common.h"
+#include "../include/Cube.h"
+#include "../include/textures.h"
+#include "../include/Material.h"
 
 #include <iostream>
 #include <cmath>
@@ -102,9 +102,9 @@ Tile::Tile(char type, GLint x, GLint z)
             this->pellet = true;
             this->powerPellet = false;
 
-            this->pellet_color[0] = (rand()%255)/255.0f;
-            this->pellet_color[1] = (rand()%255)/255.0f;
-            this->pellet_color[2] = (rand()%255)/255.0f;
+            this->pellet_color[0] = Color(rand()%2);
+            this->pellet_color[1] = Color(rand()%2);
+            this->pellet_color[2] = Color(rand()%2);
             this->pellet_color[3] = 1.0f;
             
             this->tile_color[0] = 0.7f;
@@ -118,9 +118,10 @@ Tile::Tile(char type, GLint x, GLint z)
             this->pellet = false;
             this->powerPellet = true;
             
-            this->pellet_color[0] = (rand()%255)/255.0f;
-            this->pellet_color[1] = (rand()%255)/255.0f;
-            this->pellet_color[2] = (rand()%255)/255.0f;
+            this->pellet_color[0] = Color(rand()%2);
+            this->pellet_color[1] = Color(rand()%2);
+			this->pellet_color[2] = Color(rand()%2);
+            //this->pellet_color[2] = (rand()%255)/255.0f;
             this->pellet_color[3] = 1.0f;
             
             this->tile_color[0] = 0.7f;
@@ -135,6 +136,16 @@ Tile::Tile(char type, GLint x, GLint z)
             break;
     }
     
+
+}
+
+GLfloat Tile::Color(int key){
+	switch(key){
+	case 0:
+		return 0.3;
+	case 1:
+		return 0.8;
+	}
 
 }
 

@@ -12,26 +12,29 @@
  */
 
 
-#include "Pacman.h"
-#include "Common.h"
-#include "textures.h"
-#include "Material.h"
-#include "Common.h"
+#include "../include/Pacman.h"
+#include "../include/Common.h"
+#include "../include/textures.h"
+#include "../include/Material.h"
+#include "../include/Common.h"
 
 #include <cmath>
 #include <iostream>
 
 #ifdef __APPLE__ /* OS X */
 #define pacmanTexture1 "pacman_skin.raw"
-#define pacmanTexture2 "pacman-batman.raw"
+//#define pacmanTexture2 "pacman-batman.raw"
+#define pacmanTexture2 "pumpkin.raw"
 #define pacmanTexture3 "paper.raw"
 #elif defined(__linux__) /* LINUX */
 #define pacmanTexture1 "data/Textures/pacman_skin.raw"
-#define pacmanTexture2 "data/Textures/pacman-batman.raw"
+//#define pacmanTexture2 "data/Textures/pacman-batman.raw"
+#define pacmanTexture2 "data/Textures/pumpkin.raw"
 #define pacmanTexture3 "data/Textures/paper.raw"
 #else /* WINDOWS */
 #define pacmanTexture1 "data/Textures/pacman_skin.raw"
-#define pacmanTexture2 "data/Textures/pacman-batman.raw"
+//#define pacmanTexture2 "data/Textures/pacman-batman.raw"
+#define pacmanTexture2 "data/Textures/pumpkin.raw"
 #define pacmanTexture3 "data/Textures/paper.raw"
 #endif
 
@@ -52,8 +55,9 @@ extern GLfloat pacman_paper_ambient_diffuse[];
 static int pac_atop=0;
 static int open=0;
 
-const GLfloat SPEED = 0.025;
-const GLfloat FRENZY_SPEED = 0.05;
+//const GLfloat SPEED = 0.025;
+const GLfloat SPEED = 0.05;
+const GLfloat FRENZY_SPEED = 0.07;
 
 Pacman::Pacman()
 {

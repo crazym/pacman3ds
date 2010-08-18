@@ -6,7 +6,7 @@
  *  Copyright 2010 Concordia University. All rights reserved.
  *
  */
-#include "Material.h"
+#include "../include/Material.h"
 
 GLfloat no_mat[]            = { 0.0, 0.0, 0.0, 1.0 };
 GLfloat mat_ambient[]       = { 0.5, 0.5, 0.5, 1.0 };
@@ -57,18 +57,42 @@ GLfloat lightSpecular[] = { 0.7f, 0.7f, 0.7f, 1.0f };
 GLfloat lightPosition[] = { 0.0f, 1.0f, 0.0f, 0.0f }; /* Point down Y-Axis */
 
 /* Spotlight Values */
-GLfloat spotlightAmbient[]  = { 0.5f, 0.5f, 0.0f, 1.0f };
-GLfloat spotlightDiffuse[]  = { 0.5f, 0.5f, 0.0f, 1.0f };
-GLfloat spotlightSpecular[] = { 0.5f, 0.5f, 0.0f, 1.0f };
-GLfloat spotlightPosition1[] = { 0.5f, 1.0f, 0.5f, 1.0f };
-GLfloat spotlightPosition2[] = { 19.5f, 1.0f, 0.5f, 1.0f };
-GLfloat spotlightPosition3[] = { 0.5f, 1.0f, 21.5f, 1.0f };
-GLfloat spotlightPosition4[] = { 19.5f, 1.0f, 21.5f, 1.0f };
-GLfloat spotlightDirection1[] = { 1.0f, 0.0f, 1.0f};
+GLfloat spotlightAmbient[]  = { 0.9f, 0.9f, 0.4f, 1.0f };
+GLfloat spotlightDiffuse[]  = { 0.9f, 0.9f, 0.4f, 1.0f };
+GLfloat spotlightSpecular[] = { 0.9f, 0.9f, 0.4f, 1.0f };
+
+GLfloat spotlightPosition1[] = { 0.5f, 4.0f, 0.5f, 1.0f };
+GLfloat spotlightPosition2[] = { 19.5f, 4.0f, 0.5f, 1.0f };
+GLfloat spotlightPosition3[] = { 0.5f, 4.0f, 21.5f, 1.0f };
+GLfloat spotlightPosition4[] = { 19.5f, 4.0f, 21.5f, 1.0f };
+
+GLfloat streetlightPosition1[] = { 0.5f, 1.0f, 0.5f, 1.0f };
+GLfloat streetlightPosition2[] = { 19.5f, 1.0f, 0.5f, 1.0f };
+GLfloat streetlightPosition3[] = { 0.5f, 1.0f, 21.5f, 1.0f };
+GLfloat streetlightPosition4[] = { 19.5f, 1.0f, 21.5f, 1.0f };
+/*GLfloat spotlightDirection1[] = { 1.0f, 0.0f, 1.0f};
 GLfloat spotlightDirection2[] = { -1.0f, 0.0f, 1.0f};
 GLfloat spotlightDirection3[] = { 1.0f, 0.0f, -1.0f};
-GLfloat spotlightDirection4[] = { -1.0f, 0.0f, -1.0f};
+GLfloat spotlightDirection4[] = { -1.0f, 0.0f, -1.0f};*/
+/*GLfloat spotlightPosition1[] = { 0.0f, 4.0f, 0.0f, 1.0f };
+GLfloat spotlightPosition2[] = { 20.0f, 4.0f, 0.0f, 1.0f };
+GLfloat spotlightPosition3[] = { 0.0f, 4.0f, 22.0f, 1.0f };
+GLfloat spotlightPosition4[] = { 20.0f, 4.0f, 22.0f, 1.0f };*/
 
+/* The projection of the spotlight onto the x-z plane is 4.
+* In order to obtain a 45 degree projection between the x-plane and the
+* z-plane the value must be 2sqrt(2) = ~2.82.  The value was calculated using
+* the pythagorean theorem.*/
+GLfloat spotlightDirection1[] = { 2.82f, -4, 2.82f, 1.0f };
+GLfloat spotlightDirection2[] = { -2.82f, -4, 2.82f, 1.0f };
+GLfloat spotlightDirection3[] = { 2.82f, -4, -2.82f, 1.0f };
+GLfloat spotlightDirection4[] = { -2.82f, -4, -2.82f, 1.0f };
+/*
+GLfloat spotlightDirection1[] = { 2.82f, 0.0f, 2.82f, 1.0f };
+GLfloat spotlightDirection2[] = { -2.82f, 0.0f, 2.82f, 1.0f };
+GLfloat spotlightDirection3[] = { 2.82f, 0.0f, -2.82f, 1.0f };
+GLfloat spotlightDirection4[] = { -2.82f, 0.0f, -2.82f, 1.0f };
+*/
 /* Frenzy Light Ambient*/
 
 GLfloat flightAmbient[]  = { 1.0f, 0.3f, 0.2f, 1.0f };
@@ -80,4 +104,5 @@ GLfloat flightSpecular[] = { 1.0f, 0.5f, 0.2f, 1.0f };
 GLfloat fspotlightAmbient[]  = { 1.0f, 0.2f, 0.0f, 1.0f };
 GLfloat fspotlightDiffuse[]  = { 1.0f, 0.2f, 0.0f, 1.0f };
 GLfloat fspotlightSpecular[] = { 1.0f, 0.2f, 0.0f, 1.0f };
+
 

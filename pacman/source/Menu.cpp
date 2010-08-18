@@ -14,7 +14,7 @@ main menu
 #include <string.h>
 #include <cstring>
 
-#include "Menu.h"
+#include "../include/Menu.h"
 
 using namespace std;
 
@@ -171,7 +171,7 @@ void Menu::printMenu(char level){
 					drawString("4.help");
 
 					glTranslatef(0,-3,0);
-					drawString("5.quit");
+					drawString("Esc: quit");
 
 				glPushMatrix();
 
