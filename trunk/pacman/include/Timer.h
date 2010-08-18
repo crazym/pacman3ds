@@ -21,6 +21,7 @@ public:
 	~Timer();
 
 	void drawTimer();
+	void drawLife(int);
 	void startTimer();
 	void stopTimer();
 	int getTimeElapsed();
@@ -32,6 +33,8 @@ public:
 	bool countDownIsOn;
 	void pause();
 	void resume();
+	void drawGameOver(int);
+	void drawScore(long int);
 
 private:
 

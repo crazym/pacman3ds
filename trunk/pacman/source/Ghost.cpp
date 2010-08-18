@@ -8,10 +8,10 @@
  *      http://www.opengl.org/documentation/red_book/
  */
 
-#include "Ghost.h"
+#include "../include/Ghost.h"
 
-#include "Common.h"
-#include "textures.h"
+#include "../include/Common.h"
+#include "../include/textures.h"
 
 #ifdef __APPLE__ /* OS X */
 #define ghostTexture "ghostbody.raw"
@@ -211,6 +211,20 @@ void Ghost::draw()
     glPushMatrix();
     glTranslatef(this->x, this->y, this->z);
     glScalef(0.6, 0.6, 0.6);
+
+	if (this->direction == 'n')
+	{
+		glRotatef(180, 0, 1, 0);
+	}
+	else if (this->direction == 'e')
+	{
+		glRotatef(90, 0, 1, 0);
+	}
+	else if (this->direction == 'w')
+	{
+		glRotatef(-90, 0, 1, 0);
+	}
+
     glCallList(this->listID);
     glPopMatrix();
 }
@@ -304,7 +318,8 @@ void Ghost::setDirection(char direction)
 
 GLboolean Ghost::collide(GLint n, GLint s, GLint e, GLint w)
 {
-    /*********************/
+
+	 /*********************/
     /* Detect End of Map */
     /*********************/
     if (this->x <= 0.5) 
@@ -313,9 +328,9 @@ GLboolean Ghost::collide(GLint n, GLint s, GLint e, GLint w)
         this->setDirection('w');
     }
     
-    if (this->x >= 21.5) 
+    if (this->x >= 20.5) 
     {
-        this->x = 0;
+        this->x = 1;
         this->setDirection('e');
     }
     

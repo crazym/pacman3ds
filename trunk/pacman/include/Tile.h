@@ -30,7 +30,8 @@ public:
     Tile(char type, GLint x, GLint z);
     
     void draw(GLint texturePellets, GLint texturePPellets);
-    
+    GLfloat Color(int);
+
     char type;
     GLboolean pellet;
     GLboolean powerPellet;

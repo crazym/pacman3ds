@@ -83,6 +83,11 @@ extern GLfloat spotlightDirection2[];
 extern GLfloat spotlightDirection3[];
 extern GLfloat spotlightDirection4[];
 
+extern GLfloat streetlightPosition1[];
+extern GLfloat streetlightPosition2[];
+extern GLfloat streetlightPosition3[];
+extern GLfloat streetlightPosition4[];
+
 /* Frenzy Light Values */
 
 extern GLfloat flightAmbient[];

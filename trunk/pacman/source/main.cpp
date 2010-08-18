@@ -98,24 +98,26 @@
 #include <al/alut.h>
 */
 
-#include "audio.h"
+#include <fstream>
+#include <cstdlib>
 #include <cmath>
 #include <iostream>
 #include <sstream>
 #include <iomanip>
 #include <vector>
 
-#include "Ghost.h"
-#include "Pacman.h"
-#include "Material.h"
-#include "Timer.h"
-#include "Map.h"
-#include "Tile.h"
-#include "Lamp.h"
-#include "Camera.h"
-#include "Vector.h"
-#include "Common.h"
-#include "Menu.h"
+#include "../include/audio.h"
+#include "../include/Ghost.h"
+#include "../include/Pacman.h"
+#include "../include/Material.h"
+#include "../include/Timer.h"
+#include "../include/Map.h"
+#include "../include/Tile.h"
+#include "../include/Lamp.h"
+#include "../include/Camera.h"
+#include "../include/Vector.h"
+#include "../include/Common.h"
+#include "../include/Menu.h"
 
 using namespace std;
 
@@ -138,6 +140,7 @@ void switchCamera(GLuint camera);
  Game Objects
  **************************/
 static Pacman *pacman;
+static Pacman *pacman2;
 static Ghost *ghost1;
 static Ghost *ghost2;
 static Ghost *ghost3;
@@ -167,34 +170,9 @@ static Camera ghost3Cam(1);
 static Camera ghost4Cam(1);
 
 
-static char map[483] = {										 
-    //23 Rows
-    //21 Cols
-    'W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W',	 // Current map
-    'W','X','Z','Z','Z','Z','Z','Z','Z','Z','W','Z','Z','Z','Z','Z','Z','Z','Z','X','W',
-    'W','Z','W','W','W','Z','W','W','W','Z','W','Z','W','W','W','Z','W','W','W','Z','W',
-    'W','Z','W','W','W','Z','W','W','W','Z','W','Z','W','W','W','Z','W','W','W','Z','W',
-    'W','Z','Z','Z','Z','Z','Z','Z','Z','Z','W','Z','Z','Z','Z','Z','Z','Z','Z','Z','W',
-    'W','Z','W','W','W','Z','W','Z','W','W','W','W','W','Z','W','Z','W','W','W','Z','W',
-    'W','Z','Z','Z','Z','Z','W','Z','Z','Z','W','Z','Z','Z','W','Z','Z','Z','Z','Z','W',
-    'W','W','W','W','W','Z','W','W','W','Z','W','Z','W','W','W','Z','W','W','W','W','W',
-    'Y','Y','Y','Y','W','Z','W','Z','Z','Z','Z','Z','Z','Z','W','Z','W','Y','Y','Y','Y',
-    'W','W','W','W','W','Z','W','Z','W','W','Y','W','W','Z','W','Z','W','W','W','W','W',
-    'Y','Y','Y','Y','Y','X','Z','Z','W','Y','Y','Y','W','Z','Z','X','Y','Y','Y','Y','Y',
-    'W','W','W','W','W','Z','W','Z','W','Y','Y','Y','W','Z','W','Z','W','W','W','W','W',
-    'Y','Y','Y','Y','W','Z','W','Z','W','W','W','W','W','Z','W','Z','W','Y','Y','Y','Y',
-    'Y','Y','Y','Y','W','Z','W','Z','Z','Z','Z','Z','Z','Z','W','Z','W','Y','Y','Y','Y',
-    'W','W','W','W','W','Z','W','Z','W','W','W','W','W','Z','W','Z','W','W','W','W','W',
-    'W','Z','Z','Z','Z','Z','Z','Z','Z','Z','W','Z','Z','Z','Z','Z','Z','Z','Z','Z','W',
-    'W','Z','W','W','W','Z','W','W','W','Z','W','Z','W','W','W','Z','W','W','W','Z','W',
-    'W','Z','Z','Z','W','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','W','Z','Z','Z','W',
-    'W','W','W','Z','W','Z','W','Z','W','W','W','W','W','Z','W','Z','W','Z','W','W','W',
-    'W','Z','Z','Z','Z','Z','W','Z','Z','Z','W','Z','Z','Z','W','Z','Z','Z','Z','Z','W',
-    'W','Z','W','W','W','W','W','W','W','Z','W','Z','W','W','W','W','W','W','W','Z','W',
-    'W','X','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','Z','X','W',
-    'W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W'
-    
-};
+static char map[784];
+int level = 1; // Can either be level 1, level 2 or level 3									 
+  
 
 // Initial size of graphics window on your screen.
 const GLint WIDTH  = 800; // in pixels
@@ -236,11 +214,23 @@ GLdouble fovy = 60;
 static GLint texturePellets = 1;
 static GLint texturePPellets = 1;
 
+//Defined in timer.cpp
+int lives = 3;
+GLboolean dead = 0;
+int t_flag = 0;
+int p_text = 0;
+int offset = 0;
+//SCORE
+long int score = 0;
+int play_intro = 0;
+
 static vector<Tile *>walls;
 static vector<Tile *>pelletTiles;
 static vector<Tile *>powerPelletTiles;
 
+GLboolean multiplayer = 0;
 GLboolean paused = 1;
+GLboolean respawn = 0;
 GLboolean idleEnable = 0;	// flags that set continuous rotation on/off
 GLboolean projType = 1;      // flag for proj type; ortho = 0, perspective = 1
 GLboolean isWireFrame =0;    // flag for setting wire frame mode
@@ -249,6 +239,12 @@ GLboolean textures_enabled = 1;
 GLboolean color_material_enabled = 1;
 GLboolean menuEnabled = 0;
 GLboolean timerDisplay = 1;
+GLboolean lifeDisplay = 1;
+GLboolean gameover = 0;
+GLboolean g_o_display = 1;
+GLboolean scoreDisplay = 1;
+GLboolean g_dead = 0;
+
 
  /*
  * Store initial lighting context after setup so that it may be restored
@@ -257,29 +253,43 @@ GLboolean timerDisplay = 1;
 GLfloat initalLightingValues[6][4];
 
 
+// Will read 483 or 784 characters
+void openMap()
+{
 
-/*
-void initialiseLights(){
+	ifstream indata; // indata is like cin
+	char letter; // variable for input value
 
-	//street lights
-		GLfloat spotlightPosition1[] = { 0.0f, 4.0f, 0.0f, 1.0f };
-	    GLfloat spotlightPosition2[] = { 20.0f, 4.0f, 0.0f, 1.0f };
-	    GLfloat spotlightPosition3[] = { 0.0f, 4.0f, 22.0f, 1.0f };
-	    GLfloat spotlightPosition4[] = { 20.0f, 4.0f, 22.0f, 1.0f };
+	if(level == 1)
+	{
+		 indata.open("data/Maps/Level1.txt"); // opens the file
+	}
+	if(level == 2)
+	{
+		 indata.open("data/Maps/Level2.txt"); // opens the file
+	}
+ 
+	if(!indata) { // file couldn't be opened
+		cerr << "Error: file could not be opened" << endl;
+		return;
+	}
+	
+	int i = 0;
 
-	     * The projection of the spotlight onto the x-z plane is 4.
-	     * In order to obtain a 45 degree projection between the x-plane and the
-	     * z-plane the value must be 2sqrt(2) = ~2.82.  The value was calculated using
-	     * the pythagorean theorem.
-
-
-	    GLfloat spotlightDirection1[] = { 2.82f, -4.0f, 2.82f, 1.0f };
-	    GLfloat spotlightDirection2[] = { -2.82f, -4.0f, 2.82f, 1.0f };
-	    GLfloat spotlightDirection3[] = { 2.82f, -4.0f, -2.82f, 1.0f };
-	    GLfloat spotlightDirection4[] = { -2.82f, -4.0f, -2.82f, 1.0f };
+	indata >> letter;
+	
+	while (!indata.eof() ) { // keep reading until end-of-file
+		  
+		map[i] = letter;
+		i++;
+		indata >> letter; // sets EOF flag if no value found
+	}
+	   
+	indata.close();
+	
+	return;
 
 }
-*/
 
 void resetViewParameters()
 {
@@ -393,7 +403,7 @@ void display ()
     	glEnable(GL_COLOR_MATERIAL);
     	else
     	glDisable(GL_COLOR_MATERIAL);
-
+	
 
 	if(menuEnabled){ 
 	
@@ -404,26 +414,65 @@ void display ()
 		glPopMatrix();
 	}
 
-	if(timerDisplay){ 
-		
-		//draw game timer
-		glPushMatrix();
-			glColor3f(1,1,1);
-			glTranslatef(1,4.5,0);
-			glScalef(0.01,0.01,0.01);
-			timer1->drawTimer();
-		glPopMatrix();
+	if(lives>-1){
+		if(timerDisplay){ 
+			
+			//draw game timer
+			glPushMatrix();
+				glColor3f(1,1,1);
+				glTranslatef(1,4.5,0);
+				glScalef(0.01,0.01,0.01);
+				timer1->drawTimer();
+			glPopMatrix();
 
-		//draw powerup timer
-		glPushMatrix();
+			//draw powerup timer
+			glPushMatrix();
+				glColor3f(1,1,1);
+				glTranslatef(1,3,0);
+				glScalef(0.01,0.01,0.01);
+				timer2->drawTimer();
+			glPopMatrix();
+		}
+		
+		if(lifeDisplay){
+			//Display LIFE
+			glPushMatrix();
 			glColor3f(1,1,1);
-			glTranslatef(1,3,0);
+			glTranslatef(1,7,0);
 			glScalef(0.01,0.01,0.01);
-			timer2->drawTimer();
-		glPopMatrix();
+			timer1->drawLife(lives);
+			glPopMatrix();
+		}
+		if(scoreDisplay){
+			glPushMatrix();
+			glColor3f(1,1,1);
+			glTranslatef(1,9,0);
+			glScalef(0.01,0.01,0.01);
+			timer1->drawScore(score);
+			glPopMatrix();
+		}
 	}
 
+	if(gameover&&g_o_display){
+			
+		for(int i=0;i<3;i++){
+			glPushMatrix();
+			glColor3f(1,1,1);
+			glTranslatef(1,9-2*i,0);
+			//glRotatef(-30,1,0,0);
+			glScalef(0.01,0.01,0.01);
+			//timer1->drawTimer();
+			timer1->drawGameOver(i);
+			glPopMatrix();
+		}
+			
+		//resetViewParameters();
+	}
+
+
     pacman->draw();
+	if(multiplayer)
+		pacman2->draw();
     map1->draw(texturePellets, texturePPellets);
     
     lamp1->draw();
@@ -443,10 +492,12 @@ void display ()
 
 void enableFrenzyMode(bool frenzy)
 {
+	stop_frenzy_audio();
 	if(frenzy)
 	{
-       	//set pacmans outfit to batman
-		ProcessMenu(31);
+		pacman->atePowerPellet();
+	
+		play_frenzy_audio();
 
 		/* Ambient Light Values */
 
@@ -468,11 +519,18 @@ void enableFrenzyMode(bool frenzy)
 
 		}
 
+		//ProcessMenu(17);
+
 		setupLighting();
 	}
 	if(!frenzy)
 	{
         pacman->finishPowerPellet();
+		if(multiplayer)
+		pacman2->finishPowerPellet();
+
+
+
 		//set pacman's outfit.
 		ProcessMenu(30);
 
@@ -491,8 +549,12 @@ void enableFrenzyMode(bool frenzy)
 			spotlightDiffuse[s]  = initalLightingValues[4][s];
 			spotlightSpecular[s] = initalLightingValues[5][s];
 		}
+		
+		//ProcessMenu(17);
 
 		setupLighting();
+
+		
 	}
 }
 
@@ -503,11 +565,32 @@ void idle ()
     /* Do nothing when paused */
     if (paused) {
 
+		if(play_intro == 0)
+		{
+			play_intro_audio();
+			play_intro = 1;
+		}
+
+		timer1->timer_string = "paused";
 		timer1->pause();
 		timer2->pause();
 
         return;
     }
+	
+	if(!paused) {
+
+		stop_intro_audio();
+		play_intro = 0;
+	}
+
+	else if (respawn){
+			timer1->timer_string = "PRESS 't' TO START";
+			timer1->pause();
+			timer2->pause();
+			
+			return;
+	}
 	else{
 
 			if(timer1->timerIsPaused) timer1->resume();
@@ -515,6 +598,25 @@ void idle ()
 
 		}
     
+	if(lives==-1){
+		/*
+			timer1->timer_string = "PRESS 't' TO START";
+			timer1->pause();
+			timer2->pause();*/
+		/*
+		for(int i=0;i<3;i++){
+			glPushMatrix();
+			glColor3f(1,1,1);
+			glTranslatef(1,9-i,0);
+			glScalef(0.01,0.01,0.01);
+			timer1->drawGameOver(i);
+			glPopMatrix();	
+		}
+		resetViewParameters();*/
+		//graphicKeys ('m', 0, 0);
+		return;
+
+	}
     /* Setup For Collision */
     Vector pacmanPosition(pacman->x, pacman->y, pacman->z);
     Vector ghostPosition(ghost1->x, ghost1->y, ghost1->z);
@@ -903,7 +1005,13 @@ void idle ()
         if (distance < 0.7) {
             (*p_it)->pellet = false;
             pelletTiles.erase(p_it);
-		play_pacman_eating_audio();
+			
+
+			play_pacman_eating_audio();
+			
+			
+			
+			score += 10;
         }
         
         /* Avoid an error when you eat the last pellet */
@@ -925,9 +1033,10 @@ void idle ()
         if (distance < 0.7) {
             (*p_it)->powerPellet = false;
             powerPelletTiles.erase(p_it);
-			pacman->atePowerPellet();
+
             timer2->startCountDown(15);
             enableFrenzyMode(1);
+			score +=50;
 
         }
         
@@ -937,6 +1046,105 @@ void idle ()
             break;
         }
     }
+
+	/*************************
+	 *GHOST/PACMAN Collisions*
+	 *************************/
+	if((ghost1->x<(pacman->x+1)) && (ghost1->y<(pacman->y+1)) && (ghost1->z<(pacman->z+1)))
+	{
+		if((ghost1->x>(pacman->x-1)) && (ghost1->y>(pacman->y-1)) && (ghost1->z>(pacman->z-1))){
+			if(pacman->frenzy){
+				ghost1->x = 9.0;
+				ghost1->y = 0.2;
+				ghost1->z = 11.0;
+				g_dead= 1;
+			}
+			if(!pacman->frenzy)
+				dead = 1;
+		}
+	}
+
+	if((ghost2->x<(pacman->x+1)) && (ghost2->y<(pacman->y+1)) && (ghost2->z<(pacman->z+1)))
+	{
+		if((ghost2->x>(pacman->x-1)) && (ghost2->y>(pacman->y-1)) && (ghost2->z>(pacman->z-1))){
+			if(pacman->frenzy){
+				ghost2->x = 10.0;
+				ghost2->y = 0.2;
+				ghost2->z = 11.0;
+				g_dead= 1;
+			}
+			if(!pacman->frenzy)
+				dead = 1;
+		}
+	}
+
+	if((ghost3->x<(pacman->x+1)) && (ghost3->y<(pacman->y+1)) && (ghost3->z<(pacman->z+1)))
+	{
+		if((ghost3->x>(pacman->x-1)) && (ghost3->y>(pacman->y-1)) && (ghost3->z>(pacman->z-1))){
+			if(pacman->frenzy){
+				ghost3->x = 11.0;
+				ghost3->y = 0.2;
+				ghost3->z = 11.0;
+				g_dead= 1;
+			}
+			if(!pacman->frenzy)
+				dead = 1;
+		}
+	}
+
+	if((ghost4->x<(pacman->x+1)) && (ghost4->y<(pacman->y+1)) && (ghost4->z<(pacman->z+1)))
+	{
+		if((ghost4->x>(pacman->x-1)) && (ghost4->y>(pacman->y-1)) && (ghost4->z>(pacman->z-1))){
+			if(pacman->frenzy){
+				ghost4->x = 10.0;
+				ghost4->y = 0.2;
+				ghost4->z = 10.0;
+				g_dead= 1;
+			}
+			if(!pacman->frenzy)
+				dead = 1;
+		}
+	}
+
+	if(dead)
+	{
+			lives--;
+			dead = 0;
+			
+			pacman->x = 1.0;
+			pacman->y = 0.2;
+			pacman->z = 3.0;
+
+			ghost1->x = 9.0;
+			ghost1->y = 0.2;
+			ghost1->z = 11.0;
+
+			ghost2->x = 10.0;
+			ghost2->y = 0.2;
+			ghost2->z = 11.0;
+
+			ghost3->x = 11.0;
+			ghost3->y = 0.2;
+			ghost3->z = 11.0;
+
+			ghost4->x = 10.0;
+			ghost4->y = 0.2;
+			ghost4->z = 10.0;
+
+			respawn = 1;
+			timer1->startTimer();
+			t_flag = 0;
+
+			if(lives==-1)
+				gameover = 1;
+
+	}
+
+	if(g_dead)
+	{
+		score = 1.5*score + 100;
+		g_dead = 0;
+	}
     
     /**********************/
     /*  MOVE CHARACTERS   */
@@ -950,12 +1158,7 @@ void idle ()
 	//PACMAN'S FRENZY makes lights go crazy
 	if (pacman->frenzy)
 	{
-			if(pacman->frenzy)
-		{
 	
-			play_frenzy_audio();
-		
-		}
 		int s_l=rand()%5;
 		switch (s_l)
 		{
@@ -976,7 +1179,7 @@ void idle ()
 				break;
 
 		}
-
+		
 
 		//DISABLE ALL SPOTLIGHTS
 		//functionKeys (GLUT_KEY_F9,0,0);
@@ -990,13 +1193,13 @@ void idle ()
 		{
 			pacman->frenzy = 0;
 			enableFrenzyMode(0);
-			//stop_frenzy_audio();
+			
+			stop_frenzy_audio();
 	
 		}
 
 
-	//
-	//
+
 
     if (idleEnable)
     {	
@@ -1071,9 +1274,7 @@ void graphicKeys (unsigned char key, int x, int y)
             help();
             break;
             
-		case 'v':
-            stop_intro_audio();
-            break;		
+
         case 27:
             exit(0);
             break;
@@ -1081,7 +1282,26 @@ void graphicKeys (unsigned char key, int x, int y)
         case 'p':
             paused = 1 - paused;
             break;
+
+		case 'z':
+			offset = ++offset%3;
+			ProcessMenu(offset + 2);
+			break;
             
+		case 'x':
+			offset = ++offset%3;
+			ProcessMenu(offset + 33);
+		break;
+
+		case 'c':
+			ProcessMenu(29);
+		break;
+
+		case 'b':
+			offset = ++offset%3;
+			ProcessMenu(offset + 30);
+		break;
+
         case 'w':
             currentCamera->moveForward(moveStep);
             break;
@@ -1117,7 +1337,6 @@ void graphicKeys (unsigned char key, int x, int y)
             }
 
             break;
-
         case 'r':
             resetViewParameters();
             break;
@@ -1125,17 +1344,21 @@ void graphicKeys (unsigned char key, int x, int y)
 		//toggles menu
 		case 'm':
 
-			if(menuEnabled){
+			/*if(menuEnabled){
 
 				menuEnabled = 0;
 				timerDisplay = 1;
+				g_o_display = 0;
 			}
-			else{
+			else{*/
 
 				menuEnabled = 1;
 				timerDisplay = 0;
+				lifeDisplay = 0;
+				scoreDisplay = 0;
 				paused = 1;
-			}
+				g_o_display = 0;
+			//}
 			break;
 				
         case '1':
@@ -1170,16 +1393,21 @@ void graphicKeys (unsigned char key, int x, int y)
             break;
 
         case 't' :
-            if(timer1->timerIsOn){
+            /*if(timer1->timerIsOn){
 
 				paused = 1;
             	timer1->stopTimer();
             }
-            else{
-
-            	paused = 0;
-            	timer1->startTimer();
-            }
+            else{*/
+				
+			if(t_flag==0)
+			{
+				paused = 0;
+				respawn = 0;
+				timer1->startTimer();
+			}
+			t_flag++;
+            //}
             break;
 
         default:
@@ -1203,10 +1431,12 @@ void ProcessMenu(GLint value)
             
         case 3:
             glShadeModel(GL_SMOOTH);
+			isWireFrame = false;
             break;
             
         case 4:
             glShadeModel(GL_FLAT);
+			isWireFrame = false;
             break;
             
             /* Pacman-cam */
@@ -1530,6 +1760,13 @@ int main (int argc, char *argv[])
     // Display help.
 	help();
 
+
+
+	level=1; // Setting level 2
+
+
+
+
     initModels();
     
 	play_intro_audio();
@@ -1546,7 +1783,7 @@ void initMenu()
 	nModeMenu = glutCreateMenu(ProcessMenu);
 	glutAddMenuEntry("Solid",1);
 	glutAddMenuEntry("Wire",2);
-    glutAddMenuEntry("-------------", 0);
+    //glutAddMenuEntry("-------------", 0);
     glutAddMenuEntry("Smooth Shading", 3);
     glutAddMenuEntry("Flat Shading", 4);
     glutAddMenuEntry("-------------", 0);
@@ -1615,6 +1852,8 @@ void initModels()
 		}
 	}
 
+	//Initializing lives, timer
+	lives = 0;
 
     //init scene
     glShadeModel(GL_SMOOTH);
@@ -1648,7 +1887,18 @@ void initModels()
     
     /* init map */
     srand(time(NULL)); //seed rand for pellet colours
-    map1 = new Map(map, 23, 21);
+   
+	if(level == 1)
+	{
+
+		openMap(); // Reading map from file to map 
+		map1 = new Map(map, 23, 21);
+	}
+	if(level == 2)
+	{
+		openMap(); // Reading map from file to map 
+		map1 = new Map(map, 28, 28);
+	}
     
     /* Create a vector of walls for collision detection */
     /* Create another vector of tiles with pellets for more detection */
@@ -1719,10 +1969,10 @@ void setupLighting()
     lamp4->setAmbDiffSpec(spotlightAmbient, spotlightDiffuse, spotlightSpecular);
     
     /* setup where the lamps are modeled */
-    lamp1->setModelPosition(spotlightPosition1);
-    lamp2->setModelPosition(spotlightPosition2);
-    lamp3->setModelPosition(spotlightPosition3);
-    lamp4->setModelPosition(spotlightPosition4);
+    lamp1->setModelPosition(streetlightPosition1);
+    lamp2->setModelPosition(streetlightPosition2);
+    lamp3->setModelPosition(streetlightPosition3);
+    lamp4->setModelPosition(streetlightPosition4);
     
     glEnable(GL_DEPTH_TEST);	// Hidden surface removal
     glFrontFace(GL_CCW);		// Counter clock-wise polygons face out
