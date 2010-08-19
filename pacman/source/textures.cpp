@@ -1,4 +1,4 @@
-#include "textures.h"
+#include "../include/textures.h"
 /*
  *  Reference: http://www.nullterminator.net/gltexture.html
  *

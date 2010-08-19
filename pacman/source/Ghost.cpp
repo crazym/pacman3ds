@@ -8,10 +8,10 @@
  *      http://www.opengl.org/documentation/red_book/
  */
 
-#include "Ghost.h"
+#include "../include/Ghost.h"
 
-#include "Common.h"
-#include "textures.h"
+#include "../include/Common.h"
+#include "../include/textures.h"
 
 #ifdef __APPLE__ /* OS X */
 #define ghostTexture "ghostbody.raw"

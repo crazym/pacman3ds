@@ -7,8 +7,8 @@
  *
  */
 
-#include "Map.h"
-#include "Tile.h"
+#include "../include/Map.h"
+#include "../include/Tile.h"
 
 #include <iostream>
 #include <vector>

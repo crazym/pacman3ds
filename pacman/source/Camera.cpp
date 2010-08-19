@@ -9,9 +9,10 @@
  *  Reference: http://nehe.gamedev.net/data/articles/article.asp?article=08
  */
 
-#include "Camera.h"
-#include "Vector.h"
-#include "Common.h"
+#include "../include/Camera.h"
+#include "../include/Vector.h"
+#include "../include/Common.h"
+#include <GL/glut.h>
 
 #include <cmath>
 #include <iostream>

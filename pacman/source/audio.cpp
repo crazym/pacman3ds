@@ -12,7 +12,7 @@
 
 // start the sound engine with default parameters
 
-#include "irrKlang.h"
+#include "../include/irrKlang.h"
 
 #ifdef __APPLE__ /* OS X */
 #define startLevelSound "starting_level.ogg"

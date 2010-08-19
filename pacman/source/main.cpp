@@ -105,18 +105,18 @@
 #include <iomanip>
 #include <vector>
 
-#include "audio.h"
-#include "Ghost.h"
-#include "Pacman.h"
-#include "Material.h"
-#include "Timer.h"
-#include "Map.h"
-#include "Tile.h"
-#include "Lamp.h"
-#include "Camera.h"
-#include "Vector.h"
-#include "Common.h"
-#include "Menu.h"
+#include "../include/audio.h"
+#include "../include/Ghost.h"
+#include "../include/Pacman.h"
+#include "../include/Material.h"
+#include "../include/Timer.h"
+#include "../include/Map.h"
+#include "../include/Tile.h"
+#include "../include/Lamp.h"
+#include "../include/Camera.h"
+#include "../include/Vector.h"
+#include "../include/Common.h"
+#include "../include/Menu.h"
 
 
 #ifdef __APPLE__ /* OS X */
