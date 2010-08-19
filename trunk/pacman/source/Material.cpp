@@ -6,7 +6,7 @@
  *  Copyright 2010 Concordia University. All rights reserved.
  *
  */
-#include "Material.h"
+#include "../include/Material.h"
 
 GLfloat no_mat[]            = { 0.0, 0.0, 0.0, 1.0 };
 GLfloat mat_ambient[]       = { 0.5, 0.5, 0.5, 1.0 };

@@ -5,8 +5,8 @@
  *      Author: sid
  */
 
-#include "Timer.h"
-#include "Common.h"
+#include "../include/Timer.h"
+#include "../include/Common.h"
 #include <ctime>
 #include <iostream>
 #include <sstream>

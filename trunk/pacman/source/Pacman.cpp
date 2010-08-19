@@ -12,11 +12,11 @@
  */
 
 
-#include "Pacman.h"
-#include "Common.h"
-#include "textures.h"
-#include "Material.h"
-#include "Common.h"
+#include "../include/Pacman.h"
+#include "../include/Common.h"
+#include "../include/textures.h"
+#include "../include/Material.h"
+#include "../include/Common.h"
 
 #include <cmath>
 #include <iostream>

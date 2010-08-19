@@ -7,11 +7,11 @@
  *
  */
 
-#include "Tile.h"
-#include "Common.h"
-#include "Cube.h"
-#include "textures.h"
-#include "Material.h"
+#include "../include/Tile.h"
+#include "../include/Common.h"
+#include "../include/Cube.h"
+#include "../include/textures.h"
+#include "../include/Material.h"
 
 #include <iostream>
 #include <cmath>

@@ -27,8 +27,8 @@ main menu
 #include <string.h>
 #include <cstring>
 
-#include "Menu.h"
-#include "Common.h"
+#include "../include/Menu.h"
+#include "../include/Common.h"
 
 using namespace std;
 
