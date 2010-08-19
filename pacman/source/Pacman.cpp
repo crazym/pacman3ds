@@ -55,8 +55,8 @@ extern GLfloat pacman_paper_ambient_diffuse[];
 static int pac_atop=0;
 static int open=0;
 
-const GLfloat SPEED = 0.05;
-const GLfloat FRENZY_SPEED = 0.07;
+const GLfloat SPEED = 0.1;
+const GLfloat FRENZY_SPEED = 0.15;
 
 const GLuint MAPBOUNDARY = 28;
 

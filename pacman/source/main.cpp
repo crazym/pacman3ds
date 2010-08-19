@@ -40,6 +40,14 @@
  *              Paper: http://www.cgtextures.com/
  */
 
+/*
+ *  Music Resources:
+ *      FreeMusicArchive:
+ *           Frenzy Music - The Master ov Time, pt. 1: Escape by Magic Hammer is licensed under a Attribution-Noncommercial-
+ *                              No Derivative Works 3.0 United States License.
+ *
+ */
+
 // This program uses sampleprogram.cpp as a initalLightingValueslate
 // This Program Draws a scene in a Pacman game.
 
@@ -173,7 +181,7 @@ static Camera ghost4Cam(1);
 
 
 static char map[784];
-int level = 2; // Can either be level 1, level 2							 
+int level = 1; // Can either be level 1, level 2							 
   
 
 // Initial size of graphics window on your screen.

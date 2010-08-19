@@ -19,19 +19,19 @@
 #define pacmanEatingSound "pacman_eating.ogg"
 #define pacmanDyingSound "pacman_dying.ogg"
 #define gameOverSound "game_end.ogg"
-#define frenzySound "death_metal_song.ogg"
+#define frenzySound "FrenzyMusic.ogg"
 #elif defined(__linux__) /* LINUX */
 #define startLevelSound "data/sound/starting_level.ogg"
 #define pacmanEatingSound "data/sound/pacman_eating.ogg"
 #define pacmanDyingSound "data/sound/pacman_dying.ogg"
 #define gameOverSound "data/sound/game_end.ogg"
-#define frenzySound "data/sound/death_metal_song.ogg"
+#define frenzySound "data/sound/FrenzyMusic.ogg"
 #else /* WINDOWS */
 #define startLevelSound "data/sound/starting_level.ogg"
 #define pacmanEatingSound "data/sound/pacman_eating.ogg"
 #define pacmanDyingSound "data/sound/pacman_dying.ogg"
 #define gameOverSound "data/sound/game_end.ogg"
-#define frenzySound "data/sound/death_metal_song.ogg"
+#define frenzySound "data/sound/FrenzyMusic.ogg"
 #endif
 
 
