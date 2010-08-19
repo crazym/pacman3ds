@@ -31,61 +31,60 @@ class Camera
 {
 public:
     Camera(GLuint fixed = 0);
-    
+
     void setViewport();
     void reset();
     void look();
-   
+
     void setPosition(const Vector &position);
     void setPosition(GLfloat x, GLfloat y, GLfloat z);
-    
+
     void setUp(const Vector &up);
     void setUp(GLfloat x, GLfloat y, GLfloat z);
-    
+
     void setCenter(const Vector &center);
     void setCenter(GLfloat x, GLfloat y, GLfloat z);
-    
+
     void rotateY(GLfloat amount);
-    void rotateZ(GLfloat amount);
     void roll(GLfloat amount);
     void pitch(GLfloat amount);
     void yaw(GLfloat amount);
 
-    
+
     void moveForward(GLfloat amount);
     void moveBackward(GLfloat amount);
     void moveLeft(GLfloat amount);
     void moveRight(GLfloat amount);
-    
+
     void zoomIn(GLfloat amount);
     void zoomOut(GLfloat amount);
     void zoomWithFovy(GLfloat amount);
-        
+
     Vector getTarget();
     Vector getRight();
     GLfloat getDistance();
-    
+
     /* points */
     Vector position;
     Vector center;
-    
+
     /* Vectors */
     Vector up;
-    
+	Vector target;
+	Vector right;
+
     GLfloat yRotation;
     GLfloat xRotation;
     GLfloat zRotation;
-    
-    GLfloat rollAmount;
-    GLfloat pitchAmount;
-    GLfloat yawAmount;
-    
+
     GLuint enabled;
     GLuint fixed;
-    
+
     GLdouble fovy;
     GLdouble nearPlane;
     GLdouble farPlane;
 };
 
 #endif
+
+
