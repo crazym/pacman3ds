@@ -29,7 +29,7 @@ extern GLfloat ghost_white[];
 
 GLuint Ghost::current_id = 0;
 
-const static GLfloat SPEED = 0.05;
+const static GLfloat SPEED = 0.1;
 const GLuint MAPBOUNDARY = 28;
 
 Ghost::Ghost()

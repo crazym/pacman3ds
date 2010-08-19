@@ -213,28 +213,28 @@ void getSurroundingTiles(const Map& theMap, GLint position, GLint& northTile, GL
 
 //functions lifed off the redbook.
 void print_stroke_string(void* font, char* s){
-   if (s && strlen(s)) {
-      while (*s) {
-         glutStrokeCharacter(font, *s);
-         s++;
-      }
-   }
-   glutPostRedisplay();
+    if (s && strlen(s)) {
+        while (*s) {
+            glutStrokeCharacter(font, *s);
+            s++;
+        }
+    }
+    glutPostRedisplay();
 }
 
 void print_bitmap_string (void* font, char *string)
 {
 	int x = 5;
 	int y = 5;
-
+    
 	int len, i;
 	glRasterPos2f(x, y);
 	len = (int) strlen(string);
 	for (i = 0; i < len; i++)
 	{
-	 glutBitmapCharacter(font, string[i]);
+        glutBitmapCharacter(font, string[i]);
 	}
-
+    
 	glutPostRedisplay();
 }
 
@@ -242,11 +242,11 @@ void print_bitmap_string (void* font, char *string)
 //wrapper for drwaing string
 //makes print_stroke_string easier to use
 void drawString(string timeString){
-
-		char * drawString;
-		drawString = new char[timeString.length()+1];
-		strcpy(drawString,timeString.c_str());
-
-		//print_stroke_string(GLUT_STROKE_ROMAN,drawString);
-		print_bitmap_string(GLUT_BITMAP_HELVETICA_18,drawString);
+    
+    char * drawString;
+    drawString = new char[timeString.length()+1];
+    strcpy(drawString,timeString.c_str());
+    
+    //print_stroke_string(GLUT_STROKE_MONO_ROMAN,drawString);
+    print_bitmap_string(GLUT_BITMAP_HELVETICA_18,drawString);
 }
