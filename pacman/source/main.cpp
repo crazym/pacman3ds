@@ -46,6 +46,9 @@
  *           Frenzy Music - The Master ov Time, pt. 1: Escape by Magic Hammer is licensed under a Attribution-Noncommercial-
  *                              No Derivative Works 3.0 United States License.
  *
+ *
+ *           Eating Sound - http://www.freesound.org/samplesViewSingle.php?id=27877 The Freesound Project is a collaborative database
+ *                              of Creative Commons licensed sounds.
  */
 
 // This program uses sampleprogram.cpp as a initalLightingValueslate
